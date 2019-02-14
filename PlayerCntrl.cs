@@ -12,7 +12,7 @@ public class PlayerCntrl : MonoBehaviour {
 
     public float moveSpeed = 5.0f;
     public float jumpSpeed = 100.0f;
-    public float rotSpeed = 10;
+    public float rotSpeed = 100.0f;
     float rotTimer;
     public Button[] itemButton;
     GameMgr GM;
