@@ -13,7 +13,6 @@ public class PlayerCntrl : MonoBehaviour {
     public float moveSpeed = 5.0f;
     public float jumpSpeed = 100.0f;
     public float rotSpeed = 100.0f;
-    float rotTimer;
     public Button[] itemButton;
     GameMgr GM;
     AnimationManager AM;
@@ -47,9 +46,7 @@ public class PlayerCntrl : MonoBehaviour {
     {
         GameObject obj = collision.gameObject;
         if (obj.tag == "floor")
-        {
             IsJump = (int)eBOOLEAN.FALSE;
-        }
     }
 
     void Update()
@@ -98,6 +95,8 @@ public class PlayerCntrl : MonoBehaviour {
             AM.PlayAnimation("Move");
             this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
+        else
+            AM.PlayAnimation("Idle");
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (IsJump == (int)eBOOLEAN.FALSE)
