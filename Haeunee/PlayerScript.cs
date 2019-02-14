@@ -27,7 +27,7 @@ public class PlayerScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(Input.GetMouseButtonDown(2)) //회전
+        if(Input.GetMouseButton(2)) //회전
         {
             transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0);
         }
