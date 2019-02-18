@@ -6,41 +6,59 @@ using UnityEngine;
 public class EnemyScript : MonoBehaviour {
     Vector3 enemyPos;
     Quaternion enemyRot;
-    AnimationController playerAniMgr;
+    AnimationController playerAniCon;
+    Animation animation;
     bool atkAni = false;
     int atkAniNum = 0;
+    int weaponType = -1;
+    bool aniEnd = false;
+    ShotManager shotMgr;
 
     void Start () {
-        playerAniMgr = GetComponent<AnimationController>();
+        playerAniCon = GetComponent<AnimationController>();
+        weaponType = GetComponent<HeroCustomize>().IndexWeapon.CurrentType;
+        shotMgr = GetComponentInChildren<ShotManager>();
+        animation = GetComponent<Animation>();
+        shotMgr.ShotPosChange(weaponType);
     }
 
     private void Update()
     {
-        if (enemyPos.x != transform.position.x|| enemyPos.y != transform.position.y)//움직임
+        if (atkAni == true) //공격
+        {
+            atkAni = false;
+            string atkName = "";
+            if (atkAniNum == 0)
+                atkName = playerAniCon.GetAniName("Attack01");
+            else if (atkAniNum == 1)
+                atkName = playerAniCon.GetAniName("Attack02");
+            else if (atkAniNum == 2)
+                atkName = playerAniCon.GetAniName("Critical01");
+            else if (atkAniNum == 3)
+                atkName = playerAniCon.GetAniName("Critical02");
+            animation.Play(atkName);
+            StartCoroutine(EndAni(animation[atkName].length - 0.1f));
+        }
+        else if (enemyPos.x + 0.5 <= transform.position.x || enemyPos.x - 0.5 >= transform.position.x ||
+            enemyPos.z + 0.5 <= transform.position.z|| enemyPos.z - 0.5 >= transform.position.z)//움직임
         {
             transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
-            playerAniMgr.PlayAnimation("Move");
+            animation.CrossFade(playerAniCon.GetAniName("Move"));
         }
         else //가만히 있을 때 애니메이션
         {
-            playerAniMgr.PlayAnimation("Idle");
+            animation.CrossFade(playerAniCon.GetAniName("Idle"));
         }
         if (enemyRot!=transform.rotation) //회전
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, enemyRot, 0.5f);
         }
 
-        if(atkAni == true) //공격
+        if (aniEnd == true)
         {
-            atkAni = false;
-            if (atkAniNum == 0)
-                playerAniMgr.PlayAnimation("Attack01");
-            else if (atkAniNum == 1)
-                playerAniMgr.PlayAnimation("Attack02");
-            else if (atkAniNum == 2)
-                playerAniMgr.PlayAnimation("Critical01");
-            else if (atkAniNum == 3)
-                playerAniMgr.PlayAnimation("Critical02");
+            aniEnd = false;
+            if (weaponType == (int)eWEAPON.em_BOW || weaponType == (int)eWEAPON.em_WAND)
+                shotMgr.Shooting();
         }
     }
 
@@ -54,5 +72,11 @@ public class EnemyScript : MonoBehaviour {
     {
         atkAni = true;
         atkAniNum = num;
+    }
+
+    IEnumerator EndAni(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        aniEnd = true;
     }
 }

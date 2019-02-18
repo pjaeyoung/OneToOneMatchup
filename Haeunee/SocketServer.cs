@@ -77,6 +77,7 @@ public struct sAtk //공격
     }
 }
 
+
 public class RecvData //받은 데이터와 소켓을 저장하는 클래스
 {
     public byte[] buffer = new byte[100];
