@@ -17,6 +17,7 @@ public class ItemSpawn : MonoBehaviour {
         int armorCount = weaponCount + 3;
         int itemCount = armorCount + items.Length;
         int ran = 0;
+        int itemIdx = 0;
         usedSpawnNum = new int[spawnCount];
 
         for(int i = 0; i < spawnCount; i++)
@@ -57,7 +58,7 @@ public class ItemSpawn : MonoBehaviour {
                         continue;
                 }
             }
-            else if(i >= armorCount && i < itemCount)
+            else if(i >= armorCount && i < spawnCount)
             {
                 while (true)
                 {
@@ -65,7 +66,10 @@ public class ItemSpawn : MonoBehaviour {
                     int IsuseableNum = IsSpawnUseable(ran);
                     if (IsuseableNum == (int)eBOOLEAN.TRUE)
                     {
-                        callItem(ran, armorCount, i);
+                        callItem(ran , itemIdx);
+                        itemIdx++;
+                        if(itemIdx > 3)
+                            itemIdx = 0;
                         break;
                     }
                     else
@@ -85,21 +89,20 @@ public class ItemSpawn : MonoBehaviour {
     void callArmor(int num , int weaponLen, int idx)
     {
         int cmpidx = 0;
-        if (enter.savCharInfo.gender == (int)eGENDER.MALE)
+        //if (enter.savCharInfo.gender == (int)eGENDER.MALE)
             cmpidx = idx - weaponLen + 3;
-        else if(enter.savCharInfo.gender == (int)eGENDER.FEMALE)
-            cmpidx = idx - weaponLen;
+        //else if(enter.savCharInfo.gender == (int)eGENDER.FEMALE)
+            //cmpidx = idx - weaponLen;
         Vector3 pos = itemSpawn[num].position;
         Quaternion rot = armors[cmpidx].transform.rotation;
         Instantiate(armors[cmpidx], pos, rot);
     }
 
-    void callItem(int num, int weaponArmorLen, int idx)
+    void callItem(int num , int idx)
     {
-        int cmpidx = idx - weaponArmorLen;
         Vector3 pos = itemSpawn[num].position;
-        Quaternion rot = items[cmpidx].transform.rotation;
-        Instantiate(items[cmpidx], pos, rot);
+        Quaternion rot = items[idx].transform.rotation;
+        Instantiate(items[idx], pos, rot);
     }
 
     /* itemSpawn[num] 에 이미 스폰된 아이템이 있는지 여부 판단 */
