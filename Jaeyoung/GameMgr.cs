@@ -5,32 +5,20 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 /* 아이템 클래스 : 아이템 획득 갯수, 빈 아이템가방 넘버 */
-public class Item
+public class ItemCount
 {
     int getItemNum; 
     int maxItemNum;
-    int emtyNum;
 
-    public Item()
+    public ItemCount()
     {
         getItemNum = 0;
         maxItemNum = 3;
-        emtyNum = 0;
     }
 
     public int GetItemNum()
     {
         return getItemNum;
-    }
-
-    public int GetEmtyNum()
-    {
-        return emtyNum;
-    }
-
-    public void changeEmtyNum(int changeNum)
-    {
-        emtyNum = changeNum;
     }
 
     public int changeGetItemNum(int changeNum)
@@ -45,84 +33,79 @@ public class Item
     }
 }
 
-public class Jobs
-{
-    string ImageName;
-    float hp;
-    float atk;
-    float def;
-
-    public Jobs(string n, float a, float d)
-    {
-        ImageName = n;
-        hp = 10;
-        atk = a;
-        def = d;
-    }
-}
-//벨런스 조정 나중에 
-public class Warrior : Jobs
-{
-    public Warrior() : base("img_weapon_sword", 2, 5) { }
-}
-
-public class Magician : Jobs
-{
-    public Magician() : base("wand", 1, 2) { }
-}
-
+/* fightScene에 들고 갈 플레이어 정보 (서버 연동) */
 public class PlayerInfo
 {
-    string job;
-    string armor;
-    string[] getItemArr;
+    int weapon;
+    int armor;
+    int[] getItemArr;
 
     public PlayerInfo()
     {
-        job = "";
-        armor = "";
-        getItemArr = new string[3];
+        weapon = -1;
+        armor = -1;
+        getItemArr = new int[3];
     }
 
-    public void InputGetItemArr(string i, int index)
+    public void InputGetItemArr(int i, int index)
     {
         getItemArr[index] = i;
     }
 
-    public void changePlayerInfo(string j, string a)
+    public void changeArmor(string a)
     {
-        job = j;
-        armor = a;
+        string ArmorGender = a.Substring(0, 16);
+        string ArmorNumStr = a.Substring(17);
+        int ArmorNumInt = int.Parse(ArmorNumStr);
+        if(ArmorGender == "img_armor_F_Suit_" || ArmorGender == "img_armor_M_Suit_")
+            armor = ArmorNumInt;
     }
 
-    public string getPlayerJob()
+    public void changeWeapon(string w)
     {
-        return job;
+        if (w == "img_weapon_sword")
+        {
+            weapon = (int)eWEAPON.em_SWORD;
+        }
+        else if (w == "img_weapon_wand")
+        {
+            weapon = (int)eWEAPON.em_WAND;
+        }
+        else if (w == "img_weapon_bow")
+        {
+            weapon = (int)eWEAPON.em_BOW;
+        }
+        else if (w == "img_weapon_shield")
+        {
+            weapon = (int)eWEAPON.em_SHIElD;
+        }
     }
 
-    public string getPlayerArmor()
+    public int getPlayerWeapon()
+    {
+        return weapon;
+    }
+
+    public int getPlayerArmor()
     {
         return armor;
     }
 
-    public string[] getPlayerItemArr()
+    public int getPlayerItemArr(int idx)
     {
-        return getItemArr;
+        return getItemArr[idx];
     }
 }
 
 public class GameMgr : MonoBehaviour {
-    enum eBOOLEAN
-    {
-        FALSE, TRUE
-    }
+
+    SocketServer server;
+    GameEnterScript enter;
+    public GameObject waitImg; //둘 다 데이터를 주고 받을 때까지 필요한 시간에 띄울 이미지
 
     public Text T_timer;
     public Button[] itemBtn; //화면에 표시되는 '획득한 아이템 목록'(안드로이드용 고려)
-    public Item Citem;
-    public Jobs CJobs;
-    public Warrior CWarrior;
-    public Magician CMagician;
+    public ItemCount CitemCount;
     public PlayerInfo CPlayerInfo;
 
     float countTimer; //카운트다운 타이머 
@@ -131,37 +114,30 @@ public class GameMgr : MonoBehaviour {
 
     private void Awake()
     {
-        Screen.SetResolution(Screen.width, Screen.width * 16 / 9, true); //
-        Citem = new Item();
+        CitemCount = new ItemCount();
+        CPlayerInfo = new PlayerInfo();
         countTimer = 11;
         min = 0;
         timer = 0;
     }
-
-    void Start () //fightScene까지 끝나면 gameMgr destroy
+    private void Start()
     {
-        Scene scene = SceneManager.GetActiveScene();
-        if(scene.name == "fightScene")
-        {
-            min = 0;
-        }
+        //StartCoroutine(LoadDelay());
     }
-	
-	void Update ()
+
+    void Update ()
     {
         Scene scene = SceneManager.GetActiveScene();
         if(scene.name == "ItemCollectScene")
         {
             if (min >= 1)
-            {
+            { 
                 DontDestroyOnLoad(this.transform.gameObject);
-                StartCoroutine("waitChangeScene");
+                StartCoroutine(waitChangeScene());
                 countTimer -= Time.deltaTime;
             }
             else
-            {
                 showTime();
-            }
         }
         else if (scene.name == "fightScene")
         {
@@ -169,7 +145,15 @@ public class GameMgr : MonoBehaviour {
         }
 	}
 
-    /*fightScene 전환하기 전 카운트 다운 : CountDown, waitChangeScene */
+    IEnumerator LoadDelay() //시작 시 오브젝트가 모두 로드될 때까지 기다리기 위한 코루틴
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameObject serverObj = GameObject.Find("SocketServer");
+        server = serverObj.GetComponent<SocketServer>();
+        enter = serverObj.GetComponent<GameEnterScript>();
+    }
+
+    /*fightScene 전환하기 전 카운트 다운 : CountDown, waitChangeScene , sendPlayerInfoToServ */
     void countDown ()
     {
         int count = (int)countTimer;
@@ -190,9 +174,22 @@ public class GameMgr : MonoBehaviour {
             countDown();
             yield return new WaitForSeconds(1);
         }
+        //StartCoroutine(sendPlayerInfoToServ());
         SceneManager.LoadScene(3);
     }
-    
+
+    IEnumerator sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
+    {
+        enter.savCharInfo.weapon = CPlayerInfo.getPlayerWeapon(); //선택한 무기, 방어구, 소비아이템 값 저장
+        enter.savCharInfo.armor = CPlayerInfo.getPlayerArmor();
+        enter.savCharInfo.item1 = CPlayerInfo.getPlayerItemArr(0);
+        enter.savCharInfo.item2 = CPlayerInfo.getPlayerItemArr(1);
+        enter.savCharInfo.item3 = CPlayerInfo.getPlayerItemArr(2);
+        waitImg.SetActive(true);
+        server.SendMsg(enter.savCharInfo); //현재 유저가 선택한 모든 값(외형, 옷, 무기)을 상대에게 보냄
+        yield return new WaitForSeconds(0.5f); 
+    }
+
     /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시) : showTime, TimerToString */
     void showTime()
     {
@@ -214,7 +211,7 @@ public class GameMgr : MonoBehaviour {
     }
 
     /* 아이템 가방 : 소비아이템 전용 */
-    int getEmtyImgIndex() //빈 아이템가방 인덱스 가져오기
+    public int getEmtyImgIndex() //빈 아이템가방 인덱스 가져오기
     {
         int index = 0;
         if(itemBtn.Length != 0)
@@ -223,12 +220,7 @@ public class GameMgr : MonoBehaviour {
             {
                 string imgName = itemImg.GetComponent<Image>().sprite.name;
                 if (imgName == "img_emty")
-                {
-                    int num = Citem.GetEmtyNum();
-                    if(num >= 0 && num <3)
-                        Citem.changeEmtyNum(index + 1);
                     break;
-                }
                 index++;
             }
         }
@@ -244,12 +236,31 @@ public class GameMgr : MonoBehaviour {
             string name = obj.GetComponent<MeshRenderer>().material.name;
             string objImg = getAccurateName(name);
             string fileName = "Sprites/";
+            int eitem = changeItemArrInCPlayerInfo(objImg);
+            if (eitem != -1)
+                CPlayerInfo.InputGetItemArr(eitem, emtyIndex);
+            else
+                Debug.Log("no Image");
             Sprite spr = Resources.Load<Sprite>(fileName + objImg);
             if (spr != null)
                 itemBtn[emtyIndex].GetComponent<Image>().sprite = spr;
             else
                 Debug.Log("null");
         }
+    }
+
+    int changeItemArrInCPlayerInfo(string imgName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
+    {
+        if (imgName == "img_hpPotion")
+            return (int)eITEM.em_HP_POTION;
+        else if (imgName == "img_speedPotion")
+            return (int)eITEM.em_SPEED_POTION;
+        else if (imgName == "img_damageUpPotion")
+            return (int)eITEM.em_DAMAGE_UP_POTIOM;
+        else if (imgName == "img_defenceUpPotion")
+            return (int)eITEM.em_DEFENCE_UP_POTION;
+        else
+            return -1;
     }
 
     public string getAccurateName(string name) //material.name 반환값에서 (instance) 부분 삭제 

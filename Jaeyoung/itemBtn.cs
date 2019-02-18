@@ -22,6 +22,7 @@ public class itemBtn : MonoBehaviour
 
     private void Start()
     {
+
         /* 마우스 버튼 클릭 후 드래그 구현 -> 아이템 가방에 든 물건 꺼내기(버리기) */
         EventTrigger eventTrigger = gameObject.AddComponent<EventTrigger>();
 
@@ -82,14 +83,13 @@ public class itemBtn : MonoBehaviour
             getItemArr[idx].transform.position = throwPos;
             getItemArr[idx].SetActive(true);
             getItemArr[idx] = null;
-            GM.Citem.changeEmtyNum(idx);
 
             Sprite spr = Resources.Load<Sprite>("Sprites/img_emty");
             btnArr[idx].GetComponent<Image>().sprite = spr;
 
-            int num = GM.Citem.GetItemNum();
+            int num = GM.CitemCount.GetItemNum();
             num--;
-            GM.Citem.changeGetItemNum(num);
+            GM.CitemCount.changeGetItemNum(num);
         }
         else
             Debug.Log("No item");
