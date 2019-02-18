@@ -34,8 +34,9 @@ public struct sCharInfo //획득한 아이템 정보
     public int weapon; //무기
     public int cloth; //방어구
     public int gender, hair, hairColor, face; //캐릭터 외형 정보
+    public int item1, item2, item3; //소비아이템 (hpPotion)
 
-    public sCharInfo(int f, int w, int c, int gen, int inputHair, int inputColor, int inputFace)
+    public sCharInfo(int f, int w, int c, int gen, int inputHair, int inputColor, int inputFace , int i1, int i2, int i3)
     {
         flag = f;
         weapon = w;
@@ -44,6 +45,9 @@ public struct sCharInfo //획득한 아이템 정보
         hair = inputHair;
         hairColor = inputColor;
         face = inputFace;
+        item1 = i1;
+        item2 = i2;
+        item3 = i3;
     }
 }
 

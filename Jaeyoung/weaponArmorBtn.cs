@@ -36,6 +36,7 @@ public class weaponArmorBtn : MonoBehaviour {
                 Weapon = obj;
                 Weapon.SetActive(false);
                 string str = GM.getAccurateName(imgName);
+                GM.CPlayerInfo.changeWeapon(str);
                 changeWeaponImg(str);
             }
             else if(cmp == "img_armor")
@@ -48,6 +49,7 @@ public class weaponArmorBtn : MonoBehaviour {
                 Armor = obj;
                 Armor.SetActive(false);
                 string str = GM.getAccurateName(imgName);
+                GM.CPlayerInfo.changeArmor(str);
                 changeArmorImg(str);
             }
             cmp += imgName[i];

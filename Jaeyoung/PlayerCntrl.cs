@@ -5,11 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerCntrl : MonoBehaviour {
-    enum eBOOLEAN
-    {
-        FALSE, TRUE
-    }
-
     public float moveSpeed = 5.0f;
     public float jumpSpeed = 100.0f;
     public float rotSpeed = 100.0f;
@@ -119,8 +114,6 @@ public class PlayerCntrl : MonoBehaviour {
 
     void TouchItem() //아이템 가방이 차기 전 : 아이템 가방 이미지 변경 및 itemPool로 위치 변경, 아이템 가방이 다 찬 후: 경고 메세지 
     {
-        Debug.Log("Touch!");
-
         GameObject fullItem = canvas.transform.Find("fullItemMSG").gameObject;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit rayHit;
@@ -131,14 +124,13 @@ public class PlayerCntrl : MonoBehaviour {
             GameObject obj = rayHit.transform.gameObject;
             if (obj.tag == "item")
             {
-                Debug.Log("소비아이템");
-                int num = GM.Citem.GetItemNum();
+                int num = GM.CitemCount.GetItemNum();
                 num++;
-                int IsMaxItem = GM.Citem.changeGetItemNum(num);
+                int IsMaxItem = GM.CitemCount.changeGetItemNum(num);
                 if (IsMaxItem == (int)eBOOLEAN.FALSE)
                 {
                     fullItem.SetActive(false);
-                    int emtyNum = GM.Citem.GetEmtyNum();
+                    int emtyNum = GM.getEmtyImgIndex();
                     itemBtn s_itemBtn = itemButton[emtyNum].GetComponent<itemBtn>(); //아이템 버튼 스크립트에서 아이템 목록 입력! 
                     s_itemBtn.InputGetItemArr(obj, emtyNum);
                     
@@ -154,7 +146,6 @@ public class PlayerCntrl : MonoBehaviour {
             }
             else
             {
-                Debug.Log("무기/방어구 아이템");
                 if(obj.tag == "weapon")
                 {
                     weaponArmorBtn s_weaponBtn = canvas.transform.Find("btn_GetWeapon").GetComponent<weaponArmorBtn>();
