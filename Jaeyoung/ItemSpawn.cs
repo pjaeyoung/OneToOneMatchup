@@ -7,19 +7,14 @@ public class ItemSpawn : MonoBehaviour {
     public GameObject[] items;
     public GameObject[] weapons;
     public GameObject[] armors;
-
+    GameEnterScript enter;
     int[] usedSpawnNum; //사용된 itemSpawn idx 저장
-
-    enum eBOOLEAN
-    {
-        FALSE , TRUE
-    }
 
     void Awake ()
     {
         int spawnCount = itemSpawn.Length;
         int weaponCount = weapons.Length;
-        int armorCount = weaponCount + armors.Length;
+        int armorCount = weaponCount + 3;
         int itemCount = armorCount + items.Length;
         int ran = 0;
         usedSpawnNum = new int[spawnCount];
@@ -89,7 +84,11 @@ public class ItemSpawn : MonoBehaviour {
 
     void callArmor(int num , int weaponLen, int idx)
     {
-        int cmpidx = idx - weaponLen;
+        int cmpidx = 0;
+        if (enter.savCharInfo.gender == (int)eGENDER.MALE)
+            cmpidx = idx - weaponLen + 3;
+        else if(enter.savCharInfo.gender == (int)eGENDER.FEMALE)
+            cmpidx = idx - weaponLen;
         Vector3 pos = itemSpawn[num].position;
         Quaternion rot = armors[cmpidx].transform.rotation;
         Instantiate(armors[cmpidx], pos, rot);

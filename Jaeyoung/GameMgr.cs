@@ -75,7 +75,7 @@ public class PlayerInfo
         {
             weapon = (int)eWEAPON.em_BOW;
         }
-        else if (w == "img_weapon_shield")
+        else if (w == "img_weapon_swordAndShield")
         {
             weapon = (int)eWEAPON.em_SHIElD;
         }

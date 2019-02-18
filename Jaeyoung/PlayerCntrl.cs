@@ -12,14 +12,14 @@ public class PlayerCntrl : MonoBehaviour {
     GameMgr GM;
     AnimationManager AM;
     GameObject canvas;
+    GameObject[] touchableItems;
 
     int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
-    //int IsActiveHighlight; //아이템 외곽선 하이라이트 상태면 TRUE, 아니면 FALSE
+    int IsActiveHighlight; //아이템 외곽선 하이라이트 상태면 TRUE, 아니면 FALSE
 
     private void Awake()
     {
         IsJump = (int)eBOOLEAN.FALSE;
-       // IsActiveHighlight = (int)eBOOLEAN.FALSE;
         GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         canvas = GameObject.Find("Canvas");
@@ -27,6 +27,25 @@ public class PlayerCntrl : MonoBehaviour {
 
     void Start ()
     {
+        Scene scene = SceneManager.GetActiveScene();
+        if(scene.name == "ItemCollectScene") // tocchable layer(10)인 오브젝트 정보 저장 
+        {
+            ItemSpawn s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn>();
+            int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
+            IsActiveHighlight = (int)eBOOLEAN.FALSE;
+            GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+            int len = Items.Length;
+            touchableItems = new GameObject[itemSpawnLens];
+            int idx = 0;
+            for(int i = 0; i<len; i++)
+            {
+                if(Items[i].layer == 10) 
+                {
+                    touchableItems[idx] = Items[i];
+                    idx++;
+                }
+            }
+        }
        
 	}
 	
@@ -52,6 +71,7 @@ public class PlayerCntrl : MonoBehaviour {
             if (scene.name == "ItemCollectScene")
             {
                 TouchItem();
+                chkHighlight();
             }
             else if (scene.name == "fightScene")
             {
@@ -70,28 +90,16 @@ public class PlayerCntrl : MonoBehaviour {
     /* 캐릭터 움직임 제어(상하좌우 wsad, 점프 space, 회전 마우스 가운데) : Move, Rot */
     void Move()
     {
+        AM.PlayAnimation("Idle");
         if (Input.GetKey(KeyCode.D))
-        {
-            AM.PlayAnimation("Move");
             this.transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
-        }
         else if (Input.GetKey(KeyCode.A))
-        {
-            AM.PlayAnimation("Move");
             this.transform.Translate(Vector3.left * moveSpeed * Time.deltaTime);
-        }
         if (Input.GetKey(KeyCode.S))
-        {
-            AM.PlayAnimation("Move");
             this.transform.Translate(Vector3.back * moveSpeed * Time.deltaTime);
-        }
         else if (Input.GetKey(KeyCode.W))
-        {
-            AM.PlayAnimation("Move");
             this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-        }
-        else
-            AM.PlayAnimation("Idle");
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (IsJump == (int)eBOOLEAN.FALSE)
@@ -105,9 +113,6 @@ public class PlayerCntrl : MonoBehaviour {
     void Rot() 
     {
         transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * rotSpeed * Time.deltaTime);
-        //float y = Input.mousePosition.x * Time.deltaTime * rotSpeed;
-        //Vector3 rotY = new Vector3(0, y, 0);
-        //transform.rotation = Quaternion.Euler(rotY);
     }
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
@@ -167,45 +172,42 @@ public class PlayerCntrl : MonoBehaviour {
         obj.SetActive(false);
     }
 
-    void chkHighlight() //일단 보류....
+    void chkHighlight() 
     {
-       
+        Vector3 fwd = transform.TransformDirection(transform.forward);
+        Vector3 center = transform.position;
+        Quaternion rot = transform.rotation;
+        Vector3 scale = new Vector3(2, 2, 2);
+
+        float maxDistance = 6.0f;
+    
+        if (touchableItems.Length != 0)
+        {
+            foreach (GameObject objArrChild in touchableItems)
+            {
+                RaycastHit[] hitArr;
+                hitArr = Physics.BoxCastAll(center, scale / 2, fwd, rot, maxDistance, 9);
+                foreach (RaycastHit hitArrChild in hitArr)
+                {
+                    GameObject hit = hitArrChild.transform.gameObject;
+                    if (objArrChild == hit)
+                    {
+                        hit.GetComponent<outline>().enabled = true;
+                        IsActiveHighlight = (int)eBOOLEAN.TRUE;
+                    }
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("touchableItems error");
+        }
     }
 
     /* BoxCast 디버깅용, 최종 빌드전에 삭제 */
-    //private void OnDrawGizmos()
-    //{
-    //    Vector3 fwd = transform.TransformDirection(transform.forward);
-    //    Vector3 center = transform.position;
-    //    Quaternion rot = transform.rotation;
-    //    Vector3 scale = new Vector3(10, 2, 4);
-
-    //    float maxDistance = 6.0f;
-    //    Gizmos.DrawWireCube(center, scale);
-
-    //    GameObject[] objArr = GameObject.FindGameObjectsWithTag("touchable");
-    //    if (objArr.Length != 0)
-    //    {
-    //        foreach (GameObject objArrChild in objArr)
-    //        {
-    //            RaycastHit[] hitArr;
-    //            hitArr = Physics.BoxCastAll(center, scale / 2, fwd, rot, maxDistance, 9);
-    //            foreach (RaycastHit hitArrChild in hitArr)
-    //            {
-    //                GameObject hit = hitArrChild.transform.gameObject;
-    //                if (objArrChild == hit)
-    //                {
-    //                    hit.GetComponent<outline>().enabled = true;
-    //                    IsActiveHighlight = (int)eBOOLEAN.TRUE;
-    //                }
-    //                else
-    //                {
-    //                    objArrChild.GetComponent<outline>().enabled = false;
-    //                    IsActiveHighlight = (int)eBOOLEAN.FALSE;
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        
+    }
 }
 
