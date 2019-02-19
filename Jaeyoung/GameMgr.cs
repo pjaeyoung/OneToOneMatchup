@@ -43,7 +43,7 @@ public class PlayerInfo
     public PlayerInfo()
     {
         weapon = -1;
-        armor = -1;
+        armor = 3;
         getItemArr = new int[3];
     }
 
@@ -57,7 +57,7 @@ public class PlayerInfo
         string ArmorGender = a.Substring(0, 16);
         string ArmorNumStr = a.Substring(17);
         int ArmorNumInt = int.Parse(ArmorNumStr);
-        if(ArmorGender == "img_armor_F_Suit_" || ArmorGender == "img_armor_M_Suit_")
+        if(ArmorGender == "img_armor_F_Suit" || ArmorGender == "img_armor_M_Suit")
             armor = ArmorNumInt;
     }
 
@@ -98,8 +98,6 @@ public class PlayerInfo
 }
 
 public class GameMgr : MonoBehaviour {
-
-    SocketServer server;
     GameEnterScript enter;
     public GameObject waitImg; //둘 다 데이터를 주고 받을 때까지 필요한 시간에 띄울 이미지
 
@@ -107,6 +105,7 @@ public class GameMgr : MonoBehaviour {
     public Button[] itemBtn; //화면에 표시되는 '획득한 아이템 목록'(안드로이드용 고려)
     public ItemCount CitemCount;
     public PlayerInfo CPlayerInfo;
+    bool gameEnter = false;
 
     float countTimer; //카운트다운 타이머 
     int min; //분
@@ -116,13 +115,15 @@ public class GameMgr : MonoBehaviour {
     {
         CitemCount = new ItemCount();
         CPlayerInfo = new PlayerInfo();
-        countTimer = 11;
+        countTimer = 10;
         min = 0;
         timer = 0;
     }
+
     private void Start()
     {
-        //StartCoroutine(LoadDelay());
+        GameObject serverObj = GameObject.Find("SocketServer");
+        enter = serverObj.GetComponent<GameEnterScript>();
     }
 
     void Update ()
@@ -130,11 +131,12 @@ public class GameMgr : MonoBehaviour {
         Scene scene = SceneManager.GetActiveScene();
         if(scene.name == "ItemCollectScene")
         {
-            if (min >= 1)
-            { 
+            if (min >= 1 && gameEnter == false)
+            {
+                gameEnter = true;
+                min = 0;
                 DontDestroyOnLoad(this.transform.gameObject);
                 StartCoroutine(waitChangeScene());
-                countTimer -= Time.deltaTime;
             }
             else
                 showTime();
@@ -145,25 +147,22 @@ public class GameMgr : MonoBehaviour {
         }
 	}
 
-    IEnumerator LoadDelay() //시작 시 오브젝트가 모두 로드될 때까지 기다리기 위한 코루틴
-    {
-        yield return new WaitForSeconds(0.5f);
-        GameObject serverObj = GameObject.Find("SocketServer");
-        server = serverObj.GetComponent<SocketServer>();
-        enter = serverObj.GetComponent<GameEnterScript>();
-    }
-
     /*fightScene 전환하기 전 카운트 다운 : CountDown, waitChangeScene , sendPlayerInfoToServ */
     void countDown ()
     {
+        waitImg.SetActive(true);
         int count = (int)countTimer;
         GameObject fightStart = GameObject.Find("Canvas").transform.Find("fightGameStartMSG").gameObject;
         fightStart.SetActive(true);
         Text countText = GameObject.Find("countDown").GetComponent<Text>();
         string s_count;
-      
-        s_count = string.Format("{0:00}", count);
-        countText.text = s_count;
+        
+        if(countTimer>=0)
+        {
+            s_count = string.Format("{0:00}", count);
+            countText.text = s_count;
+            countTimer -= 1;
+        }
     }
 
   
@@ -171,30 +170,27 @@ public class GameMgr : MonoBehaviour {
     {
         while(countTimer >= 0)
         {
-            countDown();
             yield return new WaitForSeconds(1);
+            countDown();
         }
-        //StartCoroutine(sendPlayerInfoToServ());
-        SceneManager.LoadScene(3);
+       sendPlayerInfoToServ();
     }
 
-    IEnumerator sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
+    void sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
     {
         enter.savCharInfo.weapon = CPlayerInfo.getPlayerWeapon(); //선택한 무기, 방어구, 소비아이템 값 저장
         enter.savCharInfo.armor = CPlayerInfo.getPlayerArmor();
         enter.savCharInfo.item1 = CPlayerInfo.getPlayerItemArr(0);
         enter.savCharInfo.item2 = CPlayerInfo.getPlayerItemArr(1);
         enter.savCharInfo.item3 = CPlayerInfo.getPlayerItemArr(2);
-        waitImg.SetActive(true);
-        server.SendMsg(enter.savCharInfo); //현재 유저가 선택한 모든 값(외형, 옷, 무기)을 상대에게 보냄
-        yield return new WaitForSeconds(0.5f); 
+        SocketServer.SingleTonServ().SendMsg(enter.savCharInfo); //현재 유저가 선택한 모든 값(외형, 옷, 무기)을 상대에게 보냄
     }
 
     /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시) : showTime, TimerToString */
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 60)
+        if (timer > 10)
         {
             timer = 0;
             min++;
