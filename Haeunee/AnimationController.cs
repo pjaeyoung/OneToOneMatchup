@@ -2,17 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-enum eANIMATION //애니메이션의 종류를 나타내는 enum
-{
-    em_IDLE = 0,
-    em_MOVE,
-    em_ATTACK01 = 0,
-    em_ATTACK02,
-    em_ATTACK03,
-    em_ATTACK04,
-    em_DAMEGE01 = 0,
-    em_DAMEGE02,
-}
 
 public class AnimationController : MonoBehaviour {
     Animation animation;
@@ -56,48 +45,48 @@ public class AnimationController : MonoBehaviour {
 
     public string GetAniName(string _anim) //무기 종류에 따라 애니메이션을 다르게 불러오기 위한 함수
     {
-        if (weaponIndex == (int)eWEAPON.em_SHIElD) //칼, 방패 애니메이션
+        if (weaponIndex == (int)eWEAPON.em_SWORDANDSHIELD) //칼, 방패 애니메이션
         {
             if (_anim == "Idle")
-                return weapon[(int)eWEAPON.em_SHIElD].standardAni[(int)eANIMATION.em_IDLE].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].standardAni[(int)eANIMATION.em_IDLE].name;
             else if (_anim == "Move")
-                return weapon[(int)eWEAPON.em_SHIElD].standardAni[(int)eANIMATION.em_MOVE].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].standardAni[(int)eANIMATION.em_MOVE].name;
             else if (_anim == "Attack01")
-                return weapon[(int)eWEAPON.em_SHIElD].atkAni[(int)eANIMATION.em_ATTACK01].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].atkAni[(int)eANIMATION.em_ATTACK01].name;
             else if (_anim == "Attack02")
-                return weapon[(int)eWEAPON.em_SHIElD].atkAni[(int)eANIMATION.em_ATTACK02].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].atkAni[(int)eANIMATION.em_ATTACK02].name;
             else if (_anim == "Critical01")
-                return weapon[(int)eWEAPON.em_SHIElD].atkAni[(int)eANIMATION.em_ATTACK03].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].atkAni[(int)eANIMATION.em_ATTACK03].name;
             else if (_anim == "Critical02")
-                return weapon[(int)eWEAPON.em_SHIElD].atkAni[(int)eANIMATION.em_ATTACK04].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].atkAni[(int)eANIMATION.em_ATTACK04].name;
             else if (_anim == "GetDamage01")
-                return weapon[(int)eWEAPON.em_SHIElD].damageAni[(int)eANIMATION.em_DAMEGE01].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].damageAni[(int)eANIMATION.em_DAMEGE01].name;
             else if (_anim == "GetDamage02")
-                return weapon[(int)eWEAPON.em_SHIElD].damageAni[(int)eANIMATION.em_DAMEGE02].name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].damageAni[(int)eANIMATION.em_DAMEGE02].name;
             else if (_anim == "Death")
-                return weapon[(int)eWEAPON.em_SHIElD].death.name;
+                return weapon[(int)eWEAPON.em_SWORDANDSHIELD].death.name;
 
         }
-        else if (weaponIndex == (int)eWEAPON.em_SWORD||weaponIndex==(int)eWEAPON.em_STICK) //대검, 막대기 애니메이션
+        else if (weaponIndex == (int)eWEAPON.em_GREATESWORD || weaponIndex==(int)eWEAPON.em_STICK) //대검, 막대기 애니메이션
         {
             if (_anim == "Idle")
-                return(weapon[(int)eWEAPON.em_SWORD].standardAni[(int)eANIMATION.em_IDLE].name);
+                return(weapon[(int)eWEAPON.em_GREATESWORD].standardAni[(int)eANIMATION.em_IDLE].name);
             else if (_anim == "Move")
-                return (weapon[(int)eWEAPON.em_SWORD].standardAni[(int)eANIMATION.em_MOVE].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].standardAni[(int)eANIMATION.em_MOVE].name);
             else if (_anim == "Attack01")
-                return (weapon[(int)eWEAPON.em_SWORD].atkAni[(int)eANIMATION.em_ATTACK01].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].atkAni[(int)eANIMATION.em_ATTACK01].name);
             else if (_anim == "Attack02")
-                return(weapon[(int)eWEAPON.em_SWORD].atkAni[(int)eANIMATION.em_ATTACK02].name);
+                return(weapon[(int)eWEAPON.em_GREATESWORD].atkAni[(int)eANIMATION.em_ATTACK02].name);
             else if (_anim == "Critical01")
-                return (weapon[(int)eWEAPON.em_SWORD].atkAni[(int)eANIMATION.em_ATTACK03].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].atkAni[(int)eANIMATION.em_ATTACK03].name);
             else if (_anim == "Critical02")
-                return (weapon[(int)eWEAPON.em_SWORD].atkAni[(int)eANIMATION.em_ATTACK04].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].atkAni[(int)eANIMATION.em_ATTACK04].name);
             else if (_anim == "GetDamage01")
-                return (weapon[(int)eWEAPON.em_SWORD].damageAni[(int)eANIMATION.em_DAMEGE01].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].damageAni[(int)eANIMATION.em_DAMEGE01].name);
             else if (_anim == "GetDamage02")
-                return (weapon[(int)eWEAPON.em_SWORD].damageAni[(int)eANIMATION.em_DAMEGE02].name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].damageAni[(int)eANIMATION.em_DAMEGE02].name);
             else if (_anim == "Death")
-                return (weapon[(int)eWEAPON.em_SWORD].death.name);
+                return (weapon[(int)eWEAPON.em_GREATESWORD].death.name);
         }
         else if (weaponIndex == (int)eWEAPON.em_DAGGER) //단검 애니메이션
         {
@@ -163,6 +152,21 @@ public class AnimationController : MonoBehaviour {
                 return (weapon[(int)eWEAPON.em_WAND].death.name);
         }
         return "Fail";
+    }
+
+    public void PlayAnimation(string aniName)
+    {
+        animation.CrossFade(GetAniName(aniName));
+    }
+
+    public void PlayAtkDmg(string aniName)
+    {
+        animation.Play(GetAniName(aniName));
+    }
+
+    public float GetAniLength(string aniName)
+    {
+        return animation[GetAniName(aniName)].length;
     }
 }
 

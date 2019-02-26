@@ -9,78 +9,6 @@ using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
 
 //게임안에서 사용할 소켓서버
-enum eMSG //메세지 종류
-{
-    em_ENTER = 1,
-    em_CHARINFO,
-    em_MOVE,
-    em_ATK,
-};
-
-struct sGameRoom //매칭 정보
-{
-    public int flag;
-    public int userNum;
-    public sGameRoom(int f, int u)
-    {
-        flag = f;
-        userNum = 0;
-    }
-}
-
-public struct sCharInfo //획득한 아이템 정보
-{
-    private int flag;
-    public int weapon; //무기
-    public int cloth; //방어구
-    public int gender, hair, hairColor, face; //캐릭터 외형 정보
-    public int item1, item2, item3; //소비아이템 (hpPotion)
-
-    public sCharInfo(int f, int w, int c, int gen, int inputHair, int inputColor, int inputFace , int i1, int i2, int i3)
-    {
-        flag = f;
-        weapon = w;
-        cloth = c;
-        gender = gen;
-        hair = inputHair;
-        hairColor = inputColor;
-        face = inputFace;
-        item1 = i1;
-        item2 = i2;
-        item3 = i3;
-    }
-}
-
-public struct sMove //움직임, 회전
-{
-    private int flag;
-    public float x, y, z;
-    public float rotX, rotY, rotZ, rotW;
-
-    public sMove(int f, float inputX, float inputY, float inputZ, float inrotX, float inrotY, float inrotZ, float inrotW)
-    {
-        flag = f;
-        x = inputX;
-        y = inputY;
-        z = inputZ;
-        rotX = inrotX;
-        rotY = inrotY;
-        rotZ = inrotZ;
-        rotW = inrotW;
-    }
-}
-
-public struct sAtk //공격
-{
-    private int flag;
-    public int atkAni;
-    public sAtk(int f, int ani)
-    {
-        flag = f;
-        atkAni = ani;
-    }
-}
-
 
 public class RecvData //받은 데이터와 소켓을 저장하는 클래스
 {
@@ -88,25 +16,31 @@ public class RecvData //받은 데이터와 소켓을 저장하는 클래스
     public Socket socket;
 }
 
-public class SocketServer : MonoBehaviour {
+public class SocketServer {
+    private static SocketServer socketServer = null;
+    public static SocketServer SingleTonServ()
+    {
+        if(socketServer==null)
+        {
+            socketServer = new SocketServer();
+            socketServer.MakeServer();
+        }
+        return socketServer;
+    }
+
     private static ManualResetEvent conn = new ManualResetEvent(false); //커넥트 스레드
     private static ManualResetEvent recv = new ManualResetEvent(false); //리시브 스레드
-    Socket sock; //소켓
-    GameObject enemyObj; //현재 스폰된 적 오브젝트
+    private static Socket sock; //소켓
     static EnemyScript eScript;
-    bool gameScene = false; //게임씬에 입장했는지 여부
+    static PlayerScript pScript;
     static GameEnterScript gScript; 
     static SpawnScript sScript; 
     RecvData rd = new RecvData();
     static sGameRoom room;
     static int enterNum;
 
-    void Start()
+    private void MakeServer()
     {
-        DontDestroyOnLoad(this); //서버 오브젝트 파괴되지 않게 함
-
-        gScript = GetComponent<GameEnterScript>();
-        sScript = GetComponent<SpawnScript>();
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //소켓생성
         var ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10001); //연결할 서버 정보
         var connResult = sock.BeginConnect(ep, new AsyncCallback(ConnectCallBack), sock); //커넥트
@@ -122,19 +56,6 @@ public class SocketServer : MonoBehaviour {
 #endif
         }
         rd.socket = sock;
-    }
-
-    // Update is called once per frame
-    void Update () {
-        sock.BeginReceive(rd.buffer, 0, rd.buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), rd);
-        //리시브 기다리기
-        recv.Set();
-        if (sScript.nowEnemy!=null && gameScene == false) //게임 씬에서 적이 스폰된 후 적 정보 가져오기
-        {
-            enemyObj = sScript.nowEnemy;
-            eScript = enemyObj.GetComponent<EnemyScript>();
-            gameScene = true;
-        }
     }
 
     private static void ConnectCallBack(IAsyncResult ar) //서버와 연결되었을 때
@@ -191,6 +112,49 @@ public class SocketServer : MonoBehaviour {
             sAtk atk = (sAtk)Marshal.PtrToStructure(buff, m_type);
             eScript.EnemyAtk(atk.atkAni);
         }
+        else if(room.flag==(int)eMSG.em_HIT)
+        {
+            Type m_type = typeof(sHit);
+            sHit hit = (sHit)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangePlayerHp(hit.hp);
+            pScript.PlayerDamage(hit);
+        }
+        else if (room.flag == (int)eMSG.em_INFO)
+        {
+            Type m_type = typeof(sChangeInfo);
+            sChangeInfo hpInfo = (sChangeInfo)Marshal.PtrToStructure(buff, m_type);
+            eScript.ChangeEnemyHp(hpInfo.hp);
+            pScript.ChangePlayerSpeed(hpInfo.speed);
+        }
+        else if (room.flag == (int)eMSG.em_USEITEM)
+        {
+            Type m_type = typeof(sUseItem);
+            sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangePlayerHp(useItem.hp);
+        }
+    }
+
+    public void GetEnterScript(GameEnterScript enter)
+    {
+        gScript = enter;
+    }
+
+    public void GetSpawnScript(SpawnScript spawn)
+    {
+        sScript = spawn;
+    }
+
+    public void GetCharScripts(PlayerScript player, EnemyScript enemy)
+    {
+        eScript = enemy;
+        pScript = player;
+    }
+
+    public void WaitRecieve()
+    {
+        sock.BeginReceive(rd.buffer, 0, rd.buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), rd);
+        //리시브 기다리기
+        recv.Set();
     }
 
     public void SendMsg(object obj)//메세지 보내기 함수

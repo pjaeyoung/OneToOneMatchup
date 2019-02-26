@@ -63,9 +63,9 @@ public class PlayerInfo
 
     public void changeWeapon(string w)
     {
-        if (w == "img_weapon_sword")
+        if (w == "img_weapon_greatSword")
         {
-            weapon = (int)eWEAPON.em_SWORD;
+            weapon = (int)eWEAPON.em_GREATESWORD;
         }
         else if (w == "img_weapon_wand")
         {
@@ -75,9 +75,9 @@ public class PlayerInfo
         {
             weapon = (int)eWEAPON.em_BOW;
         }
-        else if (w == "img_weapon_shield")
+        else if (w == "img_weapon_swordAndShield")
         {
-            weapon = (int)eWEAPON.em_SHIElD;
+            weapon = (int)eWEAPON.em_SWORDANDSHIELD;
         }
     }
 
@@ -105,7 +105,9 @@ public class GameMgr : MonoBehaviour {
     public Button[] itemBtn; //화면에 표시되는 '획득한 아이템 목록'(안드로이드용 고려)
     public ItemCount CitemCount;
     public PlayerInfo CPlayerInfo;
-    bool gameEnter = false;
+    public GameObject canvas;
+    public Scene scene;
+    int gameEnter = (int)eBOOLEAN.FALSE;
 
     float countTimer; //카운트다운 타이머 
     int min; //분
@@ -128,22 +130,19 @@ public class GameMgr : MonoBehaviour {
 
     void Update ()
     {
-        Scene scene = SceneManager.GetActiveScene();
+        scene = SceneManager.GetActiveScene();
         if(scene.name == "ItemCollectScene")
         {
-            if (min >= 1 && gameEnter == false)
+            if (min >= 1 && gameEnter == (int)eBOOLEAN.FALSE)
             {
-                gameEnter = true;
+                changeLayerToWeapon();
+                gameEnter = (int)eBOOLEAN.TRUE;
                 min = 0;
-                DontDestroyOnLoad(this.transform.gameObject);
+                DontDestroyObject();
                 StartCoroutine(waitChangeScene());
             }
             else
                 showTime();
-        }
-        else if (scene.name == "fightScene")
-        {
-            //showTime();
         }
 	}
 
@@ -164,7 +163,6 @@ public class GameMgr : MonoBehaviour {
             countTimer -= 1;
         }
     }
-
   
     IEnumerator waitChangeScene() 
     {
@@ -174,6 +172,13 @@ public class GameMgr : MonoBehaviour {
             countDown();
         }
        sendPlayerInfoToServ();
+    }
+
+    void changeLayerToWeapon()
+    {
+        LayerChange LC = this.transform.GetComponent<LayerChange>();
+        for(int i = 0; i<4; i++)
+            LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON; 
     }
 
     void sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
@@ -186,11 +191,17 @@ public class GameMgr : MonoBehaviour {
         SocketServer.SingleTonServ().SendMsg(enter.savCharInfo); //현재 유저가 선택한 모든 값(외형, 옷, 무기)을 상대에게 보냄
     }
 
+    void DontDestroyObject()
+    {
+        DontDestroyOnLoad(this.transform.gameObject);
+        DontDestroyOnLoad(canvas);
+    } //GameScene에도 사용할 게임오브젝트 유지 
+
     /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시) : showTime, TimerToString */
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 10)
+        if (timer > 60)
         {
             timer = 0;
             min++;

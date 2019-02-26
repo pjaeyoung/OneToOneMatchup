@@ -14,9 +14,11 @@ public class SpawnScript : MonoBehaviour {
     GameObject nowPlayer;
     sCharInfo enemyInfo;
     GameEnterScript enter;
+    GameMgr GM;
 
     void Start () {
         enter = GetComponent<GameEnterScript>();
+        SocketServer.SingleTonServ().GetSpawnScript(this);
     }
 
     private void Update()
@@ -43,7 +45,12 @@ public class SpawnScript : MonoBehaviour {
         Camera mainCam = Camera.main; //내 캐릭터가 가진 카메라를 화면에 띄우기
         mainCam.enabled = false;
         Camera playerCam = nowPlayer.GetComponentInChildren<Camera>();
+        nowEnemy.GetComponentInChildren<Canvas>().worldCamera = playerCam; //enemyHp바를 내 캐릭터 카메라 화면에 출력 
         playerCam.enabled = true;
+        GameObject img = GameObject.Find("Canvas").transform.GetChild(2).gameObject;
+        img.SetActive(false);
+        SocketServer.SingleTonServ().SendMsg(new sReady((int)eMSG.em_READY));
+        SocketServer.SingleTonServ().GetCharScripts(nowPlayer.GetComponent<PlayerScript>(), nowEnemy.GetComponent<EnemyScript>());
     }
 
     public void SpawnInfo(string playerParent, string enemyParent, sCharInfo charInfo)
@@ -65,8 +72,8 @@ public class SpawnScript : MonoBehaviour {
             genderStr = "Female";
         custom.Gender = genderStr;
         custom.IndexWeapon.CurrentType = charInfo.weapon;
-        custom.IndexWeapon.CurrentIndex = 3;
-        custom.IndexSuit.CurrentIndex = charInfo.cloth;
+        custom.IndexWeapon.CurrentIndex = 5;
+        custom.IndexSuit.CurrentIndex = charInfo.armor;
         custom.IndexHair.CurrentIndex = charInfo.hair;
         custom.IndexColorHair.CurrentIndex = charInfo.hairColor;
         custom.IndexFace.CurrentIndex = charInfo.face;
@@ -74,17 +81,12 @@ public class SpawnScript : MonoBehaviour {
         custom.UpdateWeapon();
         aniMgr.weaponIndex = charInfo.weapon; //무기에 따른 애니메이션도 설정
     }
-
-    IEnumerator SpawnCoroutine()
-    {
-        yield return new WaitForSeconds(0.5f);
-        Spawn();
-    }
-
+    
     IEnumerator ItemDelay() 
     {
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(1.0f);
         SceneManager.LoadScene("GameScene");
-        StartCoroutine(SpawnCoroutine()); //게임 씬이 모두 로드될 때까지 기다리는 코루틴
+        yield return new WaitForSeconds(0.5f);
+        Spawn();
     }
 }

@@ -85,4 +85,12 @@ public class UserScript : MonoBehaviour {
 
         return web.ConnectServer(Url, sendInfo);
     }
+
+    public void Test()
+    {
+        StringBuilder sendInfo = new StringBuilder();
+        sendInfo.Append("name=stick");
+        string respJson = web.ConnectServer("http://localhost:10000/Items", sendInfo);
+        Debug.Log(respJson);
+    }
 }

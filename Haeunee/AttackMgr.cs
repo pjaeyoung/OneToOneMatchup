@@ -4,15 +4,24 @@ using UnityEngine;
 
 public class AttackMgr : MonoBehaviour {
     public bool aktPossible = false;
+    AnimationController aniCon;
 	void Start () {
-		
-	}
+        aniCon = GetComponent<AnimationController>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (aktPossible==true && other.gameObject.layer ==10)
+        if (aktPossible==true && other.gameObject.layer == (int)eLAYER.WEAPON)
         {
             aktPossible = false;
+            int randDmgAni = Random.Range(0, 1);
+            sHit hit = new sHit((int)eMSG.em_HIT, randDmgAni, 0);
+            if (randDmgAni == 0)
+                aniCon.PlayAtkDmg("GetDamage01");
+            else if (randDmgAni == 1)
+                aniCon.PlayAtkDmg("GetDamage02");
+            SocketServer.SingleTonServ().SendMsg(hit);
+
             Debug.Log("Hit");
         }
     }
@@ -20,10 +29,9 @@ public class AttackMgr : MonoBehaviour {
     public void AtkPoss()
     {
         aktPossible = true;
-        Invoke("ImpossAtk", 0.5f);
     }
 
-    void ImpossAtk()
+    public void ImpossAtk()
     {
         aktPossible = false;
     }

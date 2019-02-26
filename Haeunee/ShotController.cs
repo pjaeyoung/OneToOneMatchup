@@ -10,12 +10,12 @@ public class ShotController : MonoBehaviour {
     }	
     
 	void Update () {
-        transform.Translate(rayPoint * Time.deltaTime);
+        transform.Translate(rayPoint * 0.15f);
 	}
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.layer==11)
+        if(other.gameObject.layer== (int)eLAYER.ENEMY)
         {
             Destroy(gameObject);
             Debug.Log("Hit");

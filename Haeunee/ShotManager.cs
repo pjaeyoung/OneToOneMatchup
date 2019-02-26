@@ -9,41 +9,43 @@ public class ShotManager : MonoBehaviour {
     public GameObject ball;
     public GameObject arrow;
     float maxDistance = 20;
-    TestScript test;
     int myWeaponType;
     GameObject nowShot;
 
     void Start () {
         ray = new Ray();
-        test = GetComponentInParent<TestScript>();
+        FindPoint();
     }
 	
 	// Update is called once per frame
 	void Update () {
         ray.origin = transform.position;
         ray.direction = -transform.forward;
-        if (Physics.Raycast(ray.origin,ray.direction,out rayHit, maxDistance))
+        if (transform.parent.name=="Player(Clone)")
         {
-            if(rayHit.collider.tag=="Shootable")
+            if (Physics.Raycast(ray.origin, ray.direction, out rayHit, maxDistance))
             {
-                point.SetActive(true);
-                point.transform.position = rayHit.point;
-                point.transform.localRotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
+                if (point != null && rayHit.collider.tag == "Shootable")
+                {
+                    point.SetActive(true);
+                    point.transform.position = rayHit.point;
+                    point.transform.localRotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
+                }
             }
-        }
-        else
-        {
-            point.SetActive(false);
+            else if (point != null)
+            {
+                point.SetActive(false);
+            }
         }
     }
 
     public void Shooting()
     {
         if (myWeaponType == (int)eWEAPON.em_BOW)
-            nowShot = Instantiate(arrow, transform.position, new Quaternion(0, 0, 0, 0));
+            nowShot = Instantiate(arrow, transform.position, Quaternion.identity);
         else if (myWeaponType == (int)eWEAPON.em_WAND)
             nowShot = Instantiate(ball, transform.position, Quaternion.identity);
-        //nowShot.GetComponentInChildren<Transform>().eulerAngles = transform.eulerAngles;
+        nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
         nowShot.GetComponent<ShotController>().rayPoint = ray.direction * 10;
     }
 
@@ -60,7 +62,7 @@ public class ShotManager : MonoBehaviour {
         }
     }
 
-    public void FindPoint()
+    void FindPoint()
     {
         point = GameObject.Find("PointPrefab");
         point.SetActive(false);
