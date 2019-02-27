@@ -11,10 +11,12 @@ public class EndSceneScript : MonoBehaviour
 
     void Start()
     {
+        GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
+        GameObject.Destroy(GameObject.Find("SocketServer"));
         result = SocketServer.SingleTonServ().GetResult();
         if (result == (int)eRESULT.em_WIN)
             loseText.SetActive(false);
-        if (result == (int)eRESULT.em_WIN)
+        if (result == (int)eRESULT.em_LOSE)
             winText.SetActive(false);
     }
 

@@ -181,6 +181,7 @@ public class PlayerScript : MonoBehaviour
 
         if(gameEnd == true)
         {
+            GameObject.Destroy(GM.gameObject);
             SceneManager.LoadScene("EndScene");
             gameEnd = false;
         }
@@ -208,7 +209,8 @@ public class PlayerScript : MonoBehaviour
 
     public void ChangeWaitScene()
     {
-        StartCoroutine(changeDelay());
+        gameEnd = true;
+        //StartCoroutine(ChangeDelay());
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄
@@ -241,7 +243,7 @@ public class PlayerScript : MonoBehaviour
         SocketServer.SingleTonServ().SendMsg(dead);
     }
 
-    IEnumerator changeDelay()
+    IEnumerator ChangeDelay()
     {
         yield return new WaitForSeconds(2.0f);
         gameEnd = true;
