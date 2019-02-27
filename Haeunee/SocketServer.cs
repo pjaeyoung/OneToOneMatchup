@@ -38,6 +38,7 @@ public class SocketServer {
     RecvData rd = new RecvData();
     static sGameRoom room;
     static int enterNum;
+    static int gameResult;
 
     private void MakeServer()
     {
@@ -52,7 +53,7 @@ public class SocketServer {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+            //Application.Quit();
 #endif
         }
         rd.socket = sock;
@@ -124,18 +125,19 @@ public class SocketServer {
             Type m_type = typeof(sChangeInfo);
             sChangeInfo hpInfo = (sChangeInfo)Marshal.PtrToStructure(buff, m_type);
             eScript.ChangeEnemyHp(hpInfo.hp);
-            pScript.ChangePlayerSpeed(hpInfo.speed);
         }
         else if (room.flag == (int)eMSG.em_USEITEM)
         {
             Type m_type = typeof(sUseItem);
             sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
             pScript.ChangePlayerHp(useItem.hp);
+            pScript.ChangePlayerSpeed(useItem.speed);
         }
-        else if (room.flag == (int)eMSG.em_ESC || room.flag == (int)eMSG.em_DEAD)
+        else if (room.flag == (int)eMSG.em_END)
         {
-            Type m_type = typeof(sESC);
-            sESC esc = (sESC)Marshal.PtrToStructure(buff, m_type);
+            Type m_type = typeof(sEnd);
+            sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);
+            gameResult = esc.result;
             pScript.ChangeWaitScene();
         }
     }
@@ -174,4 +176,10 @@ public class SocketServer {
 
         sock.Send(byteData);
     }
+
+    public int GetResult()
+    {
+        return gameResult;
+    }
+
 }

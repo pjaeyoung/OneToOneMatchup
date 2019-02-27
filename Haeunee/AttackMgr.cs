@@ -21,7 +21,7 @@ public class AttackMgr : MonoBehaviour {
     void HitSucc()
     {
         int randDmgAni = Random.Range(0, 1);
-        sHit hit = new sHit((int)eMSG.em_HIT, randDmgAni, 0);
+        sHit hit = new sHit(randDmgAni, 0);
         if (randDmgAni == 0)
             aniCon.PlayAtkDmg("GetDamage01");
         else if (randDmgAni == 1)

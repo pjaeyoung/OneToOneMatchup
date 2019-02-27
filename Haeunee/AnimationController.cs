@@ -164,6 +164,12 @@ public class AnimationController : MonoBehaviour {
         animation.Play(GetAniName(aniName));
     }
 
+    public void PlayDeath(string aniName)
+    {
+        animation.wrapMode = WrapMode.ClampForever;
+        animation.Play(GetAniName(aniName));
+    }
+
     public float GetAniLength(string aniName)
     {
         return animation[GetAniName(aniName)].length;

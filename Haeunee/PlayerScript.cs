@@ -34,6 +34,7 @@ public class PlayerScript : MonoBehaviour
     int playerHp = 0;
     int playerSpeed = 1;
     int nowHp = 0;
+    bool gameEnd = false;
 
     void Awake()
     {
@@ -65,6 +66,7 @@ public class PlayerScript : MonoBehaviour
             }
             if (Input.GetMouseButtonDown(0) && idleAni == true) //공격
             {
+                enemyAtk.AtkPoss(true);
                 idleAni = false;
                 string atkName = "";
                 if (atkAni == 0)
@@ -77,7 +79,7 @@ public class PlayerScript : MonoBehaviour
                     atkName = "Critical02";
                 playerAniCon.PlayAtkDmg(atkName);
                 StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
-                sAtk atk = new sAtk((int)eMSG.em_ATK, atkAni);
+                sAtk atk = new sAtk(atkAni);
                 SocketServer.SingleTonServ().SendMsg(atk);
                 atkAni++;
                 if (atkAni >= 4)
@@ -117,10 +119,7 @@ public class PlayerScript : MonoBehaviour
             {
                 aniEnd = false;
                 if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
-                {
                     shotMgr.Shooting();
-                    enemyAtk.AtkPoss(true);
-                }
                 else
                     enemyAtk.AtkPoss(false);
             }
@@ -134,7 +133,7 @@ public class PlayerScript : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3))
             {
-                sUseItem useItem = new sUseItem((int)eMSG.em_USEITEM, -1, 0);
+                sUseItem useItem = new sUseItem(-1, 0, 0);
                 if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
                     useItem.itemNum = 0;
@@ -175,9 +174,15 @@ public class PlayerScript : MonoBehaviour
             hpText.text = "Player Hp: " + playerHp;
             if(playerHp <= 0)
             {
-                playerAniCon.PlayAtkDmg("Death");
+                playerAniCon.PlayDeath("Death");
                 StartCoroutine(DeathEnd(playerAniCon.GetAniLength("Death")));
             }
+        }
+
+        if(gameEnd == true)
+        {
+            SceneManager.LoadScene("EndScene");
+            gameEnd = false;
         }
     }
 
@@ -215,7 +220,7 @@ public class PlayerScript : MonoBehaviour
         {
             Vector3 pos = transform.position;
             Quaternion rot = transform.rotation;
-            sMove move = new sMove((int)eMSG.em_MOVE, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w);
+            sMove move = new sMove(pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w);
             SocketServer.SingleTonServ().SendMsg(move);
             yield return new WaitForSeconds(0.031f);
         }
@@ -232,13 +237,13 @@ public class PlayerScript : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         //서버에 죽었다는 메세지 보내기 
-        sDEAD dead = new sDEAD((int)eMSG.em_DEAD);
+        sEnd dead = new sEnd(0);
         SocketServer.SingleTonServ().SendMsg(dead);
     }
 
     IEnumerator changeDelay()
     {
-        yield return new WaitForSeconds(1.5f);
-        SceneManager.LoadScene(1);
+        yield return new WaitForSeconds(2.0f);
+        gameEnd = true;
     }
 }

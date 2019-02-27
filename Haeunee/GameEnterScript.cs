@@ -37,7 +37,7 @@ public class GameEnterScript : MonoBehaviour {
                 gender = (int)eGENDER.MALE;
             else if (heroCustomize.Gender.Equals("Female"))
                 gender = (int)eGENDER.FEMALE;
-            savCharInfo = new sCharInfo((int)eMSG.em_CHARINFO, 0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
+            savCharInfo = new sCharInfo(0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
                 heroCustomize.IndexColorHair.CurrentIndex, heroCustomize.IndexFace.CurrentIndex, -1, -1, -1);
             SceneManager.LoadScene("ItemCollectScene");
         }
@@ -46,7 +46,7 @@ public class GameEnterScript : MonoBehaviour {
     public void RandomClick()
     {//매칭 버튼을 눌렀을 때 플레이어의 정보를 저장하고 플레이어가 매칭버튼을 눌렀다는 것을 서버에 전달
         EventSystem.current.currentSelectedGameObject.SetActive(false);
-        sGameRoom enter = new sGameRoom((int)eMSG.em_ENTER, 0);
+        sGameRoom enter = new sGameRoom(0);
         SocketServer.SingleTonServ().SendMsg(enter);
     }
 
