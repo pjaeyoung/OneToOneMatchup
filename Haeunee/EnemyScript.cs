@@ -34,11 +34,8 @@ public class EnemyScript : MonoBehaviour {
             enemyHpBar.changeHpBar(enemyHp);
             hpText.text = "Enemy Hp: " + enemyHp;
             if (enemyHp <= 0)
-            {
                 playerAniCon.PlayAtkDmg("Death");
-            }
         }
-
 
         if (atkAni == true) //공격
         {

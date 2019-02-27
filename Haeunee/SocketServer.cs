@@ -132,6 +132,12 @@ public class SocketServer {
             sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
             pScript.ChangePlayerHp(useItem.hp);
         }
+        else if (room.flag == (int)eMSG.em_ESC || room.flag == (int)eMSG.em_DEAD)
+        {
+            Type m_type = typeof(sESC);
+            sESC esc = (sESC)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeWaitScene();
+        }
     }
 
     public void GetEnterScript(GameEnterScript enter)

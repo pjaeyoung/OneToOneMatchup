@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 //플레이어를 움직이는 스크립트
 public class PlayerScript : MonoBehaviour
@@ -12,12 +13,15 @@ public class PlayerScript : MonoBehaviour
     Rigidbody playerRigidBody;
     AnimationController playerAniCon; //애니메이션
     AttackMgr enemyAtk;
+    GameMgr GM;
 
     ShotManager shotMgr;
     GameObject enemyObj;
 
     Text hpText;
     HpBar playerHPBar;
+
+    GameObject Block;
 
     int weaponNum = -1;
     int sensibilityX = 5;
@@ -39,6 +43,7 @@ public class PlayerScript : MonoBehaviour
 
         spawnInfo = sockServObj.GetComponent<SpawnScript>();
 
+        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
         shotMgr = GetComponentInChildren<ShotManager>();
         shotMgr.ShotPosChange(weaponNum);
 
@@ -47,11 +52,113 @@ public class PlayerScript : MonoBehaviour
         StartCoroutine(MoveDelay()); //플레이어의 정보 전송하는 코루틴
         hpText = GameObject.Find("Canvas").transform.GetChild(0).GetComponent<Text>();
         playerHPBar = GameObject.Find("Canvas").transform.GetChild(3).GetComponent<HpBar>();
+        Block = GameObject.Find("Canvas").transform.GetChild(4).gameObject;
+    }
+
+    private void FixedUpdate()
+    {
+        if(Block.activeSelf == false)
+        {
+            if (Input.GetMouseButton(2)) //회전
+            {
+                transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0);
+            }
+            if (Input.GetMouseButtonDown(0) && idleAni == true) //공격
+            {
+                idleAni = false;
+                string atkName = "";
+                if (atkAni == 0)
+                    atkName = "Attack01";
+                else if (atkAni == 1)
+                    atkName = "Attack02";
+                else if (atkAni == 2)
+                    atkName = "Critical01";
+                else if (atkAni == 3)
+                    atkName = "Critical02";
+                playerAniCon.PlayAtkDmg(atkName);
+                StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
+                sAtk atk = new sAtk((int)eMSG.em_ATK, atkAni);
+                SocketServer.SingleTonServ().SendMsg(atk);
+                atkAni++;
+                if (atkAni >= 4)
+                    atkAni = 0;
+            }
+            else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
+            { //움직임, 움직이는 애니
+                if (Input.GetKey(KeyCode.W))
+                {
+                    transform.Translate(Vector3.forward * playerSpeed / 10);
+                }
+                else if (Input.GetKey(KeyCode.S))
+                {
+                    transform.Translate(Vector3.back * playerSpeed / 10);
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    transform.Translate(Vector3.right * playerSpeed / 10);
+                }
+                else if (Input.GetKey(KeyCode.A))
+                {
+                    transform.Translate(Vector3.left * playerSpeed / 10);
+                }
+                playerAniCon.PlayAnimation("Move");
+            }
+            else //가만히 있는 애니
+            {
+                playerAniCon.PlayAnimation("Idle");
+            }
+
+            if (Input.GetKey(KeyCode.Space) && transform.position.y <= 0.6f) //점프
+            {
+                playerRigidBody.AddForce(new Vector3(0, 150, 0));
+            }
+
+            if (aniEnd == true)
+            {
+                aniEnd = false;
+                if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
+                {
+                    shotMgr.Shooting();
+                    enemyAtk.AtkPoss(true);
+                }
+                else
+                    enemyAtk.AtkPoss(false);
+            }
+        }
+
     }
 
     void Update()
     {
-        if(damaged==true)
+        if(Block.activeSelf == false)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                sUseItem useItem = new sUseItem((int)eMSG.em_USEITEM, -1, 0);
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                {
+                    useItem.itemNum = 0;
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    useItem.itemNum = 1;
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha3))
+                {
+                    useItem.itemNum = 2;
+                }
+                int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 한 번 사용 시 더 이상 사용 못함 
+                if(IsItemUsed == (int)eITEMUSE.UNUSED) 
+                    SocketServer.SingleTonServ().SendMsg(useItem);
+            }
+            if (Input.GetKeyDown(KeyCode.Escape)) //ESC 눌렀을 때 뜨는 창 
+            {
+                Block.SetActive(true);
+                Block.transform.GetChild(0).gameObject.SetActive(true);
+            }
+        }
+
+        if (damaged==true)
         {
             damaged = false;
             if (dmgAni == 0)
@@ -61,30 +168,12 @@ public class PlayerScript : MonoBehaviour
             Debug.Log("Damaged");
         }
 
-        if(Input.GetKey(KeyCode.Alpha1)|| Input.GetKey(KeyCode.Alpha2)||Input.GetKey(KeyCode.Alpha3))
-        {
-            sUseItem useItem = new sUseItem((int) eMSG.em_USEITEM, -1,0);
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                useItem.itemNum = 0;
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                useItem.itemNum = 1;
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                useItem.itemNum = 2;
-            }
-            SocketServer.SingleTonServ().SendMsg(useItem);
-        }
-
         if (nowHp != playerHp)
         {
             playerHp = nowHp;
             playerHPBar.changeHpBar(playerHp);
             hpText.text = "Player Hp: " + playerHp;
-            if(playerHp<=0)
+            if(playerHp <= 0)
             {
                 playerAniCon.PlayAtkDmg("Death");
                 StartCoroutine(DeathEnd(playerAniCon.GetAniLength("Death")));
@@ -92,73 +181,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        if(Input.GetMouseButton(2)) //회전
-        {
-            transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0);
-        }
-        if (Input.GetMouseButtonDown(0) && idleAni == true) //공격
-        {
-            idleAni = false;
-            string atkName = "";
-            enemyAtk.AtkPoss();
-            if (atkAni == 0)
-                atkName = "Attack01";
-            else if (atkAni == 1)
-                atkName = "Attack02";
-            else if (atkAni == 2)
-                atkName = "Critical01";
-            else if (atkAni == 3)
-                atkName = "Critical02";
-            playerAniCon.PlayAtkDmg(atkName);
-            StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
-            sAtk atk = new sAtk((int)eMSG.em_ATK, atkAni);
-            SocketServer.SingleTonServ().SendMsg(atk);
-            atkAni++;
-            if (atkAni >= 4)
-                atkAni = 0;
-        }
-        else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
-        { //움직임, 움직이는 애니
-            if (Input.GetKey(KeyCode.W))
-            {
-                transform.Translate(Vector3.forward * playerSpeed/10);
-            }
-            else if (Input.GetKey(KeyCode.S))
-            {
-                transform.Translate(Vector3.back * playerSpeed / 10);
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                transform.Translate(Vector3.right * playerSpeed / 10);
-            }
-            else if (Input.GetKey(KeyCode.A))
-            {
-                transform.Translate(Vector3.left * playerSpeed / 10);
-            }
-            playerAniCon.PlayAnimation("Move");
-        }
-        else //가만히 있는 애니
-        {
-            playerAniCon.PlayAnimation("Idle");
-        }
-
-        if (Input.GetKey(KeyCode.Space)&&transform.position.y <= 0.6f) //점프
-        {
-            playerRigidBody.AddForce(new Vector3(0, 150, 0));
-        }
-
-        if (aniEnd == true)
-        {
-            aniEnd = false;
-            if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
-                shotMgr.Shooting();
-            else
-                enemyAtk.ImpossAtk();
-        }
-    }
-
+  
     public void PlayerDamage(sHit hit)
     {
         damaged = true;
@@ -175,7 +198,12 @@ public class PlayerScript : MonoBehaviour
 
     public void ChangePlayerSpeed(int speed)
     {
-        //playerSpeed += speed;
+        playerSpeed = speed;
+    }
+
+    public void ChangeWaitScene()
+    {
+        StartCoroutine(changeDelay());
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄
@@ -203,6 +231,14 @@ public class PlayerScript : MonoBehaviour
     IEnumerator DeathEnd(float delay)
     {
         yield return new WaitForSeconds(delay);
-        //서버에 죽었다는 메세지 보내기
+        //서버에 죽었다는 메세지 보내기 
+        sDEAD dead = new sDEAD((int)eMSG.em_DEAD);
+        SocketServer.SingleTonServ().SendMsg(dead);
+    }
+
+    IEnumerator changeDelay()
+    {
+        yield return new WaitForSeconds(1.5f);
+        SceneManager.LoadScene(1);
     }
 }

@@ -14,25 +14,25 @@ public class AttackMgr : MonoBehaviour {
         if (aktPossible==true && other.gameObject.layer == (int)eLAYER.WEAPON)
         {
             aktPossible = false;
-            int randDmgAni = Random.Range(0, 1);
-            sHit hit = new sHit((int)eMSG.em_HIT, randDmgAni, 0);
-            if (randDmgAni == 0)
-                aniCon.PlayAtkDmg("GetDamage01");
-            else if (randDmgAni == 1)
-                aniCon.PlayAtkDmg("GetDamage02");
-            SocketServer.SingleTonServ().SendMsg(hit);
-
-            Debug.Log("Hit");
+            HitSucc();
         }
     }
 
-    public void AtkPoss()
+    void HitSucc()
     {
-        aktPossible = true;
+        int randDmgAni = Random.Range(0, 1);
+        sHit hit = new sHit((int)eMSG.em_HIT, randDmgAni, 0);
+        if (randDmgAni == 0)
+            aniCon.PlayAtkDmg("GetDamage01");
+        else if (randDmgAni == 1)
+            aniCon.PlayAtkDmg("GetDamage02");
+        SocketServer.SingleTonServ().SendMsg(hit);
+
+        Debug.Log("Hit");
     }
 
-    public void ImpossAtk()
+    public void AtkPoss(bool atk)
     {
-        aktPossible = false;
+        aktPossible = atk;
     }
 }
