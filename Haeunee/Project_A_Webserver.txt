@@ -50,6 +50,24 @@ def Login(): #·Î±×ÀÎ
     DB.DBClose()    
     return msg
 
+@app.route("/Items", methods = ["GET","POST"])
+
+def ItemInfo():
+    DB.DBConn() 
+    if 'name' in request.form:
+        _itemName = request.form['name']
+    
+    msg = str()
+    sql = "select hp, atk, def, speed from item where name='"+_itemName+"'"
+    data = DB.DBSelect(sql)
+    if data:
+        hp = data[0]['hp']
+        atk=data[0]['atk']
+        deff=data[0]['def']
+        speed=data[0]['speed']
+        msg = str(hp)+","+str(atk)+","+str(deff)+","+str(speed)
+        return msg
+
 @app.route("/Friends", methods = ["GET","POST"])
 
 def Friends():
@@ -86,4 +104,34 @@ def Friends():
     DB.DBClose()
     return msg    
 
+@app.route("/BattleEnd", methods = ["GET","POST"])
+
+def GameEnd():
+    DB.DBConn()   
+    if "flag" in request.form and 'nick'  in request.form:
+        _flag = request.form["flag"]
+        _userNick = request.form["nick"]
+        
+        if _flag == "win" :
+            sql = "select win, lose from user where nick = '"+_userNick+"'"
+            data = DB.DBSelect(sql)      
+            win = data[0]["win"] + 1
+            lose = data[0]["lose"]
+            sql = "update user set win ="  + str(win) +" where nick = '"+_userNick+"'"
+            DB.DBChange(sql)
+            msg = (win/(win+lose))*100
+            return str(msg)
+        
+        elif _flag =="lose":
+            sql = "select win, lose from user where nick = '"+_userNick+"'"
+            data = DB.DBSelect(sql)      
+            win = data[0]["win"]  
+            lose = data[0]["lose"] + 1
+            sql = "update user set lose ="  + str(lose) +" where nick = '"+_userNick+"'"
+            DB.DBChange(sql)
+            msg = (win/(win+lose))*100
+            return str(msg)
+    
+    DB.DBClose()
+        
 app.run(host="0.0.0.0",port=10000, debug=True)
