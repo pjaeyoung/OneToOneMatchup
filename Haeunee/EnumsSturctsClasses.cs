@@ -37,6 +37,7 @@ enum eMSG //메세지 종류
     em_INFO,
     em_USEITEM,
     em_READY,
+    em_END,
 }
 
 // 참, 거짓 판단 
@@ -82,11 +83,23 @@ enum eGENDER
     FEMALE
 }
 
+//아이템 사용 여부
+enum eITEMUSE
+{
+    UNUSED,
+    USED
+}
+
+enum eRESULT
+{
+    em_WIN = 1,
+    em_LOSE,
+};
 struct sGameRoom //매칭 정보
 {
     public int flag;
     public int userNum;
-    public sGameRoom(int f, int u)
+    public sGameRoom(int u, int f = (int)eMSG.em_ENTER)
     {
         flag = f;
         userNum = 0;
@@ -101,7 +114,7 @@ public struct sCharInfo //획득한 아이템 정보
     public int gender, hair, hairColor, face; //캐릭터 외형 정보
     public int item1, item2, item3; //소비아이템 (hpPotion)
 
-    public sCharInfo(int f, int w, int c, int gen, int inputHair, int inputColor, int inputFace, int i1, int i2, int i3)
+    public sCharInfo(int w, int c, int gen, int inputHair, int inputColor, int inputFace, int i1, int i2, int i3, int f = (int)eMSG.em_CHARINFO)
     {
         flag = f;
         weapon = w;
@@ -122,7 +135,7 @@ public struct sMove //움직임, 회전
     public float x, y, z;
     public float rotX, rotY, rotZ, rotW;
 
-    public sMove(int f, float inputX, float inputY, float inputZ, float inrotX, float inrotY, float inrotZ, float inrotW)
+    public sMove(float inputX, float inputY, float inputZ, float inrotX, float inrotY, float inrotZ, float inrotW, int f = (int)eMSG.em_MOVE)
     {
         flag = f;
         x = inputX;
@@ -139,7 +152,7 @@ public struct sAtk //공격
 {
     private int flag;
     public int atkAni;
-    public sAtk(int f, int ani)
+    public sAtk(int ani, int f = (int)eMSG.em_ATK)
     {
         flag = f;
         atkAni = ani;
@@ -151,7 +164,7 @@ public struct sHit //공격 성공
     private int flag;
     public int dmgAni;
     public int hp;
-    public sHit(int f, int ani, int nowHp)
+    public sHit(int ani, int nowHp, int f = (int)eMSG.em_HIT)
     {
         flag = f;
         dmgAni = ani;
@@ -163,25 +176,25 @@ public struct sChangeInfo //hp정보 전달
 {
     private int flag;
     public int hp;
-    public int speed;
-    public sChangeInfo(int f, int nowHp, int spd)
+    public sChangeInfo(int nowHp, int f = (int)eMSG.em_INFO)
     {
         flag = f;
         hp = nowHp;
-        speed = spd;
     }
 };
 
 public struct sUseItem //아이템 사용
 {
     private int flag;
-    public int itemNum;
+    public int itemNum; // 아이템 버튼 index
     public int hp;
-    public sUseItem(int f, int item, int nowHp)
+    public int speed;
+    public sUseItem(int item, int nowHp, int spd, int f = (int)eMSG.em_USEITEM)
     {
         flag = f;
         itemNum = item;
         hp = nowHp;
+        speed = spd;
     }
 }
 
@@ -191,6 +204,17 @@ public struct sReady
     public sReady(int f = (int)eMSG.em_READY)
     {
         flag = f;
+    }
+}
+
+public struct sEnd //항복 버튼 사용, 죽음
+{
+    private int flag;
+    public int result;
+    public sEnd(int res, int f = (int)eMSG.em_END)
+    {
+        flag = f;
+        result = res;
     }
 }
 
