@@ -89,19 +89,19 @@ public class PlayerScript : MonoBehaviour
             { //움직임, 움직이는 애니
                 if (Input.GetKey(KeyCode.W))
                 {
-                    transform.Translate(Vector3.forward * playerSpeed / 10);
+                    transform.Translate(Vector3.forward * playerSpeed / 20);
                 }
                 else if (Input.GetKey(KeyCode.S))
                 {
-                    transform.Translate(Vector3.back * playerSpeed / 10);
+                    transform.Translate(Vector3.back * playerSpeed / 20);
                 }
                 if (Input.GetKey(KeyCode.D))
                 {
-                    transform.Translate(Vector3.right * playerSpeed / 10);
+                    transform.Translate(Vector3.right * playerSpeed / 20);
                 }
                 else if (Input.GetKey(KeyCode.A))
                 {
-                    transform.Translate(Vector3.left * playerSpeed / 10);
+                    transform.Translate(Vector3.left * playerSpeed / 20);
                 }
                 playerAniCon.PlayAnimation("Move");
             }
@@ -110,7 +110,7 @@ public class PlayerScript : MonoBehaviour
                 playerAniCon.PlayAnimation("Idle");
             }
 
-            if (Input.GetKey(KeyCode.Space) && transform.position.y <= 0.6f) //점프
+            if (Input.GetKeyDown(KeyCode.Space) && transform.position.y <= 0.6f) //점프
             {
                 playerRigidBody.AddForce(new Vector3(0, 150, 0));
             }
