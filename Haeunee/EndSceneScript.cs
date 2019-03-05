@@ -33,9 +33,10 @@ public class EndSceneScript : MonoBehaviour
             winText.SetActive(false);
             winning = ResultSave("lose");
         }
-        winningRate.text = server.nick + "님의 승률 : " + winning;
+        int win = Mathf.FloorToInt(float.Parse(winning));
+        winningRate.text = server.nick + "님의 승률 : " + win;
     }
-
+    
     public void HomeBtn()
     {
         SceneManager.LoadScene("WaitScene");
