@@ -42,8 +42,8 @@ public class PlayerInfo
 
     public PlayerInfo()
     {
-        weapon = -1;
-        armor = 3;
+        weapon = (int)eWEAPON.em_STICK;
+        armor = (int)eARMOR.em_DEFAULT_AMR;
         getItemArr = new int[3];
     }
 
@@ -256,6 +256,22 @@ public class GameMgr : MonoBehaviour {
         }
     }
 
+    public int changeUsedItemImg(int idx) // GameScene에서 아이템 버튼 사용 시 emty이미지 변경 
+    {
+        Sprite spr = Resources.Load<Sprite>("Sprites/img_emty");
+        Sprite itemBtnSpr = itemBtn[idx].GetComponent<Image>().sprite;
+        if(itemBtnSpr.name == spr.name)
+        {
+            Debug.Log("이미 사용한 아이템");
+            return (int)eITEMUSE.USED;
+        }
+        else
+        {
+            itemBtn[idx].GetComponent<Image>().sprite = spr;
+            return (int)eITEMUSE.UNUSED;
+        }
+    }
+
     int changeItemArrInCPlayerInfo(string imgName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
     {
         if (imgName == "img_hpPotion")
@@ -264,7 +280,7 @@ public class GameMgr : MonoBehaviour {
             return (int)eITEM.em_SPEED_POTION;
         else if (imgName == "img_damageUpPotion")
             return (int)eITEM.em_DAMAGE_UP_POTIOM;
-        else if (imgName == "img_defenceUpPotion")
+        else if (imgName == "img_DefenceUpPotion")
             return (int)eITEM.em_DEFENCE_UP_POTION;
         else
             return -1;
@@ -284,4 +300,5 @@ public class GameMgr : MonoBehaviour {
         }
         return cmp;
     }
+
 }
