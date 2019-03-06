@@ -26,19 +26,10 @@ public class itemCntrl : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         GameObject obj = other.gameObject;
-        if (obj.tag == "floor" && test.getItem == obj)
+        if (obj.tag == "floor" && test.isDestroyOK == (int)eBOOLEAN.TRUE)
         {
             //펑 터지는 효과 애니메이션 실행
-            
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        GameObject obj = other.gameObject;
-        Debug.Log("what is triggered? : " + obj.name);
-        if(obj.tag == "floor" && test.getItem == obj)
-        {
+            test.isDestroyOK = (int)eBOOLEAN.FALSE;
             Debug.Log("destroy");
             Destroy(gameObject);
             highlightBox.SetActive(true);
