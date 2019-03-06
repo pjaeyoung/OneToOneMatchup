@@ -42,8 +42,8 @@ public class PlayerInfo
 
     public PlayerInfo()
     {
-        weapon = -1;
-        armor = 3;
+        weapon = (int)eWEAPON.em_STICK;
+        armor = (int)eARMOR.em_DEFAULT_AMR;
         getItemArr = new int[3];
     }
 
