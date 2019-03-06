@@ -36,6 +36,10 @@ public class PlayerScript : MonoBehaviour
     int nowHp = 0;
     bool gameEnd = false;
 
+    int itemImgNum = 0;
+    bool itemImgChange = false;
+    bool ItemimgSet = false;
+
     GameObject[] ItemImg;
 
     void Awake()
@@ -190,6 +194,12 @@ public class PlayerScript : MonoBehaviour
             }
         }
 
+        if(itemImgChange == true)
+        {
+            itemImgChange = false;
+            ItemImg[itemImgNum].SetActive(ItemimgSet);
+        }
+
         if(gameEnd == true) //게임 끝
         {
             GameObject.Destroy(GM.gameObject);
@@ -219,7 +229,9 @@ public class PlayerScript : MonoBehaviour
 
     public void ChangeItemImg(int itemNum, bool show)
     {
-        ItemImg[itemNum].SetActive(show);
+        itemImgChange = true;
+        itemImgNum = itemNum;
+        ItemimgSet = show;
     }
 
     public void ChangeWaitScene()

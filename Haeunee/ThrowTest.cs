@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Test : MonoBehaviour
+public class ThrowTest : MonoBehaviour
 {
     int sensibilityX = 5;
     int playerSpeed = 2;
@@ -42,7 +42,8 @@ public class Test : MonoBehaviour
         }
         else if(Input.GetMouseButtonUp(1))
         {
-            Vector3 dir = point.transform.position - ball.transform.position;
+            Vector3 dir = point.transform.localPosition - ball.transform.localPosition;
+            Debug.Log(dir.x + "," + dir.z);
             ballBody.velocity = ball.transform.TransformDirection(new Vector3(dir.x, 0, dir.z));
             ballBody.useGravity = true;
             point.SetActive(false);
