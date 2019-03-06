@@ -61,7 +61,7 @@ public class FriendsScript : MonoBehaviour {
             StringBuilder sendInfo = new StringBuilder();
             sendInfo.Append("flag=list");
             sendInfo.Append("&nick=" + nick);
-            string url = "http://localhost:10000/Friends";
+            string url = "http://192.168.0.22:10000/Friends";
 
             string respData = webScript.ConnectServer(url, sendInfo);
             string[] friendList = respData.Split(',');
@@ -97,7 +97,7 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("flag=del");
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&friend=" + friendName);
-        string url = "http://localhost:10000/Friends";
+        string url = "http://192.168.0.22:10000/Friends";
 
         string respData = webScript.ConnectServer(url, sendInfo);
         if(respData=="succ")

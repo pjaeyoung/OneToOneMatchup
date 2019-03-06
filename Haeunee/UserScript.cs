@@ -43,7 +43,7 @@ public class UserScript : MonoBehaviour {
 
     public void SignUp() //회원가입
     {
-        string respJson = ConnectServer("http://localhost:10000/SignUp");
+        string respJson = ConnectServer("http://192.168.0.22:10000/SignUp");
         Debug.Log(respJson);
 
         if(respJson.Equals("succ"))
@@ -58,7 +58,7 @@ public class UserScript : MonoBehaviour {
 
     public void Login() //로그인
     {
-        string respJson = ConnectServer("http://localhost:10000/SignIn");
+        string respJson = ConnectServer("http://192.168.0.22:10000/SignIn");
         Debug.Log(respJson);
 
         if (respJson.Equals("login"))

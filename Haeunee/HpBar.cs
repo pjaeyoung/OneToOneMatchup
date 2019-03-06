@@ -19,6 +19,7 @@ public class HpBar : MonoBehaviour {
             IsInit = (int)eBOOLEAN.TRUE;
             slider.maxValue = value;
         }
-        slider.value = value;
+        if(slider.maxValue >= value)
+            slider.value = value;
     }
 }

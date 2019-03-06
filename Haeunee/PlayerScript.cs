@@ -36,6 +36,8 @@ public class PlayerScript : MonoBehaviour
     int nowHp = 0;
     bool gameEnd = false;
 
+    GameObject[] ItemImg;
+
     void Awake()
     {
         sockServObj = GameObject.Find("SocketServer");
@@ -54,6 +56,14 @@ public class PlayerScript : MonoBehaviour
         hpText = GameObject.Find("Canvas").transform.GetChild(0).GetComponent<Text>();
         playerHPBar = GameObject.Find("Canvas").transform.GetChild(3).GetComponent<HpBar>();
         Block = GameObject.Find("Canvas").transform.GetChild(4).gameObject;
+
+        ItemImg = new GameObject[4];
+        ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg");
+        ItemImg[(int)eITEM.em_SPEED_POTION] = GameObject.Find("SpdPotionImg");
+        ItemImg[(int)eITEM.em_DAMAGE_UP_POTIOM] = GameObject.Find("AtkPotionImg");
+        ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg");
+        for (int i = 0; i < 4; i++)
+            ItemImg[i].SetActive(false);
     }
 
     private void FixedUpdate()
@@ -115,13 +125,13 @@ public class PlayerScript : MonoBehaviour
                 playerRigidBody.AddForce(new Vector3(0, 150, 0));
             }
 
-            if (aniEnd == true)
+            if (aniEnd == true) //애니메이션 다씉나고
             {
                 aniEnd = false;
                 if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
-                    shotMgr.Shooting();
+                    shotMgr.Shooting(); //원거리 샷 발사
                 else
-                    enemyAtk.AtkPoss(false);
+                    enemyAtk.AtkPoss(false); //근거리 공격 불가능
             }
         }
 
@@ -132,7 +142,7 @@ public class PlayerScript : MonoBehaviour
         if(Block.activeSelf == false)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3))
-            {
+            {//아이템 사용
                 sUseItem useItem = new sUseItem(-1, 0, 0);
                 if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
@@ -146,6 +156,7 @@ public class PlayerScript : MonoBehaviour
                 {
                     useItem.itemNum = 2;
                 }
+                StartCoroutine(EndItem(useItem.itemNum)); //아이템 끝나는 시간
                 int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 한 번 사용 시 더 이상 사용 못함 
                 if(IsItemUsed == (int)eITEMUSE.UNUSED) 
                     SocketServer.SingleTonServ().SendMsg(useItem);
@@ -157,7 +168,7 @@ public class PlayerScript : MonoBehaviour
             }
         }
 
-        if (damaged==true)
+        if (damaged==true) //데미지를 받았을 때 애니메이션 재생
         {
             damaged = false;
             if (dmgAni == 0)
@@ -167,26 +178,25 @@ public class PlayerScript : MonoBehaviour
             Debug.Log("Damaged");
         }
 
-        if (nowHp != playerHp)
+        if (nowHp != playerHp) //hp변했을 때
         {
             playerHp = nowHp;
             playerHPBar.changeHpBar(playerHp);
             hpText.text = "Player Hp: " + playerHp;
-            if(playerHp <= 0)
+            if(playerHp <= 0) //죽음
             {
                 playerAniCon.PlayDeath("Death");
                 StartCoroutine(DeathEnd(playerAniCon.GetAniLength("Death")));
             }
         }
 
-        if(gameEnd == true)
+        if(gameEnd == true) //게임 끝
         {
             GameObject.Destroy(GM.gameObject);
             SceneManager.LoadScene("EndScene");
             gameEnd = false;
         }
     }
-
   
     public void PlayerDamage(sHit hit)
     {
@@ -194,7 +204,7 @@ public class PlayerScript : MonoBehaviour
         dmgAni = hit.dmgAni;
     }
 
-    public void ChangePlayerHp(int hp)
+    public void ChangePlayerHp(int hp) //서버에서 hp변화 받아오기
     {
         if(nowHp != hp)
         {
@@ -202,15 +212,19 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    public void ChangePlayerSpeed(int speed)
+    public void ChangePlayerSpeed(int speed) //속도 변화
     {
         playerSpeed = speed;
+    }
+
+    public void ChangeItemImg(int itemNum, bool show)
+    {
+        ItemImg[itemNum].SetActive(show);
     }
 
     public void ChangeWaitScene()
     {
         gameEnd = true;
-        //StartCoroutine(ChangeDelay());
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄
@@ -229,7 +243,7 @@ public class PlayerScript : MonoBehaviour
     }
 
     IEnumerator EndAni(float delay)
-    {
+    {//애니메이션 끝
         yield return new WaitForSeconds(delay);
         idleAni = true;
         aniEnd = true;
@@ -243,9 +257,10 @@ public class PlayerScript : MonoBehaviour
         SocketServer.SingleTonServ().SendMsg(dead);
     }
 
-    IEnumerator ChangeDelay()
-    {
-        yield return new WaitForSeconds(2.0f);
-        gameEnd = true;
+    IEnumerator EndItem(int itemNum)
+    {//아이템 지속시간 끝
+        yield return new WaitForSeconds(5);
+        sEndItem endItem = new sEndItem(itemNum,0,0);
+        SocketServer.SingleTonServ().SendMsg(endItem);
     }
 }

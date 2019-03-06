@@ -44,7 +44,7 @@ public class EndSceneScript : MonoBehaviour
 
     string ResultSave(string result)
     {
-        string Url = "http://localhost:10000/BattleEnd";
+        string Url = "http://192.168.0.22:10000/BattleEnd";
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=" + result);
         sendInfo.Append("&nick=" + server.nick);

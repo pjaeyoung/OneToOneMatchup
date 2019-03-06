@@ -43,7 +43,7 @@ public class SocketServer {
     private void MakeServer()
     {
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //소켓생성
-        var ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10001); //연결할 서버 정보
+        var ep = new IPEndPoint(IPAddress.Parse("192.168.0.22"), 10001); //연결할 서버 정보
         var connResult = sock.BeginConnect(ep, new AsyncCallback(ConnectCallBack), sock); //커넥트
         bool connSucc = connResult.AsyncWaitHandle.WaitOne(5, true); //커넥트 성공여부 체크
         if (connSucc) //성공했을 때
@@ -113,24 +113,32 @@ public class SocketServer {
             sAtk atk = (sAtk)Marshal.PtrToStructure(buff, m_type);
             eScript.EnemyAtk(atk.atkAni);
         }
-        else if(room.flag==(int)eMSG.em_HIT)
+        else if(room.flag==(int)eMSG.em_HIT) //내가 공격을 성공함
         {
             Type m_type = typeof(sHit);
             sHit hit = (sHit)Marshal.PtrToStructure(buff, m_type);
             pScript.ChangePlayerHp(hit.hp);
             pScript.PlayerDamage(hit);
         }
-        else if (room.flag == (int)eMSG.em_INFO)
+        else if (room.flag == (int)eMSG.em_INFO) //적의 hp정보가 변한경우
         {
             Type m_type = typeof(sChangeInfo);
             sChangeInfo hpInfo = (sChangeInfo)Marshal.PtrToStructure(buff, m_type);
             eScript.ChangeEnemyHp(hpInfo.hp);
         }
-        else if (room.flag == (int)eMSG.em_USEITEM)
+        else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
+        {
+            Type m_type = typeof(sEndItem);
+            sEndItem endItem = (sEndItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeItemImg(endItem.itemNum, true);
+            pScript.ChangePlayerHp(endItem.hp);
+            pScript.ChangePlayerSpeed(endItem.speed);
+        }
+        else if (room.flag == (int)eMSG.em_ENDITEM) //아이템 시간 끝
         {
             Type m_type = typeof(sUseItem);
             sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
-            pScript.ChangePlayerHp(useItem.hp);
+            pScript.ChangeItemImg(useItem.itemNum, false);
             pScript.ChangePlayerSpeed(useItem.speed);
         }
         else if (room.flag == (int)eMSG.em_END)

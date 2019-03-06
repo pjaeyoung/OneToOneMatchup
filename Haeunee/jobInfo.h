@@ -91,28 +91,28 @@ public:
 			hp = 100;
 			atk = 10;
 			def = 5;
-			speed = 0;
+			speed = 1;
 		}
 		else if (flag == 10 + eARMOR::em_ARMOR)
 		{
 			hp = 200;
 			atk = 10;
 			def = 10;
-			speed = 0;
+			speed = 1;
 		}
 		else if (flag == 10 + eARMOR::em_SUIT)
 		{
 			hp = 200;
 			atk = 10;
 			def = 5;
-			speed = 1;
+			speed = 2;
 		}
 		else if (flag == 10 + eARMOR::em_ROBE)
 		{
 			hp = 200;
 			atk = 20;
 			def = 5;
-			speed = 0;
+			speed = 1;
 		}
 		else if (flag == 20 + eITEM::em_HP_POTION)
 		{
@@ -132,7 +132,7 @@ public:
 		}
 	}
 
-	float GetSatus(int status)
+	float GetStat(int status)
 	{
 		if (status == eSTATUS::em_HP)
 			return hp;
@@ -144,11 +144,18 @@ public:
 			return speed;
 	}
 
-	void ChangeStat(Status* stat)
+	void PlusStat(Status* stat)//스탯 더하기(아이템 사용)
 	{
 		this->hp += stat->hp;
 		this->atk += stat->atk;
 		this->def += stat->def;
 		this->speed += stat->speed;
+	}
+
+	void MinusStat(Status* stat) //스탯 빼기(아이템 시간 끝)
+	{
+		this->atk -= stat->atk;
+		this->def -= stat->def;
+		this->speed -= stat->speed;
 	}
 };

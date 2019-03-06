@@ -36,6 +36,7 @@ enum eMSG //메세지 종류
     em_HIT,
     em_INFO,
     em_USEITEM,
+    em_ENDITEM,
     em_READY,
     em_END,
 }
@@ -197,6 +198,21 @@ public struct sUseItem //아이템 사용
         speed = spd;
     }
 }
+
+struct sEndItem //아이템 효과 끝
+{
+    private int flag;
+    public int itemNum; // 아이템 버튼 index
+    public int hp;
+    public int speed;
+    public sEndItem(int item, int nowHp, int spd, int f = (int)eMSG.em_ENDITEM)
+    {
+        flag = f;
+        itemNum = item;
+        hp = nowHp;
+        speed = spd;
+    }
+};
 
 public struct sReady
 {

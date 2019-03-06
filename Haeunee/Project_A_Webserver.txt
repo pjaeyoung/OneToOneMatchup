@@ -108,25 +108,25 @@ def Friends():
 
 def GameEnd():
     DB.DBConn()   
-    if "flag" in request.form and 'nick'  in request.form:
+    if "flag" in request.form and 'nick'  in request.form: #닉네임과 이겼는지 졌는지 불러오기
         _flag = request.form["flag"]
         _userNick = request.form["nick"]
         
-        if _flag == "win" :
+        if _flag == "win" : #이겼을 경우
             sql = "select win, lose from user where nick = '"+_userNick+"'"
             data = DB.DBSelect(sql)      
-            win = data[0]["win"] + 1
+            win = data[0]["win"] + 1 #이긴횟수 1회 더하기
             lose = data[0]["lose"]
             sql = "update user set win ="  + str(win) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
-            msg = (win/(win+lose))*100
+            msg = (win/(win+lose))*100 #승률 계산
             return str(msg)
         
         elif _flag =="lose":
             sql = "select win, lose from user where nick = '"+_userNick+"'"
             data = DB.DBSelect(sql)      
             win = data[0]["win"]  
-            lose = data[0]["lose"] + 1
+            lose = data[0]["lose"] + 1 #진 횟수 1회 더하기
             sql = "update user set lose ="  + str(lose) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
             msg = (win/(win+lose))*100
@@ -134,4 +134,4 @@ def GameEnd():
     
     DB.DBClose()
         
-app.run(host="0.0.0.0",port=10000, debug=True)
+app.run(host="192.168.0.22",port=10000, debug=True)
