@@ -38,7 +38,7 @@ public class PlayerScript : MonoBehaviour
 
     int itemImgNum = 0;
     bool itemImgChange = false;
-    bool ItemimgSet = false;
+    bool itemImgSet = false;
 
     GameObject[] ItemImg;
 
@@ -197,7 +197,7 @@ public class PlayerScript : MonoBehaviour
         if(itemImgChange == true)
         {
             itemImgChange = false;
-            ItemImg[itemImgNum].SetActive(ItemimgSet);
+            ItemImg[itemImgNum].SetActive(itemImgSet);
         }
 
         if(gameEnd == true) //게임 끝
@@ -231,7 +231,7 @@ public class PlayerScript : MonoBehaviour
     {
         itemImgChange = true;
         itemImgNum = itemNum;
-        ItemimgSet = show;
+        itemImgSet = show;
     }
 
     public void ChangeWaitScene()

@@ -126,6 +126,11 @@ public class SocketServer {
             sChangeInfo hpInfo = (sChangeInfo)Marshal.PtrToStructure(buff, m_type);
             eScript.ChangeEnemyHp(hpInfo.hp);
         }
+        else if(room.flag == (int)eMSG.em_ITEMSPAWN)
+        {
+            Type m_type = typeof(sItemSpawn);
+            sItemSpawn itemSpawn = (sItemSpawn)Marshal.PtrToStructure(buff, m_type);
+        }
         else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
         {
             Type m_type = typeof(sEndItem);

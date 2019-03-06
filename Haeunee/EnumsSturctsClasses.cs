@@ -35,6 +35,7 @@ enum eMSG //메세지 종류
     em_ATK,
     em_HIT,
     em_INFO,
+    em_ITEMSPAWN,
     em_USEITEM,
     em_ENDITEM,
     em_READY,
@@ -181,6 +182,17 @@ public struct sChangeInfo //hp정보 전달
     {
         flag = f;
         hp = nowHp;
+    }
+};
+
+struct sItemSpawn
+{
+    private int flag;
+    public int[] itemKind;
+    public sItemSpawn(int[] itemArr, int f = (int)eMSG.em_ITEMSPAWN)
+    {
+        flag = f;
+        itemKind = itemArr;
     }
 };
 
