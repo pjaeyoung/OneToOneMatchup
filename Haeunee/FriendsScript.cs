@@ -44,11 +44,13 @@ public class FriendsScript : MonoBehaviour {
     string btnText;
     public GameObject searchInfoImg;
     public GameObject refuseWin;
+    string url;
 
     string requestName;
 
     // Use this for initialization
     void Start () {
+        url = "http://192.168.0.22:10000/Friends";
         tmpObj = new List<GameObject>();
         webServ = GameObject.Find("WebServer");
         webScript = webServ.GetComponent<WebServerScript>();
@@ -59,7 +61,6 @@ public class FriendsScript : MonoBehaviour {
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=reqlist");
         sendInfo.Append("&nick=" + nick);
-        string url = "http://192.168.0.22:10000/Friends";
         string respData = webScript.ConnectServer(url, sendInfo);
 
         savReqList = respData.Split(',');
@@ -96,7 +97,6 @@ public class FriendsScript : MonoBehaviour {
             StringBuilder sendInfo = new StringBuilder();
             sendInfo.Append("flag=reqlist");
             sendInfo.Append("&nick=" + nick);
-            string url = "http://192.168.0.22:10000/Friends";
             string respData = webScript.ConnectServer(url, sendInfo);
 
             if (respData != "no request")
@@ -148,7 +148,6 @@ public class FriendsScript : MonoBehaviour {
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=list");
         sendInfo.Append("&nick=" + nick);
-        string url = "http://192.168.0.22:10000/Friends";
 
         string respData = webScript.ConnectServer(url, sendInfo);
         string[] friendList = respData.Split(',');
@@ -178,7 +177,6 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("flag=del");
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&friend=" + btnText);
-        string url = "http://192.168.0.22:10000/Friends";
 
         string respData = webScript.ConnectServer(url, sendInfo);
         if(respData=="succ")
@@ -211,7 +209,6 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("flag=search");
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&search=" + searchName);
-        string url = "http://192.168.0.22:10000/Friends";
         string respData = webScript.ConnectServer(url, sendInfo);
 
         if(respData == "fail")
@@ -253,11 +250,10 @@ public class FriendsScript : MonoBehaviour {
             }
             tmpObj.Clear();
         }
-        int y = 85;
+        int y = -25;
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=reqlist");
         sendInfo.Append("&nick=" + nick);
-        string url = "http://192.168.0.22:10000/Friends";
         string respData = webScript.ConnectServer(url, sendInfo);
 
         string[] reqList = respData.Split(',');
@@ -266,7 +262,7 @@ public class FriendsScript : MonoBehaviour {
         int reqLen = reqList.Length;
         for (int i = 0; i < reqLen; i++)
         {
-            Vector3 chatPos = new Vector3(-150, y, 0);
+            Vector3 chatPos = new Vector3(5, y, 0);
             Quaternion q = new Quaternion(0, 0, 0, 0);
             friendText.text = reqList[i];
             GameObject tmp = Instantiate(friendBtnObj, Vector3.zero, q, reqScroll.transform);
@@ -284,13 +280,12 @@ public class FriendsScript : MonoBehaviour {
 
     public void RequestBtnClick()
     {
-        if(searchInfoImg==true)
+        if(searchInfoImg.activeSelf==true)
         {
             StringBuilder sendInfo = new StringBuilder();
             sendInfo.Append("flag=request");
             sendInfo.Append("&nick=" + nick);
             sendInfo.Append("&request=" + requestName);
-            string url = "http://192.168.0.22:10000/Friends";
             string respData = webScript.ConnectServer(url, sendInfo);
 
             if (respData == "already")
@@ -311,7 +306,6 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("flag=accept");
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&accept=" + btnText);
-        string url = "http://192.168.0.22:10000/Friends";
         string respData = webScript.ConnectServer(url, sendInfo);
 
         if (respData == "succ")
@@ -339,7 +333,6 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("flag=refuse");
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&refuse=" + btnText);
-        string url = "http://192.168.0.22:10000/Friends";
         string respData = webScript.ConnectServer(url, sendInfo);
 
         if (respData == "succ")

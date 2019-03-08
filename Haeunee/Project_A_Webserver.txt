@@ -175,6 +175,30 @@ def Friends():
             
     DB.DBClose()
 
+@app.route("/Ranking", methods = ["GET","POST"])
+
+def Ranking():
+    DB.DBConn()
+    if 'nick' in request.form:
+        _userNick = request.form['nick']
+        _rankList = list()
+        sql = "SELECT score FROM user WHERE user.nick = '"+_userNick+"'"
+        _userScore = DB.DBSelect(sql) 
+        sql = "SELECT nick, score FROM user ORDER BY `user`.`score` DESC LIMIT 100"
+        _rankList += DB.DBSelect(sql)
+        _listLen = len(_rankList)
+        msg=str()
+        for num in range (0,_listLen+1):
+            if num==0:
+                msg+=str(_userScore[0]['score'])+","
+            if num==_listLen-1:
+                msg+=_rankList[num]['nick']+","+str(_rankList[num]['score'])
+                return msg
+            else:
+                msg+=_rankList[num]['nick']+","+str(_rankList[num]['score'])+","
+                
+    DB.DBClose()
+
 @app.route("/BattleEnd", methods = ["GET","POST"])
 
 def GameEnd():
@@ -194,8 +218,9 @@ def GameEnd():
         
         elif _flag =="lose":
             sql = "select score from user where nick = '"+_userNick+"'"
-            data = DB.DBSelect(sql)      
-            _score = data[0]["score"] - 10 #지면 점수 10점 빼기
+            data = DB.DBSelect(sql)    
+            if  _score>=10:
+                _score = data[0]["score"] - 10 #지면 점수 10점 빼기
             sql = "update user set score ="  + str(_score) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
             msg = _score
