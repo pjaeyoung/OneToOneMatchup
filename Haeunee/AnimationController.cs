@@ -156,11 +156,13 @@ public class AnimationController : MonoBehaviour {
 
     public void PlayAnimation(string aniName)
     {
+        animation.wrapMode = WrapMode.Once;
         animation.CrossFade(GetAniName(aniName));
     }
 
     public void PlayAtkDmg(string aniName)
     {
+        animation.wrapMode = WrapMode.Once;
         animation.Play(GetAniName(aniName));
     }
 

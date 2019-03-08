@@ -18,6 +18,7 @@ public class EnemyScript : MonoBehaviour {
     int nowHp;
 
     void Start () {
+        DontDestroyOnLoad(transform.parent);
         playerAniCon = GetComponent<AnimationController>();
         weaponType = GetComponent<HeroCustomize>().IndexWeapon.CurrentType;
         shotMgr = GetComponentInChildren<ShotManager>();

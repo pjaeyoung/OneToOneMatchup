@@ -16,20 +16,47 @@ public class EndSceneScript : MonoBehaviour
     public Text winningRate;
     WebServerScript server;
     string winning;
+    GameObject enemy;
+    GameObject player;
+    AnimationController playerAni;
+    AnimationController enemyAni;
 
     void Start()
     {
+        PlayerScript playerScript = SocketServer.SingleTonServ().NowPlayerScript();
+        player = playerScript.transform.gameObject;
+        player.transform.rotation = Quaternion.Euler(0, 180, 0);
+        playerAni = player.GetComponent<AnimationController>();
+        playerScript.enabled = false;
+        player.GetComponentInChildren<Camera>().enabled = false;
+        Camera.main.enabled = true;
+
+        EnemyScript enemyScript = SocketServer.SingleTonServ().NowEnemyScript();
+        enemy = enemyScript.transform.gameObject;
+        enemy.transform.rotation = Quaternion.Euler(0, 180, 0);
+        enemyAni = enemy.GetComponent<AnimationController>();
+        enemyScript.enabled = false;
+        enemy.transform.Find("Canvas").gameObject.SetActive(false);
+
         server = GameObject.Find("WebServer").GetComponent<WebServerScript>();
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
         GameObject.Destroy(GameObject.Find("SocketServer"));
         result = SocketServer.SingleTonServ().GetResult();
         if (result == (int)eRESULT.em_WIN)
         {
+            player.transform.position = new Vector3(-3, -2, 13);
+            enemy.transform.position = new Vector3(3, -2, 13);
+            enemyAni.PlayAnimation("Idle");
+            StartCoroutine(DeathAni(result));
             loseText.SetActive(false);
             winning = ResultSave("win");
         }
         else if (result == (int)eRESULT.em_LOSE)
         {
+            player.transform.position = new Vector3(3, -2, 13);
+            enemy.transform.position = new Vector3(-3, -2, 13);
+            playerAni.PlayAnimation("Idle");
+            StartCoroutine(DeathAni(result));
             winText.SetActive(false);
             winning = ResultSave("lose");
         }
@@ -39,6 +66,8 @@ public class EndSceneScript : MonoBehaviour
     
     public void HomeBtn()
     {
+        GameObject.Destroy(player.transform.parent);
+        GameObject.Destroy(enemy.transform.parent);
         SceneManager.LoadScene("WaitScene");
     }
 
@@ -50,4 +79,13 @@ public class EndSceneScript : MonoBehaviour
         sendInfo.Append("&nick=" + server.nick);
         return server.ConnectServer(Url, sendInfo);
     }    
+
+    IEnumerator DeathAni(int res)
+    {
+        yield return new WaitForSeconds(1.0f);
+        if (result == (int)eRESULT.em_WIN)
+            enemyAni.PlayDeath("Death");
+        else if (result == (int)eRESULT.em_LOSE)
+            playerAni.PlayDeath("Death");
+    }
 }

@@ -76,33 +76,104 @@ def Friends():
         _flag = request.form["flag"]
         _userNick = request.form["nick"]
     
-        _userFriend = list() #유저 친구 목록 불러오기
-        sql = "select nick from user where user.idx in (select friend.friend_idx from friend inner join user on user.idx where user.nick='"+_userNick+"')"
-        _userFriend = DB.DBSelect(sql)
+    #유저 친구 목록 불러오기
+        _userFriend=list()
+        sql = "select nick from user where user.idx in (select friend.friend_idx from friend inner join user on user.idx=friend.user_idx where user.nick='"+_userNick+"')"
+        _userFriend += DB.DBSelect(sql)
         sql = "select nick from user where user.idx in (select friend.user_idx from friend inner join user on user.idx=friend.friend_idx where user.nick='"+_userNick+"')"
         _userFriend+=DB.DBSelect(sql)    
+        
+        _sendReq=list() #친구 신청 보낸 목록
+        _recvReq=list() #친구신청 받은 목록
+        sql = "select nick from user where user.idx in (select friend_req.friend_idx from friend_req inner join user on user.idx=friend_req.user_idx where user.nick='"+_userNick+"')"
+        _sendReq += DB.DBSelect(sql)
+        sql = "select nick from user where user.idx in (select friend_req.user_idx from friend_req inner join user on user.idx=friend_req.friend_idx where user.nick='"+_userNick+"')"
+        _recvReq+=DB.DBSelect(sql) 
                         
-        if _flag=="list":
+        if _flag=="list": #친구 리스트 보내기
             if _userFriend:
                 _friendLen = len(_userFriend)
                 msg =str()
-                for num in range(1,_friendLen):
+                for num in range(0,_friendLen+1):
                     if num==_friendLen-1:
                         msg += ( _userFriend[num]["nick"])
+                        return msg
                     else:
                         msg += ( _userFriend[num]["nick"]+",")
             else:
                 msg = "no friends"
+                return msg
                 
         elif _flag =="del": #유저 친구 삭제하기
-            _dataLen=len(_userFriend)
             _friendNick = request.form["friend"]
             sql = "delete from friend where (user_idx=(select idx from user where user.nick='"+_userNick+"') and friend_idx=(select idx from user where user.nick='"+_friendNick+"')) or (user_idx=(select idx from user where user.nick='"+_friendNick+"') and friend_idx=(select idx from user where user.nick='"+_userNick+"'))"
             DB.DBChange(sql)
             msg = "succ"
+            return msg
+        
+        elif _flag =="search": #유저 검색하기
+            _searchNick = request.form["search"]
+              
+            sql = "select user.score from user where user.nick ='"+_searchNick+"'"
+            data = DB.DBSelect(sql)
+            if data:
+                _searchScore = data[0]["score"]
+                msg = str(_searchScore)
+            else:
+                msg = "fail"   
+            return msg 
+        
+        elif _flag =="request": #친구요청 하기
+            _reqNick = request.form["request"]
+            if _userNick==_reqNick:
+                return "already"
+            _userFriend+=_sendReq+_recvReq
+            _friendLen = len(_userFriend)
+            for num in range (0,_friendLen+1):
+                if num<_friendLen and  _userFriend[num]["nick"]==_reqNick:
+                    msg = "already"
+                    return msg 
+                elif num==_friendLen-1 or _friendLen==0:
+                    sql = "insert into friend_req(user_idx) select idx from user where user.nick = '"+_userNick+"'"
+                    DB.DBChange(sql)
+                    sql = "update friend_req set friend_idx = (select idx from user where user.nick='"+_reqNick+"') where user_idx=(select idx from user where user.nick='"+_userNick+"') and friend_idx = 0"
+                    DB.DBChange(sql)
+                    msg = "succ"
+                    return msg 
                 
+        elif _flag =="reqlist": #친구요청목록 보내기
+            if _recvReq:
+                _reqLen = len(_recvReq)
+                msg =str()
+                for num in range(0,_reqLen+1):
+                    if num==_reqLen-1:
+                        msg += ( _recvReq[num]["nick"])
+                        return msg
+                    else:
+                        msg += ( _recvReq[num]["nick"]+",")
+            else:
+                msg = "no request"
+                return msg
+            
+        elif _flag=="accept": #친구 요청 수락
+            _acceptNick = request.form["accept"]  
+            sql = "insert into friend(user_idx) select idx from user where user.nick = '"+_userNick+"'"
+            DB.DBChange(sql)
+            sql = "update friend set friend_idx = (select idx from user where user.nick='"+_acceptNick+"') where user_idx=(select idx from user where user.nick='"+_userNick+"') and friend_idx = 0"
+            DB.DBChange(sql)
+            sql = "delete from friend_req where (user_idx=(select idx from user where user.nick='"+_acceptNick+"') and friend_idx=(select idx from user where user.nick='"+_userNick+"'))"
+            DB.DBChange(sql)
+            msg = "succ"
+            return msg
+        
+        elif _flag=="refuse": #친구 요청 거절하기
+            _refuseNick = request.form["refuse"] 
+            sql = "delete from friend_req where (user_idx=(select idx from user where user.nick='"+_refuseNick+"') and friend_idx=(select idx from user where user.nick='"+_userNick+"'))"
+            DB.DBChange(sql)
+            msg = "succ"
+            return msg
+            
     DB.DBClose()
-    return msg    
 
 @app.route("/BattleEnd", methods = ["GET","POST"])
 
@@ -113,23 +184,21 @@ def GameEnd():
         _userNick = request.form["nick"]
         
         if _flag == "win" : #이겼을 경우
-            sql = "select win, lose from user where nick = '"+_userNick+"'"
+            sql = "select score from user where nick = '"+_userNick+"'"
             data = DB.DBSelect(sql)      
-            win = data[0]["win"] + 1 #이긴횟수 1회 더하기
-            lose = data[0]["lose"]
-            sql = "update user set win ="  + str(win) +" where nick = '"+_userNick+"'"
+            _score = data[0]["score"] + 20 #이기면 점수 20점 더하기
+            sql = "update user set score ="  + str(_score) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
-            msg = (win/(win+lose))*100 #승률 계산
+            msg = _score #승률 계산
             return str(msg)
         
         elif _flag =="lose":
-            sql = "select win, lose from user where nick = '"+_userNick+"'"
+            sql = "select score from user where nick = '"+_userNick+"'"
             data = DB.DBSelect(sql)      
-            win = data[0]["win"]  
-            lose = data[0]["lose"] + 1 #진 횟수 1회 더하기
-            sql = "update user set lose ="  + str(lose) +" where nick = '"+_userNick+"'"
+            _score = data[0]["score"] - 10 #지면 점수 10점 빼기
+            sql = "update user set score ="  + str(_score) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
-            msg = (win/(win+lose))*100
+            msg = _score
             return str(msg)
     
     DB.DBClose()

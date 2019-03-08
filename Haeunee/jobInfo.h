@@ -116,7 +116,7 @@ public:
 		}
 		else if (flag == 20 + eITEM::em_HP_POTION)
 		{
-			hp = 200;
+			hp = 100;
 		}
 		else if (flag == 20 + eITEM::em_SPEED_POTION)
 		{

@@ -6,7 +6,7 @@ public class ShotController : MonoBehaviour {
     public Vector3 rayPoint;
 	
 	void Start () {
-        Destroy(gameObject, 2.0f);
+        Destroy(gameObject, 0.7f);
     }	
     
 	void Update () {

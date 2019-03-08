@@ -171,6 +171,16 @@ public class SocketServer {
         pScript = player;
     }
 
+    public PlayerScript NowPlayerScript()
+    {
+        return pScript;
+    }
+
+    public EnemyScript NowEnemyScript()
+    {
+        return eScript;
+    }
+
     public void WaitRecieve()
     {
         sock.BeginReceive(rd.buffer, 0, rd.buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), rd);
