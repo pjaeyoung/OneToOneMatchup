@@ -24,15 +24,16 @@ public class PlayerScript : MonoBehaviour
     GameObject Block;
 
     GameObject highlightBox;
-    OnOffHighLight s_highlight;
     GameObject targetZone;
     DrawTargetZone s_drawTZ;
     Camera playerCamera;
     GameObject getItem = null;
     public int isDestroyOK = (int)eBOOLEAN.FALSE; //던질 아이템 destroy 조건 
 
+    itemSpawn2 s_itemSpawn2;
+
     int weaponNum = -1;
-    int sensibilityX = 5;
+    int sensibilityX = 10;
     int atkAni = 0;
 
     bool idleAni = true;
@@ -47,6 +48,9 @@ public class PlayerScript : MonoBehaviour
     int itemImgNum = 0;
     bool itemImgChange = false;
     bool itemImgSet = false;
+    bool spawnPoss = false;
+
+    int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
 
     GameObject[] ItemImg;
 
@@ -70,16 +74,17 @@ public class PlayerScript : MonoBehaviour
         Block = GameObject.Find("Canvas").transform.GetChild(4).gameObject;
 
         highlightBox = transform.Find("chkHighlight").gameObject;
-        s_highlight = highlightBox.GetComponent<OnOffHighLight>();
         playerCamera = transform.Find("Camera").GetComponent<Camera>();
         targetZone = transform.Find("targetZone").gameObject;
         s_drawTZ = targetZone.GetComponent<DrawTargetZone>();
 
+        s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
+
         ItemImg = new GameObject[4];
-        ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg");
-        ItemImg[(int)eITEM.em_SPEED_POTION] = GameObject.Find("SpdPotionImg");
-        ItemImg[(int)eITEM.em_DAMAGE_UP_POTIOM] = GameObject.Find("AtkPotionImg");
-        ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg");
+        ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg").gameObject;
+        ItemImg[(int)eITEM.em_SPEED_POTION] = GameObject.Find("SpdPotionImg").gameObject;
+        ItemImg[(int)eITEM.em_DAMAGE_UP_POTIOM] = GameObject.Find("AtkPotionImg").gameObject;
+        ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg").gameObject;
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
     }
@@ -100,12 +105,19 @@ public class PlayerScript : MonoBehaviour
             else
                 playerAniCon.PlayAnimation("Idle");
 
-            if (Input.GetKeyDown(KeyCode.Space) && transform.position.y <= 0.6f) //점프
+            if (Input.GetKeyDown(KeyCode.Space)) //점프
                 Jump();
             if (aniEnd == true) //애니메이션 다씉나고
                 shotMgrStart();
         }
 
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        GameObject obj = other.gameObject;
+        if (obj.tag == "floor")
+            IsJump = (int)eBOOLEAN.FALSE;
     }
 
     void Update()
@@ -126,14 +138,14 @@ public class PlayerScript : MonoBehaviour
         if (gameEnd == true) //게임 끝
             changeEndScene();
 
-        if (Input.GetMouseButtonDown(1) && highlightBox.activeSelf == true)
+        if (Input.GetMouseButtonDown(1) && highlightBox.activeSelf == true) //하이라이트 박스 출력 중일 때만 아이템 클릭 가능
             itemClick();
 
         if(getItem != null)
         {
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
                 ActiveTargetZone();
-            else if (Input.GetMouseButtonUp(1))
+            else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
                 prepareTransferItem();
         }
     }
@@ -188,7 +200,11 @@ public class PlayerScript : MonoBehaviour
 
     void Jump()
     {
-        playerRigidBody.AddForce(new Vector3(0, 300, 0));
+        if (IsJump == (int)eBOOLEAN.FALSE)
+        {
+            IsJump = (int)eBOOLEAN.TRUE;
+            playerRigidBody.AddForce(0, 300, 0, ForceMode.Acceleration);
+        }
     }
 
     void shotMgrStart()
@@ -289,6 +305,10 @@ public class PlayerScript : MonoBehaviour
                 highlightBox.SetActive(true);
             }
         }
+        else
+        {
+            highlightBox.SetActive(true);
+        }
     }
 
     void ActiveTargetZone()
@@ -299,6 +319,7 @@ public class PlayerScript : MonoBehaviour
 
     void prepareTransferItem()
     {
+        Debug.Log("prepareTransfer");
         Vector3 newPos = targetZone.transform.position;
         targetZone.SetActive(false);
         getItem.GetComponent<Rigidbody>().useGravity = true;
@@ -308,9 +329,10 @@ public class PlayerScript : MonoBehaviour
 
     void TransferItem(Vector3 TZPos)
     {
-        Vector3 dir = TZPos - getItem.transform.localPosition;
-        Debug.Log("dir.x : " + dir.x + " dir.y : " + dir.y);
+        Debug.Log("Transfer");
+        Vector3 dir = TZPos - getItem.transform.position;
         getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z);
+        getItem = null;
     }
 
     public void PlayerDamage(sHit hit)
@@ -342,6 +364,12 @@ public class PlayerScript : MonoBehaviour
     public void ChangeWaitScene()
     {
         gameEnd = true;
+    }
+
+    public void passOnItemSpawnInfo(int[] result) //itemSpawn2 스크립트에 서버에서 받은 정보 전달
+    {
+        spawnPoss = true;
+        s_itemSpawn2.setItemSpawns(result);
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄

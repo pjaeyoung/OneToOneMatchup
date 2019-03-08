@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DrawTargetZone : MonoBehaviour
 {
-    //targetZone 움직임 한계치
+    /* targetZone 움직임 한계치 */
     float maxX = 100.0f;
     float minX = -100.0f;
     float maxZ = 180.0f;
@@ -19,13 +19,12 @@ public class DrawTargetZone : MonoBehaviour
         nowPos += newPos * 15;
         if (nowPos.x > maxX)
             nowPos.x = maxX;
-        if (nowPos.x < minX)
+        else if (nowPos.x < minX)
             nowPos.x = minX;
         if (nowPos.z > maxZ)
             nowPos.z = maxZ;
-        if (nowPos.z < minZ)
+        else if (nowPos.z < minZ)
             nowPos.z = minZ;
         transform.localPosition = nowPos;
-        Debug.Log("x : " + nowPos.x + " y : " + nowPos.y + " z : " + nowPos.z);
     }
 }

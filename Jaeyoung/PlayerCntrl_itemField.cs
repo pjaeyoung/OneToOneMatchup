@@ -8,7 +8,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
 {
     public float moveSpeed = 5.0f;
     public float jumpSpeed = 100.0f;
-    public float rotSpeed = 100.0f;
+    public int sensibilityX = 10;
     public Button[] itemButton;
     public LayerChange layerChange;
     GameMgr GM;
@@ -17,12 +17,11 @@ public class PlayerCntrl_itemField : MonoBehaviour
     GameObject canvas;
     GameObject[] touchableItems;
     GameObject fullItem;
+    GameObject highlightBox;
     Rigidbody playerRigid;
-    OnOffHighLight s_onOffHighlight;
 
     int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
     
-
     private void Awake()
     {
         IsJump = (int)eBOOLEAN.FALSE;
@@ -31,7 +30,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
         scene = SceneManager.GetActiveScene();
         canvas = GameObject.Find("Canvas");
         playerRigid = GetComponent<Rigidbody>();
-        s_onOffHighlight = transform.GetChild(9).GetComponent<OnOffHighLight>();
+        highlightBox = GameObject.Find("chkHighlight");
     }
 
     void Start()
@@ -68,15 +67,16 @@ public class PlayerCntrl_itemField : MonoBehaviour
             Rot();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider other)
     {
-        GameObject obj = collision.transform.gameObject;
+        GameObject obj = other.gameObject;
         if (obj.tag == "floor")
             IsJump = (int)eBOOLEAN.FALSE;
     }
+
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && s_onOffHighlight.IsHighlight == (int)eBOOLEAN.TRUE)
+        if (Input.GetMouseButtonDown(0) && highlightBox.activeSelf == true)
             TouchItem();
     }
 
@@ -105,53 +105,58 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     void Rot()
     {
-        transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * rotSpeed * Time.deltaTime);
+        transform.Rotate(new Vector3(0,Input.GetAxisRaw("Mouse X") * sensibilityX, 0));
     }
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
 
     void TouchItem() //아이템 가방이 차기 전 : 아이템 가방 이미지 변경 및 itemPool로 위치 변경, 아이템 가방이 다 찬 후: 경고 메세지 
     {
-        Debug.Log("Touch");
-
         Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit rayHit;
         if (Physics.Raycast(cameraRay, out rayHit))
         {
             GameObject rayObj = rayHit.transform.gameObject;
-            if (rayObj.tag == "item" && rayObj.GetComponent<outline>().OutlineMode == outline.Mode.OutlineAndSilhouette)
+            int possess = (int)eBOOLEAN.FALSE;
+            if (rayObj.GetComponent<outline>() != null) // outline 스크립트 있는 지 여부 판단 
+                possess = (int)eBOOLEAN.TRUE;
+            
+            if(possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
             {
-                int num = GM.CitemCount.GetItemNum();
-                num++;
-                int IsMaxItem = GM.CitemCount.changeGetItemNum(num);
-                if (IsMaxItem == (int)eBOOLEAN.FALSE)
+                if (rayObj.tag == "item")
                 {
-                    fullItem.SetActive(false);
-                    int emtyNum = GM.getEmtyImgIndex();
-                    itemBtn s_itemBtn = itemButton[emtyNum].GetComponent<itemBtn>(); //아이템 버튼 스크립트에서 아이템 목록 입력! 
-                    s_itemBtn.InputGetItemArr(rayObj, emtyNum);
+                    int num = GM.CitemCount.GetItemNum();
+                    num++;
+                    int IsMaxItem = GM.CitemCount.changeGetItemNum(num);
+                    if (IsMaxItem == (int)eBOOLEAN.FALSE)
+                    {
+                        fullItem.SetActive(false);
+                        int emtyNum = GM.getEmtyImgIndex();
+                        itemBtn s_itemBtn = itemButton[emtyNum].GetComponent<itemBtn>(); //아이템 버튼 스크립트에서 아이템 목록 입력! 
+                        s_itemBtn.InputGetItemArr(rayObj, emtyNum);
 
-                    GM.changeItemImg(rayObj);
-                    rayObj.SetActive(false);
+                        GM.changeItemImg(rayObj);
+                        rayObj.SetActive(false);
+                    }
+                    else
+                    {
+                        num = 3;
+                        fullItem.SetActive(true);
+                        StartCoroutine("fullItemMsgEnd", fullItem);
+                    }
                 }
                 else
                 {
-                    num = 3;
-                    fullItem.SetActive(true);
-                    StartCoroutine("fullItemMsgEnd", fullItem);
-                }
-            }
-            else
-            {
-                if(rayObj.tag == "weapon" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineAndSilhouette)
-                {
-                    weaponArmorBtn s_weaponBtn = canvas.transform.Find("btn_GetWeapon").GetComponent<weaponArmorBtn>();
-                    s_weaponBtn.inputGameObj(rayObj);
-                }
-                else if (rayObj.tag == "armor" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineAndSilhouette)
-                {
-                    weaponArmorBtn s_ArmorBtn = canvas.transform.Find("btn_GetArmor").GetComponent<weaponArmorBtn>();
-                    s_ArmorBtn.inputGameObj(rayObj);
+                    if (rayObj.tag == "weapon" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineVisible)
+                    {
+                        weaponArmorBtn s_weaponBtn = canvas.transform.Find("btn_GetWeapon").GetComponent<weaponArmorBtn>();
+                        s_weaponBtn.inputGameObj(rayObj);
+                    }
+                    else if (rayObj.tag == "armor" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineVisible)
+                    {
+                        weaponArmorBtn s_ArmorBtn = canvas.transform.Find("btn_GetArmor").GetComponent<weaponArmorBtn>();
+                        s_ArmorBtn.inputGameObj(rayObj);
+                    }
                 }
             }
         }
@@ -160,7 +165,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     /* 꽉찬 아이템창 알림 메세지 화면 표시 시간 제어 */
     IEnumerator fullItemMsgEnd(GameObject obj)
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.8f);
         obj.SetActive(false);
     }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 /* 서버 오브젝트에 AddComponent하기 */
 
@@ -186,9 +187,10 @@ public struct sChangeInfo //hp정보 전달
     }
 };
 
-public struct sItemSpawn
+public struct sItemSpawn //아이템 랜덤 생성 
 {
     private int flag;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
     public int[] itemKind;
     public sItemSpawn(int[] itemArr, int f = (int)eMSG.em_ITEMSPAWN)
     {

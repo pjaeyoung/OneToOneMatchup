@@ -2,28 +2,43 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemSpawn2 : MonoBehaviour
+public class itemSpawn2 : MonoBehaviour
 {
-    public GameObject[] itemSpawns;
-    public GameObject[] items;
-    int ranItemNum = 0;
+    public GameObject[] itemKind;
+    public Transform[] itemSpawns;
+
+    int IsInstanceItemOK = (int)eBOOLEAN.FALSE;
     int spawnLen;
-    int itemLen;
+    int[] result;
 
-    public void Awake()
+    private void Update()
     {
-        spawnLen = itemSpawns.Length;
-        itemLen = items.Length;
-        RandomSpawn();
-    }
-
-    void RandomSpawn()
-    {
-        for (int i = 0; i < spawnLen; i++)
+        if (IsInstanceItemOK == (int)eBOOLEAN.TRUE)
         {
-            ranItemNum = Random.Range(0, itemLen - 1);
-            Instantiate(items[ranItemNum], itemSpawns[i].transform.position, items[ranItemNum].transform.rotation);
+            IsInstanceItemOK = (int)eBOOLEAN.FALSE;
+            instanceItem();
         }
     }
 
+    public void setItemSpawns(int[] _result)
+    {
+        spawnLen = itemSpawns.Length;
+        result = _result;
+        int resultLen = _result.Length;
+        if (spawnLen != resultLen)
+            Debug.Log("spawnLen and resultLen is not same");
+        else
+        {
+            IsInstanceItemOK = (int)eBOOLEAN.TRUE;
+        }
+    }
+
+    void instanceItem()
+    {
+        for (int i = 0; i < spawnLen; i++)
+        {
+            int itemIdx = result[i]; //아이템 종류 
+            Instantiate(itemKind[itemIdx], itemSpawns[i].position, itemKind[itemIdx].transform.rotation, itemSpawns[i]);
+        }
+    }
 }

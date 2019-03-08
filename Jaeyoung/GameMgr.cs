@@ -108,6 +108,7 @@ public class GameMgr : MonoBehaviour {
     public GameObject canvas;
     public Scene scene;
     int gameEnter = (int)eBOOLEAN.FALSE;
+    int interactive = (int)eBOOLEAN.TRUE; // 아이템 버튼 interactive 설정
 
     float countTimer; //카운트다운 타이머 
     int min; //분
@@ -143,6 +144,15 @@ public class GameMgr : MonoBehaviour {
             }
             else
                 showTime();
+        }
+        else if(scene.name == "GameScene" && interactive == (int)eBOOLEAN.TRUE)
+        {
+            interactive = (int)eBOOLEAN.FALSE;
+            for(int i = 0; i<3; i++)
+            {
+                itemBtn[i].enabled = false;
+                itemBtn[i].gameObject.GetComponent<itemBtn>().enabled = false;
+            }
         }
 	}
 
