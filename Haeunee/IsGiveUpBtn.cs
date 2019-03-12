@@ -16,10 +16,11 @@ public class IsGiveUpBtn : MonoBehaviour
 
     public void onClickYesBtn()
     {
-        sEnd esc = new sEnd(0);
-        SocketServer.SingleTonServ().SendMsg(esc);
-        Debug.Log("ESC");
+        sEnd end = new sEnd((int)eMSG.em_END);
+        SocketServer.SingleTonServ().SendMsg(end);
+        Debug.Log("END");
         //서버에 항복 메세지 전달
+        //나와 상대방 모두 대기 화면으로 바꾸기 
     }
 
     public void onClickNoBtn()

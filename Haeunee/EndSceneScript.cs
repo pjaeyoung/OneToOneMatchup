@@ -66,8 +66,8 @@ public class EndSceneScript : MonoBehaviour
     
     public void HomeBtn()
     {
-        GameObject.Destroy(player.transform.parent);
-        GameObject.Destroy(enemy.transform.parent);
+        GameObject.Destroy(player.transform.parent.gameObject);
+        GameObject.Destroy(enemy.transform.parent.gameObject);
         SceneManager.LoadScene("WaitScene");
     }
 

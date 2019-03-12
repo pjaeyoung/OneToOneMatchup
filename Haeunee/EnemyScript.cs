@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //적 유저 움직임 스크립트
-public class EnemyScript : MonoBehaviour {
+public class EnemyScript : MonoBehaviour
+{
     Vector3 enemyPos;
     Quaternion enemyRot;
     AnimationController playerAniCon;
@@ -16,8 +17,15 @@ public class EnemyScript : MonoBehaviour {
     Text hpText;
     HpBar enemyHpBar;
     int nowHp;
+    GameObject getObj;
+    itemSpawn2 throwObj;
+    bool objGet = false;
+    int objNum;
+    bool objThrow = false;
+    Vector3 targetPos;
 
-    void Start () {
+    void Start()
+    {
         DontDestroyOnLoad(transform.parent);
         playerAniCon = GetComponent<AnimationController>();
         weaponType = GetComponent<HeroCustomize>().IndexWeapon.CurrentType;
@@ -25,6 +33,8 @@ public class EnemyScript : MonoBehaviour {
         shotMgr.ShotPosChange(weaponType);
         hpText = GameObject.Find("Canvas").transform.GetChild(1).GetComponent<Text>();
         enemyHpBar = transform.Find("Canvas").transform.GetChild(0).GetComponent<HpBar>();
+
+        throwObj = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
     }
 
     private void Update()
@@ -54,7 +64,7 @@ public class EnemyScript : MonoBehaviour {
             StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
         }
         else if (enemyPos.x + 0.1 <= transform.position.x || enemyPos.x - 0.1 >= transform.position.x ||
-            enemyPos.z + 0.1 <= transform.position.z|| enemyPos.z - 0.1 >= transform.position.z)//움직임
+            enemyPos.z + 0.1 <= transform.position.z || enemyPos.z - 0.1 >= transform.position.z)//움직임
         {
             transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
             playerAniCon.PlayAnimation("Move");
@@ -63,9 +73,27 @@ public class EnemyScript : MonoBehaviour {
         {
             playerAniCon.PlayAnimation("Idle");
         }
-        if (enemyRot!=transform.rotation) //회전
+        if (enemyRot != transform.rotation) //회전
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, enemyRot, 0.5f);
+        }
+
+        if(objGet==true)
+        {
+            objGet = false;
+            getObj = throwObj.GetObj(objNum);
+            getObj.GetComponent<Rigidbody>().useGravity = false;
+            Vector3 newPos = transform.position;
+            newPos.y += 5;
+            getObj.transform.position = newPos;
+        }
+
+        if(objThrow==true)
+        {
+            objThrow = false;
+            itemCntrl cntrl = getObj.GetComponentInChildren<itemCntrl>();
+            cntrl.isDestroyOK = true;
+            throwObj.prepareTransferItem(getObj, targetPos);
         }
     }
 
@@ -94,5 +122,17 @@ public class EnemyScript : MonoBehaviour {
         yield return new WaitForSeconds(delay);
         if (weaponType == (int)eWEAPON.em_BOW || weaponType == (int)eWEAPON.em_WAND)
             shotMgr.Shooting();
+    }
+
+    public void GetThrowObj(int num)
+    {
+        objGet = true;
+        objNum = num;
+    }
+
+    public void ThrowItem(Vector3 pos)
+    {
+        objThrow = true;
+        targetPos = pos;
     }
 }

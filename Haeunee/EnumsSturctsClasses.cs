@@ -39,6 +39,8 @@ enum eMSG //메세지 종류
     em_ITEMSPAWN,
     em_USEITEM,
     em_ENDITEM,
+    em_GETOBJ,
+    em_THROWOBJ,
     em_READY,
     em_END,
 }
@@ -68,7 +70,7 @@ enum eARMOR
     em_ARMOR,
     em_SUIT,
     em_ROBE,
-};
+}
 
 //아이템 종류
 enum eITEM
@@ -98,6 +100,13 @@ enum eRESULT
     em_WIN = 1,
     em_LOSE,
 };
+
+enum eATKTYPE
+{
+    em_NORMAL = 1,
+    em_OBJTHROW,
+};
+
 struct sGameRoom //매칭 정보
 {
     public int flag;
@@ -166,11 +175,13 @@ public struct sHit //공격 성공
 {
     private int flag;
     public int dmgAni;
+    int atkType;
     public int hp;
-    public sHit(int ani, int nowHp, int f = (int)eMSG.em_HIT)
+    public sHit(int ani,int type, int nowHp, int f = (int)eMSG.em_HIT)
     {
         flag = f;
         dmgAni = ani;
+        atkType = type;
         hp = nowHp;
     }
 }
@@ -186,7 +197,7 @@ public struct sChangeInfo //hp정보 전달
     }
 };
 
-struct sItemSpawn
+public struct sItemSpawn //아이템 랜덤 생성 
 {
     private int flag;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
@@ -196,7 +207,7 @@ struct sItemSpawn
         flag = f;
         itemKind = itemArr;
     }
-};
+}
 
 public struct sUseItem //아이템 사용
 {
@@ -225,6 +236,30 @@ struct sEndItem //아이템 효과 끝
         itemNum = item;
         hp = nowHp;
         speed = spd;
+    }
+}
+
+struct sGetObj
+{
+    int flag;
+    public int itemNum;
+    public sGetObj(int item, int f = (int)eMSG.em_GETOBJ)
+    {
+        flag = f;
+        itemNum = item;
+    }
+};
+
+struct sThrowObj
+{
+    int flag;
+    public float throwPosX, throwPosY, throwPosZ;
+    public sThrowObj(float x, float y, float z, int f = (int)eMSG.em_THROWOBJ)
+    {
+        flag = f;
+        throwPosX = x;
+        throwPosY = y;
+        throwPosZ = z;
     }
 };
 

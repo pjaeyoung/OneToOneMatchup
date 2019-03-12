@@ -218,9 +218,10 @@ def GameEnd():
         
         elif _flag =="lose":
             sql = "select score from user where nick = '"+_userNick+"'"
-            data = DB.DBSelect(sql)    
+            data = DB.DBSelect(sql)   
+            _score = data[0]["score"] 
             if  _score>=10:
-                _score = data[0]["score"] - 10 #지면 점수 10점 빼기
+                _score -= 10 #지면 점수 10점 빼기
             sql = "update user set score ="  + str(_score) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
             msg = _score

@@ -26,7 +26,7 @@ public class ThrowTest : MonoBehaviour
         {
             if (Physics.Raycast(ray, out hit))
             {
-                if(hit.transform.tag =="object")
+                if(hit.transform.gameObject.layer == (int) eLAYER.TOUCHABLE)
                 {
                     ball = hit.transform.gameObject;
                     ballBody = ball.GetComponent<Rigidbody>();
@@ -42,8 +42,7 @@ public class ThrowTest : MonoBehaviour
         }
         else if(Input.GetMouseButtonUp(1))
         {
-            Vector3 dir = point.transform.localPosition - ball.transform.localPosition;
-            Debug.Log(dir.x + "," + dir.z);
+            Vector3 dir = point.transform.position - ball.transform.position;
             ballBody.velocity = ball.transform.TransformDirection(new Vector3(dir.x, 0, dir.z));
             ballBody.useGravity = true;
             point.SetActive(false);

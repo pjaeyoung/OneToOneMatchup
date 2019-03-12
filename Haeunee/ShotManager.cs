@@ -25,7 +25,7 @@ public class ShotManager : MonoBehaviour {
         {
             if (Physics.Raycast(ray.origin, ray.direction, out rayHit, maxDistance))
             {
-                if (point != null && rayHit.collider.tag == "Shootable")
+                if (point != null && (rayHit.collider.tag == "Shootable"|| rayHit.collider.tag == "Enemy"))
                 {
                     point.SetActive(true);
                     point.transform.position = rayHit.point;

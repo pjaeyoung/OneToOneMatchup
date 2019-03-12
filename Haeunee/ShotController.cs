@@ -6,7 +6,7 @@ public class ShotController : MonoBehaviour {
     public Vector3 rayPoint;
 	
 	void Start () {
-        Destroy(gameObject, 0.7f);
+        Destroy(gameObject, 0.3f);
     }	
     
 	void Update () {
@@ -15,10 +15,9 @@ public class ShotController : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.layer== (int)eLAYER.ENEMY)
+        if(other.gameObject.layer== (int)eLAYER.ENEMY || other.tag == "Shootable")
         {
             Destroy(gameObject);
-            Debug.Log("Hit");
         }
     }
 }

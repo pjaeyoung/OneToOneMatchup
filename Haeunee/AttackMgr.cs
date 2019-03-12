@@ -14,14 +14,14 @@ public class AttackMgr : MonoBehaviour {
         if (aktPossible==true && other.gameObject.layer == (int)eLAYER.WEAPON)
         {
             aktPossible = false;
-            HitSucc();
+            HitSucc((int)eATKTYPE.em_NORMAL);
         }
     }
 
-    void HitSucc()
+    public void HitSucc(int atkType)
     {
         int randDmgAni = Random.Range(0, 1);
-        sHit hit = new sHit(randDmgAni, 0);
+        sHit hit = new sHit(randDmgAni, atkType, 0);
         if (randDmgAni == 0)
             aniCon.PlayAtkDmg("GetDamage01");
         else if (randDmgAni == 1)
