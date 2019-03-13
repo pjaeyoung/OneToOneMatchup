@@ -64,7 +64,16 @@ public class PlayerCntrl_itemField : MonoBehaviour
     {
         Move();
         if (Input.GetMouseButton(2))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             Rot();
+        }
+        else if (Input.GetMouseButtonUp(2))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     void OnTriggerEnter(Collider other)

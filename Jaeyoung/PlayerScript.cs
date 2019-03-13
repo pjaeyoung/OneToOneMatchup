@@ -94,8 +94,13 @@ public class PlayerScript : MonoBehaviour
     {
         if (Block.activeSelf == false)
         {
-            if (Input.GetMouseButton(2)) 
+            if (Input.GetMouseButton(2))
+            {
+                Cursor.lockState = CursorLockMode.Locked;
                 Rot();
+            }
+            else if (Input.GetMouseButtonUp(2))
+                Cursor.lockState = CursorLockMode.None;
             if (Input.GetMouseButtonDown(0) && idleAni == true && getItem == null)
                 Attack();
             else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
@@ -111,7 +116,7 @@ public class PlayerScript : MonoBehaviour
             if (aniEnd == true) //애니메이션 다씉나고
                 shotMgrStart();
         }
-
+      
     }
 
     void OnTriggerEnter(Collider other)
@@ -150,9 +155,15 @@ public class PlayerScript : MonoBehaviour
         if(getItem != null)
         {
             if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = false;
                 ActiveTargetZone();
+            }
             else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
             {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 Vector3 newPos = targetZone.transform.position;
                 itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
                 cntrl.TransferItem(newPos);
