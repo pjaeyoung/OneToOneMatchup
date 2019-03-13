@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class itemSpawn2 : MonoBehaviour
 {
-    public GameObject[] itemKind;
+    public GameObject[] itemKind; //index 는 spawn index값, [index] 값은 item 종류
     public Transform[] itemSpawns;
 
-    int IsInstanceItemOK = (int)eBOOLEAN.FALSE;
+    bool IsInstanceItemOK = false; 
     int spawnLen;
     int[] result;
+    GameObject[] spawnItemList; //스폰된 item 리스트 
 
     private void Update()
     {
-        if (IsInstanceItemOK == (int)eBOOLEAN.TRUE)
+        if (IsInstanceItemOK == true)
         {
-            IsInstanceItemOK = (int)eBOOLEAN.FALSE;
+            IsInstanceItemOK = false;
             instanceItem();
         }
     }
@@ -29,16 +30,32 @@ public class itemSpawn2 : MonoBehaviour
             Debug.Log("spawnLen and resultLen is not same");
         else
         {
-            IsInstanceItemOK = (int)eBOOLEAN.TRUE;
+            IsInstanceItemOK = true;
         }
     }
 
     void instanceItem()
     {
+        spawnItemList = new GameObject[10];
         for (int i = 0; i < spawnLen; i++)
         {
             int itemIdx = result[i]; //아이템 종류 
-            Instantiate(itemKind[itemIdx], itemSpawns[i].position, itemKind[itemIdx].transform.rotation, itemSpawns[i]);
+            spawnItemList[i] = Instantiate(itemKind[itemIdx], itemSpawns[i].position, itemKind[itemIdx].transform.rotation, itemSpawns[i]);
         }
+    }
+
+    public int GetObjNum(GameObject obj)
+    {
+        for (int i = 0; i < spawnLen; i++)
+        {
+            if (spawnItemList[i] == obj)
+                return i;
+        }
+        return 0;
+    }
+
+    public GameObject GetObj(int itemNum)
+    {
+        return spawnItemList[itemNum];
     }
 }

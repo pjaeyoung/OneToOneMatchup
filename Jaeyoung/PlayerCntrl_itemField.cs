@@ -118,7 +118,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
         {
             GameObject rayObj = rayHit.transform.gameObject;
             int possess = (int)eBOOLEAN.FALSE;
-            if (rayObj.GetComponent<outline>() != null) // outline 스크립트 있는 지 여부 판단 
+            if (rayObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단 
                 possess = (int)eBOOLEAN.TRUE;
             
             if(possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)

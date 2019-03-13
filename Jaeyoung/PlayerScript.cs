@@ -28,7 +28,6 @@ public class PlayerScript : MonoBehaviour
     DrawTargetZone s_drawTZ;
     Camera playerCamera;
     GameObject getItem = null;
-    public int isDestroyOK = (int)eBOOLEAN.FALSE; //던질 아이템 destroy 조건 
 
     itemSpawn2 s_itemSpawn2;
 
@@ -48,14 +47,15 @@ public class PlayerScript : MonoBehaviour
     int itemImgNum = 0;
     bool itemImgChange = false;
     bool itemImgSet = false;
-    bool spawnPoss = false;
 
     int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
+    bool itemPoss = true;
 
     GameObject[] ItemImg;
 
     void Awake()
     {
+        DontDestroyOnLoad(transform.parent);
         sockServObj = GameObject.Find("SocketServer");
         playerInfo = sockServObj.GetComponent<GameEnterScript>();
         weaponNum = playerInfo.savCharInfo.weapon;
@@ -87,6 +87,7 @@ public class PlayerScript : MonoBehaviour
         ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg").gameObject;
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
+
     }
 
     private void FixedUpdate()
@@ -123,8 +124,13 @@ public class PlayerScript : MonoBehaviour
     void Update()
     {
         if (Block.activeSelf == false)
-            useItem();
+        {
+            if(itemPoss==true)
+            {
+                useItem();
+            }
             ActiveBlock();
+        }
 
         if (damaged == true) //데미지를 받았을 때 애니메이션 재생
             DamageAniAct();
@@ -146,7 +152,16 @@ public class PlayerScript : MonoBehaviour
             if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
                 ActiveTargetZone();
             else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
-                prepareTransferItem();
+            {
+                Vector3 newPos = targetZone.transform.position;
+                itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
+                cntrl.TransferItem(newPos);
+                cntrl.isDestroyOK = true;
+                targetZone.SetActive(false);
+                getItem = null;
+                sThrowObj thObj = new sThrowObj(newPos.x, newPos.y, newPos.z);
+                SocketServer.SingleTonServ().SendMsg(thObj);
+            }
         }
     }
 
@@ -233,6 +248,7 @@ public class PlayerScript : MonoBehaviour
             {
                 useItem.itemNum = 2;
             }
+            itemPoss = false;
             StartCoroutine(EndItem(useItem.itemNum)); //아이템 끝나는 시간
             int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 한 번 사용 시 더 이상 사용 못함 
             if (IsItemUsed == (int)eITEMUSE.UNUSED)
@@ -274,7 +290,8 @@ public class PlayerScript : MonoBehaviour
     void setItemImg()
     {
         itemImgChange = false;
-        ItemImg[itemImgNum].SetActive(itemImgSet);
+        if(itemImgNum != -1)
+            ItemImg[itemImgNum].SetActive(itemImgSet);
     }
 
     void changeEndScene()
@@ -292,13 +309,18 @@ public class PlayerScript : MonoBehaviour
         if (Physics.Raycast(cameraRay, out rayHit))
         {
             GameObject hitObj = rayHit.transform.gameObject;
-            if (hitObj.layer == (int)eLAYER.TOUCHABLE)
+            outline ObjOutline = hitObj.GetComponent<outline>();
+            if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
             {
                 hitObj.GetComponent<Rigidbody>().useGravity = false;
                 Vector3 newPos = transform.position;
                 newPos.y += 5;
                 hitObj.transform.position = newPos;
                 getItem = hitObj;
+
+                int itemNum = s_itemSpawn2.GetObjNum(hitObj);
+                sGetObj getObj = new sGetObj(itemNum);
+                SocketServer.SingleTonServ().SendMsg(getObj);
             }
             else
             {
@@ -315,25 +337,7 @@ public class PlayerScript : MonoBehaviour
     {
         targetZone.SetActive(true);
         s_drawTZ.drawTargetZone();
-    }
-
-    void prepareTransferItem()
-    {
-        Debug.Log("prepareTransfer");
-        Vector3 newPos = targetZone.transform.position;
-        targetZone.SetActive(false);
-        getItem.GetComponent<Rigidbody>().useGravity = true;
-        isDestroyOK = (int)eBOOLEAN.TRUE;
-        TransferItem(newPos);
-    }
-
-    void TransferItem(Vector3 TZPos)
-    {
-        Debug.Log("Transfer");
-        Vector3 dir = TZPos - getItem.transform.position;
-        getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z);
-        getItem = null;
-    }
+    }   
 
     public void PlayerDamage(sHit hit)
     {
@@ -368,7 +372,6 @@ public class PlayerScript : MonoBehaviour
 
     public void passOnItemSpawnInfo(int[] result) //itemSpawn2 스크립트에 서버에서 받은 정보 전달
     {
-        spawnPoss = true;
         s_itemSpawn2.setItemSpawns(result);
     }
 
@@ -405,6 +408,7 @@ public class PlayerScript : MonoBehaviour
     IEnumerator EndItem(int itemNum)
     {//아이템 지속시간 끝
         yield return new WaitForSeconds(5);
+        itemPoss = true;
         sEndItem endItem = new sEndItem(itemNum, 0, 0);
         SocketServer.SingleTonServ().SendMsg(endItem);
     }
