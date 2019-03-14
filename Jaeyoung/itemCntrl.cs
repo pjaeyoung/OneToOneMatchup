@@ -14,6 +14,7 @@ public class itemCntrl : MonoBehaviour
     bool IsInHighlightBox = false; //아이템이 하이라이트 박스과 충돌했는지 여부 
     public bool isDestroyOK = false;
     AttackMgr atkMgr;
+    effectMgr EM;
 
     private void Awake()
     {
@@ -28,6 +29,7 @@ public class itemCntrl : MonoBehaviour
             s_Enemy = SocketServer.SingleTonServ().NowEnemyScript();
             atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
             highlightBox = s_player.gameObject.transform.Find("chkHighlight").gameObject;
+            EM = GameObject.Find("effectMgr").GetComponent<effectMgr>();
         }
         highlightBox.SetActive(true);
         if(transform.name == "swordAndShield(Clone)") //swordAndShield 자식 오브젝트 둘 모두에게 적용 
@@ -73,7 +75,6 @@ public class itemCntrl : MonoBehaviour
             /* 아이템을 들어올린 후 던진 뒤에만 floor 충돌 체크 */
             if (isDestroyOK == true)
             {
-                //펑 터지는 효과 애니메이션 실행
                 if(obj.tag == "Enemy")
                 {
                     atkMgr.HitSucc((int)eATKTYPE.em_OBJTHROW);
@@ -81,6 +82,8 @@ public class itemCntrl : MonoBehaviour
                 if(obj.tag=="Shootable"||obj.tag=="floor"|| obj.tag == "Enemy"|| obj.tag == "Player")
                 {
                     Debug.Log("destroy");
+                    EM.effect[(int)ePARTICLE.em_HIT].transform.position = transform.position;
+                    EM.particle[(int)ePARTICLE.em_HIT].Play();
                     highlightBox.SetActive(true);
                     Destroy(gameObject);
                     isDestroyOK = false;
@@ -93,7 +96,7 @@ public class itemCntrl : MonoBehaviour
     {
         GameObject obj = other.gameObject;
         if (obj == highlightBox)
-            IsInHighlightBox = false;
+            IsInHighlightBox = false; 
     }
 
     public void TransferItem(Vector3 newPos)//targetZone이 마지막으로 가리킨 위치로 item 이동

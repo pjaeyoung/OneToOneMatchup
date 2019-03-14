@@ -4,99 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-/* 아이템 클래스 : 아이템 획득 갯수, 빈 아이템가방 넘버 */
-public class ItemCount
-{
-    int getItemNum; 
-    int maxItemNum;
-
-    public ItemCount()
-    {
-        getItemNum = 0;
-        maxItemNum = 3;
-    }
-
-    public int GetItemNum()
-    {
-        return getItemNum;
-    }
-
-    public int changeGetItemNum(int changeNum)
-    {
-        if(changeNum <= maxItemNum)
-        {
-            getItemNum = changeNum;
-            return 0;
-        }
-        else
-            return 1;
-    }
-}
-
-/* fightScene에 들고 갈 플레이어 정보 (서버 연동) */
-public class PlayerInfo
-{
-    int weapon;
-    int armor;
-    int[] getItemArr;
-
-    public PlayerInfo()
-    {
-        weapon = (int)eWEAPON.em_STICK;
-        armor = (int)eARMOR.em_DEFAULT_AMR;
-        getItemArr = new int[3];
-    }
-
-    public void InputGetItemArr(int i, int index)
-    {
-        getItemArr[index] = i;
-    }
-
-    public void changeArmor(string a)
-    {
-        string ArmorGender = a.Substring(0, 16);
-        string ArmorNumStr = a.Substring(17);
-        int ArmorNumInt = int.Parse(ArmorNumStr);
-        if(ArmorGender == "img_armor_F_Suit" || ArmorGender == "img_armor_M_Suit")
-            armor = ArmorNumInt;
-    }
-
-    public void changeWeapon(string w)
-    {
-        if (w == "img_weapon_greatSword")
-        {
-            weapon = (int)eWEAPON.em_GREATESWORD;
-        }
-        else if (w == "img_weapon_wand")
-        {
-            weapon = (int)eWEAPON.em_WAND;
-        }
-        else if (w == "img_weapon_bow")
-        {
-            weapon = (int)eWEAPON.em_BOW;
-        }
-        else if (w == "img_weapon_swordAndShield")
-        {
-            weapon = (int)eWEAPON.em_SWORDANDSHIELD;
-        }
-    }
-
-    public int getPlayerWeapon()
-    {
-        return weapon;
-    }
-
-    public int getPlayerArmor()
-    {
-        return armor;
-    }
-
-    public int getPlayerItemArr(int idx)
-    {
-        return getItemArr[idx];
-    }
-}
-
 public class GameMgr : MonoBehaviour {
     GameEnterScript enter;
     public GameObject waitImg; //둘 다 데이터를 주고 받을 때까지 필요한 시간에 띄울 이미지
@@ -107,8 +14,8 @@ public class GameMgr : MonoBehaviour {
     public PlayerInfo CPlayerInfo;
     public GameObject canvas;
     public Scene scene;
-    int gameEnter = (int)eBOOLEAN.FALSE;
-    int interactive = (int)eBOOLEAN.TRUE; // 아이템 버튼 interactive 설정
+    bool gameEnter = false;
+    bool interactive = true; // 아이템 버튼 interactive 설정
 
     float countTimer; //카운트다운 타이머 
     int min; //분
@@ -134,10 +41,10 @@ public class GameMgr : MonoBehaviour {
         scene = SceneManager.GetActiveScene();
         if(scene.name == "ItemCollectScene")
         {
-            if (min >= 1 && gameEnter == (int)eBOOLEAN.FALSE)
+            if (min >= 1 && gameEnter == false)
             {
                 changeLayerToWeapon();
-                gameEnter = (int)eBOOLEAN.TRUE;
+                gameEnter = true;
                 min = 0;
                 DontDestroyObject();
                 StartCoroutine(waitChangeScene());
@@ -145,13 +52,16 @@ public class GameMgr : MonoBehaviour {
             else
                 showTime();
         }
-        else if(scene.name == "GameScene" && interactive == (int)eBOOLEAN.TRUE)
+        else if(scene.name == "GameScene")
         {
-            interactive = (int)eBOOLEAN.FALSE;
-            for(int i = 0; i<3; i++)
+            if(interactive == true)
             {
-                itemBtn[i].enabled = false;
-                itemBtn[i].gameObject.GetComponent<itemBtn>().enabled = false;
+                interactive = false;
+                for (int i = 0; i < 3; i++)
+                {
+                    itemBtn[i].enabled = false;
+                    itemBtn[i].gameObject.GetComponent<itemBtn>().enabled = false;
+                }
             }
         }
 	}
