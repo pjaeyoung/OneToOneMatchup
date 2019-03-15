@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 public class itemCntrl : MonoBehaviour
 {
     PlayerScript s_player;
-    EnemyScript s_Enemy;
     GameObject highlightBox;
     outline s_outline;
     outline[] s_outline2;
@@ -14,7 +13,7 @@ public class itemCntrl : MonoBehaviour
     bool IsInHighlightBox = false; //아이템이 하이라이트 박스과 충돌했는지 여부 
     public bool isDestroyOK = false;
     AttackMgr atkMgr;
-    effectMgr EM;
+    ParticleSystem particle;
 
     private void Awake()
     {
@@ -26,10 +25,8 @@ public class itemCntrl : MonoBehaviour
         else if (scene.name == "GameScene")
         {
             s_player = SocketServer.SingleTonServ().NowPlayerScript();
-            s_Enemy = SocketServer.SingleTonServ().NowEnemyScript();
-            atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
             highlightBox = s_player.gameObject.transform.Find("chkHighlight").gameObject;
-            EM = GameObject.Find("effectMgr").GetComponent<effectMgr>();
+            particle = GameObject.Find("HitEffect").GetComponentInChildren<ParticleSystem>();
         }
         highlightBox.SetActive(true);
         if(transform.name == "swordAndShield(Clone)") //swordAndShield 자식 오브젝트 둘 모두에게 적용 
@@ -75,15 +72,11 @@ public class itemCntrl : MonoBehaviour
             /* 아이템을 들어올린 후 던진 뒤에만 floor 충돌 체크 */
             if (isDestroyOK == true)
             {
-                if(obj.tag == "Enemy")
-                {
-                    atkMgr.HitSucc((int)eATKTYPE.em_OBJTHROW);
-                }
                 if(obj.tag=="Shootable"||obj.tag=="floor"|| obj.tag == "Enemy"|| obj.tag == "Player")
                 {
                     Debug.Log("destroy");
-                    EM.effect[(int)ePARTICLE.em_HIT].transform.position = transform.position;
-                    EM.particle[(int)ePARTICLE.em_HIT].Play();
+                    particle.gameObject.transform.position = transform.position;
+                    particle.Play();
                     highlightBox.SetActive(true);
                     Destroy(gameObject);
                     isDestroyOK = false;

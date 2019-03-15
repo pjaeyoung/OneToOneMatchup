@@ -30,6 +30,7 @@ public class PlayerScript : MonoBehaviour
     GameObject getItem = null;
 
     itemSpawn2 s_itemSpawn2;
+    hitEffect s_hitEffect;
 
     int weaponNum = -1;
     int sensibilityX = 10;
@@ -79,6 +80,7 @@ public class PlayerScript : MonoBehaviour
         s_drawTZ = targetZone.GetComponent<DrawTargetZone>();
 
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
+        s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
 
         ItemImg = new GameObject[4];
         ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg").gameObject;
@@ -384,6 +386,11 @@ public class PlayerScript : MonoBehaviour
     public void passOnItemSpawnInfo(int[] result) //itemSpawn2 스크립트에 서버에서 받은 정보 전달
     {
         s_itemSpawn2.setItemSpawns(result);
+    }
+
+    public void CreateHitEffect(bool b)
+    {
+        s_hitEffect.IsAtkMgr = b;
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄

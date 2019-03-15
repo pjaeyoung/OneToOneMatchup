@@ -130,6 +130,8 @@ public class SocketServer {
         {
             Type m_type = typeof(sItemSpawn);
             sItemSpawn itemSpawn = (sItemSpawn)Marshal.PtrToStructure(buff, m_type);
+            pScript.passOnItemSpawnInfo(itemSpawn.itemKind);
+            pScript.CreateHitEffect(true);
         }
         else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
         {
@@ -145,6 +147,18 @@ public class SocketServer {
             sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
             pScript.ChangeItemImg(useItem.itemNum, false);
             pScript.ChangePlayerSpeed(useItem.speed);
+        }
+        else if (room.flag == (int)eMSG.em_GETOBJ) //던질 물건 잡기
+        {
+            Type m_type = typeof(sGetObj);
+            sGetObj getObj = (sGetObj)Marshal.PtrToStructure(buff, m_type);
+            eScript.GetThrowObj(getObj.itemNum);
+        }
+        else if (room.flag == (int)eMSG.em_THROWOBJ) //물건 던지기
+        {
+            Type m_type = typeof(sThrowObj);
+            sThrowObj throwObj = (sThrowObj)Marshal.PtrToStructure(buff, m_type);
+            eScript.ThrowItem(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
         }
         else if (room.flag == (int)eMSG.em_END)
         {
@@ -169,6 +183,16 @@ public class SocketServer {
     {
         eScript = enemy;
         pScript = player;
+    }
+
+    public PlayerScript NowPlayerScript()
+    {
+        return pScript;
+    }
+
+    public EnemyScript NowEnemyScript()
+    {
+        return eScript;
     }
 
     public void WaitRecieve()
