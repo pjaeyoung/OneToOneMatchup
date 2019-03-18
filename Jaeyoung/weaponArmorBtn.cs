@@ -21,50 +21,43 @@ public class weaponArmorBtn : MonoBehaviour {
     public void inputGameObj(GameObject obj)
     {
         Vector3 newPos = obj.transform.position;
-        string imgName = obj.GetComponent<MeshRenderer>().material.name;
-        int imgNameLen = imgName.Length;
-        string cmp = "";
-        for(int i = 0; i < imgNameLen; i++)
+        if(obj.tag == "weapon")
         {
-            if(cmp == "img_weapon")
+            if (Weapon != null)
             {
-                if(Weapon != null)
-                {
-                    Weapon.transform.position = newPos;
-                    Weapon.SetActive(true);
-                }
-                Weapon = obj;
-                Weapon.SetActive(false);
-                string str = GM.getAccurateName(imgName);
-                GM.CPlayerInfo.changeWeapon(str);
-                changeWeaponImg(str);
+                Weapon.transform.position = newPos;
+                Weapon.SetActive(true);
             }
-            else if(cmp == "img_armor")
-            {
-                if(Armor != null)
-                {
-                    Armor.transform.position = newPos;
-                    Armor.SetActive(true);
-                }
-                Armor = obj;
-                Armor.SetActive(false);
-                string str = GM.getAccurateName(imgName);
-                GM.CPlayerInfo.changeArmor(str);
-                changeArmorImg(str);
-            }
-            cmp += imgName[i];
+            Weapon = obj;
+            Weapon.SetActive(false);
+            string str = Weapon.name;
+            GM.CPlayerInfo.changeWeapon(str);
+            changeWeaponImg(str);
         }
+        else if(obj.tag == "armor")
+        {
+            if (Armor != null)
+            {
+                Armor.transform.position = newPos;
+                Armor.SetActive(true);
+            }
+            Armor = obj;
+            Armor.SetActive(false);
+            string str = Armor.name;
+            GM.CPlayerInfo.changeArmor(str);
+            changeArmorImg(str);
+        }       
     }
 
-    void changeWeaponImg(string imgName)
+    void changeWeaponImg(string _itemName)
     {
-        Sprite spr = Resources.Load<Sprite>("Sprites/" + imgName);
+        Sprite spr = Resources.Load<Sprite>("Sprites/" + _itemName);
         weaponBtn.GetComponent<Image>().sprite = spr;
     }
 
-    void changeArmorImg(string imgName)
+    void changeArmorImg(string _itemName)
     {
-        Sprite spr = Resources.Load<Sprite>("Sprites/" + imgName);
+        Sprite spr = Resources.Load<Sprite>("Sprites/" + _itemName);
         ArmorBtn.GetComponent<Image>().sprite = spr;
     }
 
