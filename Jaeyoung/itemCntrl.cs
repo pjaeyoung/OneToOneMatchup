@@ -74,8 +74,7 @@ public class itemCntrl : MonoBehaviour
             {
                 if(obj.tag=="Shootable"||obj.tag=="floor"|| obj.tag == "Enemy"|| obj.tag == "Player")
                 {
-                    Debug.Log("destroy");
-                    particle.gameObject.transform.position = transform.position;
+                    particle.gameObject.transform.parent.position = transform.position;
                     particle.Play();
                     highlightBox.SetActive(true);
                     Destroy(gameObject);
@@ -95,7 +94,6 @@ public class itemCntrl : MonoBehaviour
     public void TransferItem(Vector3 newPos)//targetZone이 마지막으로 가리킨 위치로 item 이동
     {
         transform.GetComponent<Rigidbody>().useGravity = true;
-        Debug.Log("Transfer");
         Vector3 dir = newPos - transform.position;
         transform.GetComponent<Rigidbody>().velocity = transform.TransformDirection(dir.x, 0, dir.z);
     }

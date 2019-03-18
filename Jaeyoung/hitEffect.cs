@@ -12,6 +12,7 @@ public class hitEffect : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         GameObject obj = other.gameObject;
+        StartCoroutine(Delay());
         if(obj.tag == "Enemy" && IsAtkMgr == true)
         {
             atkMgr.HitSucc((int)eATKTYPE.em_OBJTHROW);
@@ -26,5 +27,11 @@ public class hitEffect : MonoBehaviour
             s_Enemy = SocketServer.SingleTonServ().NowEnemyScript();
             atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
         }
+    }
+
+    IEnumerator Delay()
+    {
+        yield return new WaitForSeconds(1);
+        transform.position = new Vector3(1000, 1000, 1000);
     }
 }
