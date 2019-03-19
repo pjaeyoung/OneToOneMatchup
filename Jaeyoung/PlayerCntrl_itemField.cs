@@ -31,33 +31,29 @@ public class PlayerCntrl_itemField : MonoBehaviour
         canvas = GameObject.Find("Canvas");
         playerRigid = GetComponent<Rigidbody>();
         highlightBox = GameObject.Find("chkHighlight");
+        fullItem = canvas.transform.Find("fullItemMSG").gameObject;
     }
 
-    void Start()
+    private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
     {
-        if (scene.name == "ItemCollectScene") // touchable layer인 오브젝트 정보 저장, 무기 아이템 layer변경(LayerChange 스크립트) 
-        {
-            fullItem = canvas.transform.Find("fullItemMSG").gameObject;
-            layerChange = GM.GetComponent<LayerChange>();
-            ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
-            int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
+        layerChange = GM.GetComponent<LayerChange>();
+        ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
+        int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
 
-            GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-            int len = Items.Length;
-            touchableItems = new GameObject[itemSpawnLens];
-            int idx = 0;
-            for (int i = 0; i < len; i++)
+        GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+        int len = Items.Length;
+        touchableItems = new GameObject[itemSpawnLens];
+        int idx = 0;
+        for (int i = 0; i < len; i++)
+        {
+            if (Items[i].layer == (int)eLAYER.TOUCHABLE)
             {
-                if (Items[i].layer == (int)eLAYER.TOUCHABLE)
-                {
-                    touchableItems[idx] = Items[i];
-                    if (touchableItems[idx].tag == "weapon")
-                        layerChange.InputWeaponArr(touchableItems[idx]);
-                    idx++;
-                }
+                touchableItems[idx] = Items[i];
+                if (touchableItems[idx].tag == "weapon")
+                    layerChange.InputWeaponArr(touchableItems[idx]);
+                idx++;
             }
         }
-
     }
 
     private void FixedUpdate()

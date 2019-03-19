@@ -121,7 +121,7 @@ public class GameMgr : MonoBehaviour {
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 60)
+        if (timer > 2)
         {
             timer = 0;
             min++;
@@ -160,15 +160,14 @@ public class GameMgr : MonoBehaviour {
         int emtyIndex = getEmtyImgIndex();
         if(emtyIndex >-1 && emtyIndex < 4)
         {
-            string name = obj.GetComponent<MeshRenderer>().material.name;
-            string objImg = getAccurateName(name);
+            string itemName = obj.name;
             string fileName = "Sprites/";
-            int eitem = changeItemArrInCPlayerInfo(objImg);
+            int eitem = changeItemArrInCPlayerInfo(itemName);
             if (eitem != -1)
                 CPlayerInfo.InputGetItemArr(eitem, emtyIndex);
             else
                 Debug.Log("no Image");
-            Sprite spr = Resources.Load<Sprite>(fileName + objImg);
+            Sprite spr = Resources.Load<Sprite>(fileName + itemName);
             if (spr != null)
                 itemBtn[emtyIndex].GetComponent<Image>().sprite = spr;
             else
@@ -192,33 +191,17 @@ public class GameMgr : MonoBehaviour {
         }
     }
 
-    int changeItemArrInCPlayerInfo(string imgName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
+    int changeItemArrInCPlayerInfo(string _itemName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
     {
-        if (imgName == "img_hpPotion")
+        if (_itemName == "hpPotion")
             return (int)eITEM.em_HP_POTION;
-        else if (imgName == "img_speedPotion")
+        else if (_itemName == "speedPotion")
             return (int)eITEM.em_SPEED_POTION;
-        else if (imgName == "img_damageUpPotion")
+        else if (_itemName == "damageUpPotion")
             return (int)eITEM.em_DAMAGE_UP_POTIOM;
-        else if (imgName == "img_DefenceUpPotion")
+        else if (_itemName == "defenceUpPotion")
             return (int)eITEM.em_DEFENCE_UP_POTION;
         else
             return -1;
     }
-
-    public string getAccurateName(string name) //material.name 반환값에서 (instance) 부분 삭제 
-    {
-        string cmp = "";
-        int nameLength = name.Length;
-        for(int i = 0; i<nameLength; i++)
-        {
-            if (name[i] == ' ')
-            {
-                break;
-            }
-            cmp += name[i];
-        }
-        return cmp;
-    }
-
 }

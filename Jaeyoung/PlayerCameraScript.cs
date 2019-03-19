@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 //카메라 벽 뚫지 않게 하기 위한 스크립트
 public class PlayerCameraScript : MonoBehaviour {
+    float MouseY = 0;
 
-	void Start () {
-		
-	}
-
-	void Update () {
-        if (Input.GetMouseButton(2)) //회전
-        {
-            transform.Rotate(-Input.GetAxisRaw("Mouse Y") * 5, 0, 0);
-        }
+    private void Awake()
+    {
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -28,6 +23,20 @@ public class PlayerCameraScript : MonoBehaviour {
         if (other.gameObject.layer == (int)eLAYER.WALL)
         {
             other.gameObject.layer = (int)eLAYER.TOUCHWALL;
+        }
+    }
+
+	void FixedUpdate () {
+        if (Input.GetMouseButton(2))
+        {
+            MouseY += Input.GetAxisRaw("Mouse Y");
+            if (MouseY < -7 || MouseY > 10)
+                return;
+            else
+            {
+                Debug.Log("Mouse Y: " + MouseY);
+                transform.Rotate(Vector3.right, Input.GetAxis("Mouse Y") * 3);
+            }
         }
     }
 }
