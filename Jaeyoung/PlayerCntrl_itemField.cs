@@ -25,7 +25,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     private void Awake()
     {
         IsJump = (int)eBOOLEAN.FALSE;
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         scene = SceneManager.GetActiveScene();
         canvas = GameObject.Find("Canvas");
@@ -122,6 +122,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
         if (Physics.Raycast(cameraRay, out rayHit))
         {
             GameObject rayObj = rayHit.transform.gameObject;
+            Debug.Log("rayHit : " + rayObj.name);
             int possess = (int)eBOOLEAN.FALSE;
             if (rayObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단 
                 possess = (int)eBOOLEAN.TRUE;

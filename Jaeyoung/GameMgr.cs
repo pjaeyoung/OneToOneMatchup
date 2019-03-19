@@ -32,7 +32,7 @@ public class GameMgr : MonoBehaviour {
 
     private void Start()
     {
-        GameObject serverObj = GameObject.Find("SocketServer");
+        GameObject serverObj = GameObject.Find("GameMgr");
         enter = serverObj.GetComponent<GameEnterScript>();
     }
 
@@ -121,7 +121,7 @@ public class GameMgr : MonoBehaviour {
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 2)
+        if (timer > 200)
         {
             timer = 0;
             min++;
@@ -160,7 +160,7 @@ public class GameMgr : MonoBehaviour {
         int emtyIndex = getEmtyImgIndex();
         if(emtyIndex >-1 && emtyIndex < 4)
         {
-            string itemName = obj.name;
+            string itemName = getAccurateName(obj.name);
             string fileName = "Sprites/";
             int eitem = changeItemArrInCPlayerInfo(itemName);
             if (eitem != -1)
@@ -193,15 +193,29 @@ public class GameMgr : MonoBehaviour {
 
     int changeItemArrInCPlayerInfo(string _itemName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
     {
-        if (_itemName == "hpPotion")
+        if (_itemName == "hpPotion(Clone)")
             return (int)eITEM.em_HP_POTION;
-        else if (_itemName == "speedPotion")
+        else if (_itemName == "speedPotion(Clone)")
             return (int)eITEM.em_SPEED_POTION;
-        else if (_itemName == "damageUpPotion")
+        else if (_itemName == "damageUpPotion(Clone)")
             return (int)eITEM.em_DAMAGE_UP_POTIOM;
-        else if (_itemName == "defenceUpPotion")
+        else if (_itemName == "defenceUpPotion(Clone)")
             return (int)eITEM.em_DEFENCE_UP_POTION;
         else
             return -1;
+    }
+
+    public string getAccurateName(string name)
+    {
+        string temp = "";
+        int len = name.Length;
+        for (int i = 0; i < len; i++)
+        {
+            char sub = name[i];
+            if (sub == '(')
+                break;
+            temp += name[i];
+        }
+        return temp;
     }
 }

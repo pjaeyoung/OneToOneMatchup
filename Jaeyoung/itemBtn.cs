@@ -15,7 +15,7 @@ public class itemBtn : MonoBehaviour
 
     private void Awake()
     {
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         Player = GameObject.FindWithTag("Player").transform;
         getItemArr = new GameObject[3];
         btnArr = GM.itemBtn;
@@ -56,7 +56,6 @@ public class itemBtn : MonoBehaviour
 
     void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("pointer Down");
        if(GM.scene.name == "ItemCollectScene")
         {
             int btnArrLength = btnArr.Length;
@@ -74,13 +73,11 @@ public class itemBtn : MonoBehaviour
 
     void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("OnDrag");
+        
     }
 
     void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("End Drag");
-
         if (GM.scene.name == "ItemCollectScene")
         {
             if (getItemArr[idx] != null)

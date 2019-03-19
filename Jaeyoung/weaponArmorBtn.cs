@@ -14,7 +14,7 @@ public class weaponArmorBtn : MonoBehaviour {
 
     private void Awake()
     {
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
     }
 
     /* 무기, 방어구 버튼과 연결된 게임오브젝트 정보 저장 : inputGameObj, changeWeaponImg, changeArmorImg */
@@ -51,14 +51,17 @@ public class weaponArmorBtn : MonoBehaviour {
 
     void changeWeaponImg(string _itemName)
     {
-        Sprite spr = Resources.Load<Sprite>("Sprites/" + _itemName);
+        string itemName = GM.getAccurateName(_itemName);
+        Sprite spr = Resources.Load<Sprite>("Sprites/" + itemName);
         weaponBtn.GetComponent<Image>().sprite = spr;
     }
 
     void changeArmorImg(string _itemName)
     {
-        Sprite spr = Resources.Load<Sprite>("Sprites/" + _itemName);
+        string itemName = GM.getAccurateName(_itemName);
+        Sprite spr = Resources.Load<Sprite>("Sprites/" + itemName);
         ArmorBtn.GetComponent<Image>().sprite = spr;
     }
 
+    
 }   
