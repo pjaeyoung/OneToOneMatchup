@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class itemSpawn2 : MonoBehaviour
 {
-    public GameObject[] itemKind;
+    public GameObject[] itemKind; //index 는 spawn index값, [index] 값은 item 종류
     public Transform[] itemSpawns;
 
-    int IsInstanceItemOK = (int)eBOOLEAN.FALSE;
+    bool IsInstanceItemOK = false; 
     int spawnLen;
     int[] result;
-    GameObject[] spawnItemList;
-    GameObject getItem;
+    GameObject[] spawnItemList; //스폰된 item 리스트 
 
     private void Update()
     {
-        if (IsInstanceItemOK == (int)eBOOLEAN.TRUE)
+        if (IsInstanceItemOK == true)
         {
-            IsInstanceItemOK = (int)eBOOLEAN.FALSE;
+            IsInstanceItemOK = false;
             instanceItem();
         }
     }
@@ -31,7 +30,7 @@ public class itemSpawn2 : MonoBehaviour
             Debug.Log("spawnLen and resultLen is not same");
         else
         {
-            IsInstanceItemOK = (int)eBOOLEAN.TRUE;
+            IsInstanceItemOK = true;
         }
     }
 
@@ -57,23 +56,8 @@ public class itemSpawn2 : MonoBehaviour
 
     public GameObject GetObj(int itemNum)
     {
+        Debug.Log("itemNum: " + itemNum);
+        Debug.Log("itemName: " + spawnItemList[itemNum].name);
         return spawnItemList[itemNum];
-    }
-
-    public void prepareTransferItem(GameObject obj, Vector3 newPos)
-    {
-        getItem = obj;
-        Debug.Log("prepareTransfer");
-        
-        getItem.GetComponent<Rigidbody>().useGravity = true;
-        TransferItem(newPos);
-    }
-
-    public void TransferItem(Vector3 TZPos)
-    {
-        Debug.Log("Transfer");
-        Vector3 dir = TZPos - getItem.transform.position;
-        getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z);
-        getItem = null;
     }
 }

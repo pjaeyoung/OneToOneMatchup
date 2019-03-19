@@ -10,7 +10,13 @@ public class WebServerScript : MonoBehaviour {
 
     void Start () {
         DontDestroyOnLoad(this);
+        SocketServer.SingleTonServ();
 	}
+
+    private void Update()
+    {
+        SocketServer.SingleTonServ().WaitRecieve();
+    }
 
     public string ConnectServer(string Url, StringBuilder Info) //웹서버와 연결
     {

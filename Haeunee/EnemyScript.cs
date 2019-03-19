@@ -18,7 +18,7 @@ public class EnemyScript : MonoBehaviour
     HpBar enemyHpBar;
     int nowHp;
     GameObject getObj;
-    itemSpawn2 throwObj;
+    itemSpawn2 s_itemSpawn2;
     bool objGet = false;
     int objNum;
     bool objThrow = false;
@@ -33,8 +33,7 @@ public class EnemyScript : MonoBehaviour
         shotMgr.ShotPosChange(weaponType);
         hpText = GameObject.Find("Canvas").transform.GetChild(1).GetComponent<Text>();
         enemyHpBar = transform.Find("Canvas").transform.GetChild(0).GetComponent<HpBar>();
-
-        throwObj = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
+        s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
     }
 
     private void Update()
@@ -81,7 +80,7 @@ public class EnemyScript : MonoBehaviour
         if(objGet==true)
         {
             objGet = false;
-            getObj = throwObj.GetObj(objNum);
+            getObj = s_itemSpawn2.GetObj(objNum);
             getObj.GetComponent<Rigidbody>().useGravity = false;
             Vector3 newPos = transform.position;
             newPos.y += 5;
@@ -91,9 +90,9 @@ public class EnemyScript : MonoBehaviour
         if(objThrow==true)
         {
             objThrow = false;
-            itemCntrl cntrl = getObj.GetComponentInChildren<itemCntrl>();
+            itemCntrl cntrl = getObj.GetComponent<itemCntrl>();
             cntrl.isDestroyOK = true;
-            throwObj.prepareTransferItem(getObj, targetPos);
+            cntrl.TransferItem(targetPos);
         }
     }
 

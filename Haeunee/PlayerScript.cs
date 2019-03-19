@@ -30,6 +30,7 @@ public class PlayerScript : MonoBehaviour
     GameObject getItem = null;
 
     itemSpawn2 s_itemSpawn2;
+    hitEffect s_hitEffect;
 
     int weaponNum = -1;
     int sensibilityX = 10;
@@ -52,12 +53,11 @@ public class PlayerScript : MonoBehaviour
     bool itemPoss = true;
 
     GameObject[] ItemImg;
-    itemSpawn2 throwObj;
 
     void Awake()
     {
         DontDestroyOnLoad(transform.parent);
-        sockServObj = GameObject.Find("SocketServer");
+        sockServObj = GameObject.Find("GameMgr");
         playerInfo = sockServObj.GetComponent<GameEnterScript>();
         weaponNum = playerInfo.savCharInfo.weapon;
 
@@ -80,6 +80,7 @@ public class PlayerScript : MonoBehaviour
         s_drawTZ = targetZone.GetComponent<DrawTargetZone>();
 
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
+        s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
 
         ItemImg = new GameObject[4];
         ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg").gameObject;
@@ -89,15 +90,23 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
 
-        throwObj = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
     }
 
     private void FixedUpdate()
     {
         if (Block.activeSelf == false)
         {
-            if (Input.GetMouseButton(2)) 
+            if (Input.GetMouseButton(2))
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
                 Rot();
+            }
+            else if (Input.GetMouseButtonUp(2))
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
             if (Input.GetMouseButtonDown(0) && idleAni == true && getItem == null)
                 Attack();
             else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
@@ -113,7 +122,7 @@ public class PlayerScript : MonoBehaviour
             if (aniEnd == true) //애니메이션 다씉나고
                 shotMgrStart();
         }
-
+      
     }
 
     void OnTriggerEnter(Collider other)
@@ -152,14 +161,21 @@ public class PlayerScript : MonoBehaviour
         if(getItem != null)
         {
             if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = false;
                 ActiveTargetZone();
+            }
             else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
             {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 Vector3 newPos = targetZone.transform.position;
-                throwObj.prepareTransferItem(getItem, newPos);
-                itemCntrl cntrl = getItem.GetComponentInChildren<itemCntrl>();
+                itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
+                cntrl.TransferItem(newPos);
                 cntrl.isDestroyOK = true;
                 targetZone.SetActive(false);
+                getItem = null;
                 sThrowObj thObj = new sThrowObj(newPos.x, newPos.y, newPos.z);
                 SocketServer.SingleTonServ().SendMsg(thObj);
             }
@@ -291,7 +307,8 @@ public class PlayerScript : MonoBehaviour
     void setItemImg()
     {
         itemImgChange = false;
-        ItemImg[itemImgNum].SetActive(itemImgSet);
+        if(itemImgNum != -1)
+            ItemImg[itemImgNum].SetActive(itemImgSet);
     }
 
     void changeEndScene()
@@ -309,7 +326,8 @@ public class PlayerScript : MonoBehaviour
         if (Physics.Raycast(cameraRay, out rayHit))
         {
             GameObject hitObj = rayHit.transform.gameObject;
-            if (hitObj.layer == (int)eLAYER.TOUCHABLE)
+            outline ObjOutline = hitObj.GetComponent<outline>();
+            if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
             {
                 hitObj.GetComponent<Rigidbody>().useGravity = false;
                 Vector3 newPos = transform.position;
@@ -317,7 +335,7 @@ public class PlayerScript : MonoBehaviour
                 hitObj.transform.position = newPos;
                 getItem = hitObj;
 
-                int itemNum = throwObj.GetObjNum(hitObj);
+                int itemNum = s_itemSpawn2.GetObjNum(hitObj);
                 sGetObj getObj = new sGetObj(itemNum);
                 SocketServer.SingleTonServ().SendMsg(getObj);
             }
@@ -372,6 +390,11 @@ public class PlayerScript : MonoBehaviour
     public void passOnItemSpawnInfo(int[] result) //itemSpawn2 스크립트에 서버에서 받은 정보 전달
     {
         s_itemSpawn2.setItemSpawns(result);
+    }
+
+    public void CreateHitEffect(bool b)
+    {
+        s_hitEffect.IsAtkMgr = b;
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄

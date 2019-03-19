@@ -40,7 +40,7 @@ public class EndSceneScript : MonoBehaviour
 
         server = GameObject.Find("WebServer").GetComponent<WebServerScript>();
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
-        GameObject.Destroy(GameObject.Find("SocketServer"));
+        GameObject.Destroy(GameObject.Find("GameMgr"));
         result = SocketServer.SingleTonServ().GetResult();
         if (result == (int)eRESULT.em_WIN)
         {

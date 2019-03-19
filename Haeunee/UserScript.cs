@@ -14,13 +14,17 @@ public class UserScript : MonoBehaviour {
     public GameObject overlapWin; //중복 알림화면
     public GameObject succWin; //회원가입 성공 알림 화면
     public GameObject failWin; //로그인 실패 알림 화면
+    public GameObject alreadyLogin;
     GameObject server; //웹서버 오브젝트
     WebServerScript web; //웹 서버 스크립트
     public string nick; //닉네임
     float winTime; //알림 화면 떠 있는 시간
+    bool loginResult = false;
+    int loginSucc = 0;
 
     private void Start()
     {
+        SocketServer.SingleTonServ().GetUserScript(this);
         server = GameObject.Find("WebServer");
         web = server.GetComponent<WebServerScript>();
         passInput.contentType = InputField.ContentType.Password; //비밀번호 창에 별표 띄우기
@@ -28,15 +32,30 @@ public class UserScript : MonoBehaviour {
 
     private void Update()
     {
-        if(overlapWin.activeSelf==true||succWin.activeSelf==true||failWin.activeSelf==true)
+        if(overlapWin.activeSelf||succWin.activeSelf||failWin.activeSelf|| alreadyLogin.activeSelf)
         { //켜져있는 창 시간지나면 닫기
             winTime += Time.deltaTime;
-            if(winTime>=3)
+            if(winTime>=1)
             {
                 winTime = 0;
                 overlapWin.SetActive(false);
                 succWin.SetActive(false);
                 failWin.SetActive(false);
+                alreadyLogin.SetActive(false);
+            }
+        }
+
+        if(loginResult)
+        {
+            loginResult = false;
+            if(loginSucc == 0)
+            {
+                web.nick = nick;
+                SceneManager.LoadScene("WaitScene");
+            }
+            else if (loginSucc == 1)
+            {
+                alreadyLogin.SetActive(true);
             }
         }
     }
@@ -54,6 +73,10 @@ public class UserScript : MonoBehaviour {
         {
             overlapWin.SetActive(true);
         }
+        else if (respJson.Equals("fail"))
+        {
+            failWin.SetActive(true);
+        }
     }
 
     public void Login() //로그인
@@ -63,8 +86,10 @@ public class UserScript : MonoBehaviour {
 
         if (respJson.Equals("login"))
         {
-            web.nick = nick;
-            SceneManager.LoadScene("WaitScene");
+            char[] nickName = new char[30];
+            nick.ToCharArray().CopyTo(nickName, 0);
+            sLogin login = new sLogin(nickName, 1);
+            SocketServer.SingleTonServ().SendMsg(login);
         }
         else if (respJson.Equals("fail"))
         {
@@ -76,13 +101,25 @@ public class UserScript : MonoBehaviour {
     {
         nick = nickInput.text;
         string password = passInput.text;
-        nickInput.text = "";
-        passInput.text = "";
+        if (nick != "" && password != "")
+        {
+            nickInput.text = "";
+            passInput.text = "";
 
-        StringBuilder sendInfo = new StringBuilder();
-        sendInfo.Append("nick=" + nick);
-        sendInfo.Append("&password=" + password);
+            StringBuilder sendInfo = new StringBuilder();
+            sendInfo.Append("nick=" + nick);
+            sendInfo.Append("&password=" + password);
 
-        return web.ConnectServer(Url, sendInfo);
+            return web.ConnectServer(Url, sendInfo);
+        }
+        else
+            return "fail";
+    }
+
+    public void LoginResult(string loginNick, int succ)
+    {
+        nick = loginNick;
+        loginSucc = succ;
+        loginResult = true;
     }
 }

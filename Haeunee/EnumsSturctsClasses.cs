@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
-/* 서버 오브젝트에 AddComponent하기 */
-
 //레이어 INDEX 명칭 
 enum eLAYER
 {
@@ -13,6 +11,13 @@ enum eLAYER
     ENEMY,
     TOUCHWALL,
     TOUCHABLE,
+}
+
+//파티클 종류 
+enum ePARTICLE
+{
+    em_HIT, //아이템 던질 때 
+    em_MAGIG, //마법 공격할 때 
 }
 
 //애니메이션의 종류
@@ -30,7 +35,8 @@ enum eANIMATION
 
 enum eMSG //메세지 종류
 {
-    em_ENTER = 1,
+    em_LOGIN = 1,
+    em_ENTER,
     em_CHARINFO,
     em_MOVE,
     em_ATK,
@@ -106,6 +112,20 @@ enum eATKTYPE
     em_NORMAL = 1,
     em_OBJTHROW,
 };
+
+struct sLogin
+{
+    private int flag;
+    public int loginSucc;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] nick;
+    public sLogin(char[] name, int succ, int f = (int)eMSG.em_LOGIN)
+    {
+        flag = f;
+        nick = name;
+        loginSucc = succ;
+    }
+}
 
 struct sGameRoom //매칭 정보
 {
@@ -283,4 +303,96 @@ public struct sEnd //항복 버튼 사용, 죽음
     }
 }
 
+/* 아이템 클래스 : 아이템 획득 갯수, 빈 아이템가방 넘버 */
+public class ItemCount
+{
+    int getItemNum;
+    int maxItemNum;
+
+    public ItemCount()
+    {
+        getItemNum = 0;
+        maxItemNum = 3;
+    }
+
+    public int GetItemNum()
+    {
+        return getItemNum;
+    }
+
+    public int changeGetItemNum(int changeNum)
+    {
+        if (changeNum <= maxItemNum)
+        {
+            getItemNum = changeNum;
+            return 0;
+        }
+        else
+            return 1;
+    }
+}
+
+/* fightScene에 들고 갈 플레이어 정보 (서버 연동) */
+public class PlayerInfo
+{
+    int weapon;
+    int armor;
+    int[] getItemArr;
+
+    public PlayerInfo()
+    {
+        weapon = (int)eWEAPON.em_STICK;
+        armor = (int)eARMOR.em_DEFAULT_AMR;
+        getItemArr = new int[3];
+    }
+
+    public void InputGetItemArr(int i, int index)
+    {
+        getItemArr[index] = i;
+    }
+
+    public void changeArmor(string a)
+    {
+        string ArmorGender = a.Substring(0, 16);
+        string ArmorNumStr = a.Substring(17);
+        int ArmorNumInt = int.Parse(ArmorNumStr);
+        if (ArmorGender == "img_armor_F_Suit" || ArmorGender == "img_armor_M_Suit")
+            armor = ArmorNumInt;
+    }
+
+    public void changeWeapon(string w)
+    {
+        if (w == "img_weapon_greatSword")
+        {
+            weapon = (int)eWEAPON.em_GREATESWORD;
+        }
+        else if (w == "img_weapon_wand")
+        {
+            weapon = (int)eWEAPON.em_WAND;
+        }
+        else if (w == "img_weapon_bow")
+        {
+            weapon = (int)eWEAPON.em_BOW;
+        }
+        else if (w == "img_weapon_swordAndShield")
+        {
+            weapon = (int)eWEAPON.em_SWORDANDSHIELD;
+        }
+    }
+
+    public int getPlayerWeapon()
+    {
+        return weapon;
+    }
+
+    public int getPlayerArmor()
+    {
+        return armor;
+    }
+
+    public int getPlayerItemArr(int idx)
+    {
+        return getItemArr[idx];
+    }
+}
 
