@@ -21,9 +21,8 @@ public class WebServerScript : MonoBehaviour {
     public string ConnectServer(string Url, StringBuilder Info) //웹서버와 연결
     {
         StringBuilder sendInfo = Info;
-
-        string url = Url;
-        HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+        
+        HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
         byte[] byteArr = UTF8Encoding.UTF8.GetBytes(sendInfo.ToString());
         httpWebRequest.ContentType = "application/x-www-form-urlencoded";
         httpWebRequest.Method = "POST";

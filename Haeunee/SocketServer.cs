@@ -41,6 +41,7 @@ public class SocketServer {
     static sGameRoom room;
     static int enterNum;
     static int gameResult;
+    IntPtr ptr;
 
     private void MakeServer()
     {
@@ -203,8 +204,8 @@ public class SocketServer {
     {
         int byteSize = Marshal.SizeOf(obj); //구조체를 바이트로 변환
         byte[] byteData = new byte[byteSize];
-        IntPtr ptr = Marshal.AllocHGlobal(byteSize);
-        Marshal.StructureToPtr(obj, ptr, true);
+        ptr = Marshal.AllocHGlobal(byteSize);
+        Marshal.StructureToPtr(obj, ptr, false);
         Marshal.Copy(ptr, byteData, 0, byteSize);
         Marshal.FreeHGlobal(ptr);
 
