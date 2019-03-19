@@ -117,9 +117,19 @@ public class UserScript : MonoBehaviour {
             return "fail";
     }
 
-    public void LoginResult(string loginNick, int succ) //소켓서버에서 로그인 중복체크 결과
+    public void LoginResult(char[] loginNick, int succ) //소켓서버에서 로그인 중복체크 결과
     {
-        nick = loginNick;
+        nick = "";
+        for(int i=0; i< loginNick.Length; i++)
+        {
+            Debug.Log(loginNick[i]);
+            if (loginNick[i].Equals(' ')!=true || loginNick[i].Equals('\0')!=true) 
+                Debug.Log(loginNick[i].Equals(' ') || loginNick[i].Equals('\0'));
+            else
+                nick += loginNick[i];
+        }
+
+        Debug.Log(nick.Length);
         loginSucc = succ; //중복이 아니라면 0 중복이면 1
         loginResult = true;
     }

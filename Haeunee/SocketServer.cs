@@ -70,8 +70,7 @@ public class SocketServer {
         {
             Type m_type = typeof(sLogin);
             sLogin loginInfo = (sLogin)Marshal.PtrToStructure(buff, m_type);
-            string info = new string(loginInfo.nick);
-            userScript.LoginResult(info, loginInfo.loginSucc);
+            userScript.LoginResult(loginInfo.nick, loginInfo.loginSucc);
         }
         else if (room.flag == (int)eMSG.em_ENTER) //매칭 버튼을 눌렀다는 정보
         {
