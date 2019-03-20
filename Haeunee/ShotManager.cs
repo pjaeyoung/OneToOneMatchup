@@ -17,14 +17,13 @@ public class ShotManager : MonoBehaviour {
         FindPoint();
     }
 	
-	// Update is called once per frame
 	void Update () {
         ray.origin = transform.position;
         ray.direction = -transform.forward;
         if (transform.parent.name=="Player(Clone)")
         {
             if (Physics.Raycast(ray.origin, ray.direction, out rayHit, maxDistance))
-            {
+            { //레이에 물건, 적이 닿았을 경우 표시
                 if (point != null && (rayHit.collider.tag == "Shootable"|| rayHit.collider.tag == "Enemy"))
                 {
                     point.SetActive(true);
@@ -40,7 +39,7 @@ public class ShotManager : MonoBehaviour {
     }
 
     public void Shooting()
-    {
+    { //샷 생성
         if (myWeaponType == (int)eWEAPON.em_BOW)
             nowShot = Instantiate(arrow, transform.position, Quaternion.identity);
         else if (myWeaponType == (int)eWEAPON.em_WAND)
@@ -50,7 +49,7 @@ public class ShotManager : MonoBehaviour {
     }
 
     public void ShotPosChange(int weaponType)
-    {
+    { //무기에 따라 샷이 날아갈 곳 변경
         myWeaponType = weaponType;
         if (weaponType==(int)eWEAPON.em_WAND)
             transform.localPosition = new Vector3(8, 20, 0);
@@ -62,7 +61,7 @@ public class ShotManager : MonoBehaviour {
         }
     }
 
-    void FindPoint()
+    void FindPoint() //닿은 부분 표시 찾기
     {
         point = GameObject.Find("PointPrefab");
         point.SetActive(false);

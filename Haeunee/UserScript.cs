@@ -45,15 +45,15 @@ public class UserScript : MonoBehaviour {
             }
         }
 
-        if(loginResult) //중복체크 결과에 따른 반응
+        if(loginResult) //중복체크 결과에 따른 반응 
         {
             loginResult = false;
-            if(loginSucc == 0)//로그인 성공
+            if(loginSucc == 0) //로그인 성공
             {
                 web.nick = nick;
                 SceneManager.LoadScene("WaitScene");
             }
-            else if (loginSucc == 1)//실패
+            else if (loginSucc == 1) //실패
             {
                 alreadyLogin.SetActive(true);
             }
@@ -84,12 +84,12 @@ public class UserScript : MonoBehaviour {
         string respJson = ConnectServer("http://192.168.0.22:10000/SignIn");
         Debug.Log(respJson);
 
-        if (respJson.Equals("login")) //존재하는 아이디와 패스워드일때
+        if (respJson.Equals("login")) //존재하는 아이디와 패스워드일 때
         {
-            char[] nickName = new char[30];
-            nick += " ";
-            nick.ToCharArray().CopyTo(nickName, 0);
-            sLogin login = new sLogin(nickName, 1);
+            int blank = 20 - nick.Length;
+            for(int i=1;i<=blank;i++)
+                nick += ' ';
+            sLogin login = new sLogin(nick.ToCharArray(), 1);
             SocketServer.SingleTonServ().SendMsg(login); //소켓 서버에서 이미 로그인 된 아이디는 아닌지 확인
         }
         else if (respJson.Equals("fail"))
@@ -120,16 +120,15 @@ public class UserScript : MonoBehaviour {
     public void LoginResult(char[] loginNick, int succ) //소켓서버에서 로그인 중복체크 결과
     {
         nick = "";
-        for(int i=0; i< loginNick.Length; i++)
+        int len = loginNick.Length;
+        for(int i = 0; i< len; i++)
         {
             Debug.Log(loginNick[i]);
-            if (loginNick[i].Equals(' ')!=true || loginNick[i].Equals('\0')!=true) 
+            if (loginNick[i].Equals(' ') || loginNick[i].Equals('\0'))
                 Debug.Log(loginNick[i].Equals(' ') || loginNick[i].Equals('\0'));
             else
                 nick += loginNick[i];
         }
-
-        Debug.Log(nick.Length);
         loginSucc = succ; //중복이 아니라면 0 중복이면 1
         loginResult = true;
     }

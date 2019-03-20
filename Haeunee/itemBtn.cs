@@ -15,7 +15,7 @@ public class itemBtn : MonoBehaviour
 
     private void Awake()
     {
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         Player = GameObject.FindWithTag("Player").transform;
         getItemArr = new GameObject[3];
         btnArr = GM.itemBtn;

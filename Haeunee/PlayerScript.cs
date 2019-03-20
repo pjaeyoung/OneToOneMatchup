@@ -63,7 +63,7 @@ public class PlayerScript : MonoBehaviour
 
         spawnInfo = sockServObj.GetComponent<SpawnScript>();
 
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         shotMgr = GetComponentInChildren<ShotManager>();
         shotMgr.ShotPosChange(weaponNum);
 
@@ -119,7 +119,7 @@ public class PlayerScript : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space)) //점프
                 Jump();
-            if (aniEnd == true) //애니메이션 다씉나고
+            if (aniEnd == true) //애니메이션 다 끝나고
                 shotMgrStart();
         }
       
@@ -149,7 +149,7 @@ public class PlayerScript : MonoBehaviour
         if (nowHp != playerHp) //hp변했을 때
             changeHPTextAndDeathAniAct();
 
-        if (itemImgChange == true)
+        if (itemImgChange == true) //아이템을 사용하여 아이템 이미지가 바뀐 경우
             setItemImg();
 
         if (gameEnd == true) //게임 끝
@@ -182,12 +182,12 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void Rot()
+    void Rot() //회전
     {
         transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0);
     }
 
-    void Attack()
+    void Attack() //공격(애니메이션 재생, 서버에 정보 전송)
     {
         enemyAtk.AtkPoss(true);
         idleAni = false;
@@ -209,7 +209,7 @@ public class PlayerScript : MonoBehaviour
             atkAni = 0;
     }
 
-    void Move()
+    void Move() //움직임
     {
         if (Input.GetKey(KeyCode.W))
         {
@@ -230,7 +230,7 @@ public class PlayerScript : MonoBehaviour
         playerAniCon.PlayAnimation("Move");
     }
 
-    void Jump()
+    void Jump()//점프
     {
         if (IsJump == (int)eBOOLEAN.FALSE)
         {
@@ -268,7 +268,7 @@ public class PlayerScript : MonoBehaviour
             itemPoss = false;
             StartCoroutine(EndItem(useItem.itemNum)); //아이템 끝나는 시간
             int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 한 번 사용 시 더 이상 사용 못함 
-            if (IsItemUsed == (int)eITEMUSE.UNUSED)
+            if (IsItemUsed == (int)eITEMUSE.UNUSED)//아이템 사용 되었을 때 서버에 정보 전송
                 SocketServer.SingleTonServ().SendMsg(useItem);
         }
     }
@@ -282,7 +282,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void DamageAniAct()
+    void DamageAniAct() //피격 애니메이션
     {
         damaged = false;
         if (dmgAni == 0)
@@ -304,7 +304,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void setItemImg()
+    void setItemImg() //아이템 사용 이미지
     {
         itemImgChange = false;
         if(itemImgNum != -1)
@@ -318,7 +318,7 @@ public class PlayerScript : MonoBehaviour
         gameEnd = false;
     }
 
-    void itemClick()
+    void itemClick() //던질 아이템을 클릭
     {
         highlightBox.SetActive(false);
         Ray cameraRay = playerCamera.ScreenPointToRay(Input.mousePosition);
@@ -338,6 +338,7 @@ public class PlayerScript : MonoBehaviour
                 int itemNum = s_itemSpawn2.GetObjNum(hitObj);
                 sGetObj getObj = new sGetObj(itemNum);
                 SocketServer.SingleTonServ().SendMsg(getObj);
+                Debug.Log("send Succ");
             }
             else
             {
@@ -350,13 +351,13 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void ActiveTargetZone()
+    void ActiveTargetZone() //던질 아이템이 날아갈 곳 표시
     {
         targetZone.SetActive(true);
         s_drawTZ.drawTargetZone();
     }   
 
-    public void PlayerDamage(sHit hit)
+    public void PlayerDamage(sHit hit) //플레이어가 피격당했다는 정보 받음
     {
         damaged = true;
         dmgAni = hit.dmgAni;
@@ -375,14 +376,14 @@ public class PlayerScript : MonoBehaviour
         playerSpeed = speed;
     }
 
-    public void ChangeItemImg(int itemNum, bool show)
+    public void ChangeItemImg(int itemNum, bool show) //아이템 이미지를 변경시켜야 한다는 정보
     {
         itemImgChange = true;
         itemImgNum = itemNum;
         itemImgSet = show;
     }
 
-    public void ChangeWaitScene()
+    public void ChangeWaitScene() //게임이 끝났다는 정보
     {
         gameEnd = true;
     }
@@ -392,7 +393,7 @@ public class PlayerScript : MonoBehaviour
         s_itemSpawn2.setItemSpawns(result);
     }
 
-    public void CreateHitEffect(bool b)
+    public void CreateHitEffect(bool b) //아이템 던졌을 때 이펙트
     {
         s_hitEffect.IsAtkMgr = b;
     }

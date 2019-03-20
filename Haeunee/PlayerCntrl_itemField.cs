@@ -21,43 +21,39 @@ public class PlayerCntrl_itemField : MonoBehaviour
     Rigidbody playerRigid;
 
     int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
-    
+
     private void Awake()
     {
         IsJump = (int)eBOOLEAN.FALSE;
-        GM = GameObject.Find("gameMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         scene = SceneManager.GetActiveScene();
         canvas = GameObject.Find("Canvas");
         playerRigid = GetComponent<Rigidbody>();
         highlightBox = GameObject.Find("chkHighlight");
+        fullItem = canvas.transform.Find("fullItemMSG").gameObject;
     }
 
-    void Start()
+    private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
     {
-        if (scene.name == "ItemCollectScene") // touchable layer인 오브젝트 정보 저장, 무기 아이템 layer변경(LayerChange 스크립트) 
-        {
-            fullItem = canvas.transform.Find("fullItemMSG").gameObject;
-            layerChange = GM.GetComponent<LayerChange>();
-            ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
-            int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
+        layerChange = GM.GetComponent<LayerChange>();
+        ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
+        int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
 
-            GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-            int len = Items.Length;
-            touchableItems = new GameObject[itemSpawnLens];
-            int idx = 0;
-            for (int i = 0; i < len; i++)
+        GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+        int len = Items.Length;
+        touchableItems = new GameObject[itemSpawnLens];
+        int idx = 0;
+        for (int i = 0; i < len; i++)
+        {
+            if (Items[i].layer == (int)eLAYER.TOUCHABLE)
             {
-                if (Items[i].layer == (int)eLAYER.TOUCHABLE)
-                {
-                    touchableItems[idx] = Items[i];
-                    if (touchableItems[idx].tag == "weapon")
-                        layerChange.InputWeaponArr(touchableItems[idx]);
-                    idx++;
-                }
+                touchableItems[idx] = Items[i];
+                if (touchableItems[idx].tag == "weapon")
+                    layerChange.InputWeaponArr(touchableItems[idx]);
+                idx++;
             }
         }
-
     }
 
     private void FixedUpdate()
@@ -114,7 +110,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     void Rot()
     {
-        transform.Rotate(new Vector3(0,Input.GetAxisRaw("Mouse X") * sensibilityX, 0));
+        transform.Rotate(new Vector3(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0));
     }
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
@@ -126,11 +122,12 @@ public class PlayerCntrl_itemField : MonoBehaviour
         if (Physics.Raycast(cameraRay, out rayHit))
         {
             GameObject rayObj = rayHit.transform.gameObject;
+            Debug.Log("rayHit : " + rayObj.name);
             int possess = (int)eBOOLEAN.FALSE;
             if (rayObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단 
                 possess = (int)eBOOLEAN.TRUE;
-            
-            if(possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
+
+            if (possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
             {
                 if (rayObj.tag == "item")
                 {

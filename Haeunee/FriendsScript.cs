@@ -47,10 +47,9 @@ public class FriendsScript : MonoBehaviour {
     string url;
 
     string requestName;
-
-    // Use this for initialization
+    
     void Start () {
-        url = "http://192.168.0.22:10000/Friends";
+        url = "http://192.168.0.22:10000/Friends"; //친구 요청이 있는지 확인
         tmpObj = new List<GameObject>();
         webServ = GameObject.Find("WebServer");
         webScript = webServ.GetComponent<WebServerScript>();
@@ -65,13 +64,12 @@ public class FriendsScript : MonoBehaviour {
 
         savReqList = respData.Split(',');
 
-        if (respData != "no request")
+        if (respData != "no request") //친구 요청이 있을 경우 표시
         {
             existImg.SetActive(true);
         }
     }
 	
-	// Update is called once per frame
 	void Update () {
 		if(delWin== true||searchFailWin==true
             || alreadyFriendWin==true|| reqSuccWin==true
@@ -91,7 +89,7 @@ public class FriendsScript : MonoBehaviour {
         }
 
         reqExist += Time.deltaTime;
-        if(friendListOn == false && reqExist >= 10)
+        if(friendListOn == false && reqExist >= 10) //10초마다 새로운 친구요청이 있는지 확인
         {
             reqExist = 0;
             StringBuilder sendInfo = new StringBuilder();
@@ -123,7 +121,7 @@ public class FriendsScript : MonoBehaviour {
     public void FriendBtnClick()
     {
         existImg.SetActive(false);
-        if (friendListOn == false) //친구 리스트 불러오기
+        if (friendListOn == false)
         {
             friendWin.SetActive(true);
             friendListOn = true;
@@ -132,7 +130,7 @@ public class FriendsScript : MonoBehaviour {
     }
 
 
-    public void FriendList()
+    public void FriendList()//친구 리스트 불러오기
     {
         if(tmpObj != null)
         {
@@ -179,14 +177,15 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("&friend=" + btnText);
 
         string respData = webScript.ConnectServer(url, sendInfo);
-        if(respData=="succ")
+        if(nowBtnObj!=null && respData == "succ")
         {
             delWin.SetActive(true);
             nowBtnObj.SetActive(false);
+            nowBtnObj = null;
         }
     }
 
-    public void FriendNameClick()
+    public void FriendNameClick() //친구 이름 클릭
     {
         nowBtnObj = EventSystem.current.currentSelectedGameObject;
         btnText = nowBtnObj.GetComponentInChildren<Text>().text.ToString();
@@ -201,7 +200,7 @@ public class FriendsScript : MonoBehaviour {
         }
     }
 
-    public void SearchBtnClick()
+    public void SearchBtnClick() //친구 찾기 버튼 클릭
     {
         string searchName = searchNickInput.text.ToString();
         searchNickInput.text = "";
@@ -223,7 +222,7 @@ public class FriendsScript : MonoBehaviour {
         }
     }
 
-    public void FriendSearch()
+    public void FriendSearch() //친구 신청하는 창 켜기
     {
         searchWin.SetActive(true);
         friendListWin.SetActive(false);
@@ -239,7 +238,7 @@ public class FriendsScript : MonoBehaviour {
         }
     }
 
-    public void FriendRequest()
+    public void FriendRequest() //친구 요청 창 켜기
     {
         if (tmpObj != null)
         {
@@ -278,7 +277,7 @@ public class FriendsScript : MonoBehaviour {
         friendListWin.SetActive(false);
     }
 
-    public void RequestBtnClick()
+    public void RequestBtnClick() //친구 신청하기 버튼 클릭, 신청 전송
     {
         if(searchInfoImg.activeSelf==true)
         {
@@ -300,7 +299,7 @@ public class FriendsScript : MonoBehaviour {
         }
     }
 
-    public void AcceptBtnClick()
+    public void AcceptBtnClick() //친구 신청 수락
     {
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=accept");
@@ -308,7 +307,7 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("&accept=" + btnText);
         string respData = webScript.ConnectServer(url, sendInfo);
 
-        if (respData == "succ")
+        if (nowBtnObj != null&&respData == "succ")
         {
             int savLen = savReqList.Length;
             for (int i = 0; i < savLen; i++)
@@ -324,10 +323,11 @@ public class FriendsScript : MonoBehaviour {
             }
             acceptWin.SetActive(true);
             nowBtnObj.SetActive(false);
+            nowBtnObj = null;
         }
     }
 
-    public void RefuseBtnClick()
+    public void RefuseBtnClick() //친구 신청 거절
     {
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=refuse");
@@ -335,7 +335,7 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("&refuse=" + btnText);
         string respData = webScript.ConnectServer(url, sendInfo);
 
-        if (respData == "succ")
+        if (nowBtnObj != null && respData == "succ")
         {
             int savLen = savReqList.Length;
             for (int i = 0; i < savLen; i++)
@@ -351,6 +351,7 @@ public class FriendsScript : MonoBehaviour {
             }
             refuseWin.SetActive(true);
             nowBtnObj.SetActive(false);
+            nowBtnObj = null;
         }
     }
 

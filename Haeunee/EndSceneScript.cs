@@ -22,12 +22,13 @@ public class EndSceneScript : MonoBehaviour
     AnimationController enemyAni;
 
     void Start()
-    {
+    { //플레이어 캐릭터와 적 캐릭터만 나오게 하기
         PlayerScript playerScript = SocketServer.SingleTonServ().NowPlayerScript();
         player = playerScript.transform.gameObject;
         player.transform.rotation = Quaternion.Euler(0, 180, 0);
         playerAni = player.GetComponent<AnimationController>();
         playerScript.enabled = false;
+        playerAni.PlayAnimation("Idle");
         player.GetComponentInChildren<Camera>().enabled = false;
         Camera.main.enabled = true;
 
@@ -37,16 +38,18 @@ public class EndSceneScript : MonoBehaviour
         enemyAni = enemy.GetComponent<AnimationController>();
         enemyScript.enabled = false;
         enemy.transform.Find("Canvas").gameObject.SetActive(false);
+        enemy.GetComponent<Rigidbody>().isKinematic = false;
+        enemyAni.PlayAnimation("Idle");
 
         server = GameObject.Find("WebServer").GetComponent<WebServerScript>();
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
         GameObject.Destroy(GameObject.Find("GameMgr"));
         result = SocketServer.SingleTonServ().GetResult();
+        //결과에 따라 맞는 위치에 배치하기
         if (result == (int)eRESULT.em_WIN)
         {
             player.transform.position = new Vector3(-3, -2, 13);
             enemy.transform.position = new Vector3(3, -2, 13);
-            enemyAni.PlayAnimation("Idle");
             StartCoroutine(DeathAni(result));
             loseText.SetActive(false);
             winning = ResultSave("win");
@@ -55,11 +58,11 @@ public class EndSceneScript : MonoBehaviour
         {
             player.transform.position = new Vector3(3, -2, 13);
             enemy.transform.position = new Vector3(-3, -2, 13);
-            playerAni.PlayAnimation("Idle");
             StartCoroutine(DeathAni(result));
             winText.SetActive(false);
-            winning = ResultSave("lose");
+            winning = ResultSave("lose"); 
         }
+        //승률 표시
         int win = Mathf.FloorToInt(float.Parse(winning));
         winningRate.text = server.nick + "님의 승률 : " + win;
     }
@@ -71,7 +74,7 @@ public class EndSceneScript : MonoBehaviour
         SceneManager.LoadScene("WaitScene");
     }
 
-    string ResultSave(string result)
+    string ResultSave(string result) //웹서버와 연결, 승률 계산하여 가져오기
     {
         string Url = "http://192.168.0.22:10000/BattleEnd";
         StringBuilder sendInfo = new StringBuilder();
@@ -80,7 +83,7 @@ public class EndSceneScript : MonoBehaviour
         return server.ConnectServer(Url, sendInfo);
     }    
 
-    IEnumerator DeathAni(int res)
+    IEnumerator DeathAni(int res) //진 캐릭터 죽는 애니메이션 재생하기
     {
         yield return new WaitForSeconds(1.0f);
         if (result == (int)eRESULT.em_WIN)

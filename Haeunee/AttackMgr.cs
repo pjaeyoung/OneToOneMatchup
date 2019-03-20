@@ -10,7 +10,7 @@ public class AttackMgr : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other)
-    {
+    {//공격 애니메이션 재생되고 있을 때, 무기에만 피격되게 함
         if (aktPossible==true && other.gameObject.layer == (int)eLAYER.WEAPON)
         {
             aktPossible = false;
@@ -19,7 +19,7 @@ public class AttackMgr : MonoBehaviour {
     }
 
     public void HitSucc(int atkType)
-    {
+    {//맞은 경우 애니메이션 재생하고 서버에 정보 전송
         int randDmgAni = Random.Range(0, 1);
         sHit hit = new sHit(randDmgAni, atkType, 0);
         if (randDmgAni == 0)

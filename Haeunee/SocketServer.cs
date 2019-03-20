@@ -127,32 +127,33 @@ public class SocketServer {
         }
         else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
         {
-            Type m_type = typeof(sEndItem);
-            sEndItem endItem = (sEndItem)Marshal.PtrToStructure(buff, m_type);
-            pScript.ChangeItemImg(endItem.itemNum, true);
-            pScript.ChangePlayerHp(endItem.hp);
-            pScript.ChangePlayerSpeed(endItem.speed);
+            Type m_type = typeof(sUseItem);
+            sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeItemImg(useItem.itemNum, true);
+            pScript.ChangePlayerHp(useItem.hp);
+            pScript.ChangePlayerSpeed(useItem.speed);
         }
         else if (room.flag == (int)eMSG.em_ENDITEM) //아이템 시간 끝
         {
-            Type m_type = typeof(sUseItem);
-            sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
-            pScript.ChangeItemImg(useItem.itemNum, false);
-            pScript.ChangePlayerSpeed(useItem.speed);
+            Type m_type = typeof(sEndItem);
+            sEndItem endItem = (sEndItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeItemImg(endItem.itemNum, false);
+            pScript.ChangePlayerSpeed(endItem.speed);
         }
         else if (room.flag == (int)eMSG.em_GETOBJ) //던질 물건 잡기
         {
             Type m_type = typeof(sGetObj);
             sGetObj getObj = (sGetObj)Marshal.PtrToStructure(buff, m_type);
+            Debug.Log("server get succ");
             eScript.GetThrowObj(getObj.itemNum);
         }
         else if (room.flag == (int)eMSG.em_THROWOBJ) //물건 던지기
         {
             Type m_type = typeof(sThrowObj);
             sThrowObj throwObj = (sThrowObj)Marshal.PtrToStructure(buff, m_type);
-            eScript.ThrowItem(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
+            eScript.ThrowObj(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
         }
-        else if (room.flag == (int)eMSG.em_END)
+        else if (room.flag == (int)eMSG.em_END) //게임이 종료되었을 경우
         {
             Type m_type = typeof(sEnd);
             sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);

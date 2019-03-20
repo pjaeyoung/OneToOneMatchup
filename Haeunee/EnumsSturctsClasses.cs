@@ -351,30 +351,30 @@ public class PlayerInfo
         getItemArr[index] = i;
     }
 
-    public void changeArmor(string a)
+    public void changeArmor(string armorName)
     {
-        string ArmorGender = a.Substring(0, 16);
-        string ArmorNumStr = a.Substring(17);
+        string ArmorGender = armorName.Substring(0, 1);
+        string ArmorNumStr = armorName.Substring(8, 1);
         int ArmorNumInt = int.Parse(ArmorNumStr);
-        if (ArmorGender == "img_armor_F_Suit" || ArmorGender == "img_armor_M_Suit")
+        if (ArmorGender == "F" || ArmorGender == "M")
             armor = ArmorNumInt;
     }
 
     public void changeWeapon(string w)
     {
-        if (w == "img_weapon_greatSword")
+        if (w == "greatSword")
         {
             weapon = (int)eWEAPON.em_GREATESWORD;
         }
-        else if (w == "img_weapon_wand")
+        else if (w == "wand")
         {
             weapon = (int)eWEAPON.em_WAND;
         }
-        else if (w == "img_weapon_bow")
+        else if (w == "bow")
         {
             weapon = (int)eWEAPON.em_BOW;
         }
-        else if (w == "img_weapon_swordAndShield")
+        else if (w == "swordAndShield")
         {
             weapon = (int)eWEAPON.em_SWORDANDSHIELD;
         }

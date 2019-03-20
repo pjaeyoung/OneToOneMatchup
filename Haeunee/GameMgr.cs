@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class GameMgr : MonoBehaviour {
+public class GameMgr : MonoBehaviour
+{
     GameEnterScript enter;
     public GameObject waitImg; //둘 다 데이터를 주고 받을 때까지 필요한 시간에 띄울 이미지
 
@@ -36,10 +37,10 @@ public class GameMgr : MonoBehaviour {
         enter = serverObj.GetComponent<GameEnterScript>();
     }
 
-    void Update ()
+    void Update()
     {
         scene = SceneManager.GetActiveScene();
-        if(scene.name == "ItemCollectScene")
+        if (scene.name == "ItemCollectScene")
         {
             if (min >= 1 && gameEnter == false)
             {
@@ -52,9 +53,9 @@ public class GameMgr : MonoBehaviour {
             else
                 showTime();
         }
-        else if(scene.name == "GameScene")
+        else if (scene.name == "GameScene")
         {
-            if(interactive == true)
+            if (interactive == true)
             {
                 interactive = false;
                 for (int i = 0; i < 3; i++)
@@ -64,10 +65,10 @@ public class GameMgr : MonoBehaviour {
                 }
             }
         }
-	}
+    }
 
     /*fightScene 전환하기 전 카운트 다운 : CountDown, waitChangeScene , sendPlayerInfoToServ */
-    void countDown ()
+    void countDown()
     {
         waitImg.SetActive(true);
         int count = (int)countTimer;
@@ -75,30 +76,30 @@ public class GameMgr : MonoBehaviour {
         fightStart.SetActive(true);
         Text countText = GameObject.Find("countDown").GetComponent<Text>();
         string s_count;
-        
-        if(countTimer>=0)
+
+        if (countTimer >= 0)
         {
             s_count = string.Format("{0:00}", count);
             countText.text = s_count;
             countTimer -= 1;
         }
     }
-  
-    IEnumerator waitChangeScene() 
+
+    IEnumerator waitChangeScene()
     {
-        while(countTimer >= 0)
+        while (countTimer >= 0)
         {
             yield return new WaitForSeconds(1);
             countDown();
         }
-       sendPlayerInfoToServ();
+        sendPlayerInfoToServ();
     }
 
     void changeLayerToWeapon()
     {
         LayerChange LC = this.transform.GetComponent<LayerChange>();
-        for(int i = 0; i<4; i++)
-            LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON; 
+        for (int i = 0; i < 4; i++)
+            LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON;
     }
 
     void sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
@@ -121,7 +122,7 @@ public class GameMgr : MonoBehaviour {
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 2)
+        if (timer > 60)
         {
             timer = 0;
             min++;
@@ -141,7 +142,7 @@ public class GameMgr : MonoBehaviour {
     public int getEmtyImgIndex() //빈 아이템가방 인덱스 가져오기
     {
         int index = 0;
-        if(itemBtn.Length != 0)
+        if (itemBtn.Length != 0)
         {
             foreach (Button itemImg in itemBtn)
             {
@@ -156,19 +157,18 @@ public class GameMgr : MonoBehaviour {
 
     public void changeItemImg(GameObject obj) //빈 아이템가방 인덱스에 아이템 이미지 삽입 
     {
-        
+
         int emtyIndex = getEmtyImgIndex();
-        if(emtyIndex >-1 && emtyIndex < 4)
+        if (emtyIndex > -1 && emtyIndex < 4)
         {
-            string name = obj.GetComponent<MeshRenderer>().material.name;
-            string objImg = getAccurateName(name);
+            string itemName = getAccurateName(obj.name);
             string fileName = "Sprites/";
-            int eitem = changeItemArrInCPlayerInfo(objImg);
+            int eitem = changeItemArrInCPlayerInfo(itemName);
             if (eitem != -1)
                 CPlayerInfo.InputGetItemArr(eitem, emtyIndex);
             else
                 Debug.Log("no Image");
-            Sprite spr = Resources.Load<Sprite>(fileName + objImg);
+            Sprite spr = Resources.Load<Sprite>(fileName + itemName);
             if (spr != null)
                 itemBtn[emtyIndex].GetComponent<Image>().sprite = spr;
             else
@@ -180,7 +180,7 @@ public class GameMgr : MonoBehaviour {
     {
         Sprite spr = Resources.Load<Sprite>("Sprites/img_emty");
         Sprite itemBtnSpr = itemBtn[idx].GetComponent<Image>().sprite;
-        if(itemBtnSpr.name == spr.name)
+        if (itemBtnSpr.name == spr.name)
         {
             Debug.Log("이미 사용한 아이템");
             return (int)eITEMUSE.USED;
@@ -192,33 +192,31 @@ public class GameMgr : MonoBehaviour {
         }
     }
 
-    int changeItemArrInCPlayerInfo(string imgName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
+    int changeItemArrInCPlayerInfo(string _itemName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
     {
-        if (imgName == "img_hpPotion")
+        if (_itemName == "hpPotion")
             return (int)eITEM.em_HP_POTION;
-        else if (imgName == "img_speedPotion")
+        else if (_itemName == "speedPotion")
             return (int)eITEM.em_SPEED_POTION;
-        else if (imgName == "img_damageUpPotion")
+        else if (_itemName == "damageUpPotion")
             return (int)eITEM.em_DAMAGE_UP_POTIOM;
-        else if (imgName == "img_DefenceUpPotion")
+        else if (_itemName == "defenceUpPotion")
             return (int)eITEM.em_DEFENCE_UP_POTION;
         else
             return -1;
     }
 
-    public string getAccurateName(string name) //material.name 반환값에서 (instance) 부분 삭제 
+    public string getAccurateName(string name)
     {
-        string cmp = "";
-        int nameLength = name.Length;
-        for(int i = 0; i<nameLength; i++)
+        string temp = "";
+        int len = name.Length;
+        for (int i = 0; i < len; i++)
         {
-            if (name[i] == ' ')
-            {
+            char sub = name[i];
+            if (sub == '(')
                 break;
-            }
-            cmp += name[i];
+            temp += name[i];
         }
-        return cmp;
+        return temp;
     }
-
 }

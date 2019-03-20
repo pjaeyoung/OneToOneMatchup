@@ -47,6 +47,10 @@ public class EnemyScript : MonoBehaviour
                 playerAniCon.PlayDeath("Death");
         }
 
+        if(MoveLimit(enemyPos.x, transform.position.x) ||
+            MoveLimit(enemyPos.y, transform.position.y)|| MoveLimit(enemyPos.z, transform.position.z)) //움직임
+            transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
+
         if (atkAni == true) //공격
         {
             atkAni = false;
@@ -62,22 +66,22 @@ public class EnemyScript : MonoBehaviour
             playerAniCon.PlayAtkDmg(atkName);
             StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
         }
-        else if (enemyPos.x + 0.1 <= transform.position.x || enemyPos.x - 0.1 >= transform.position.x ||
-            enemyPos.z + 0.1 <= transform.position.z || enemyPos.z - 0.1 >= transform.position.z)//움직임
+        else if (MoveLimit(enemyPos.x, transform.position.x) || MoveLimit(enemyPos.z, transform.position.z))
         {
-            transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
-            playerAniCon.PlayAnimation("Move");
+            playerAniCon.PlayAnimation("Move");//움직임 애니메이션(점프일때 적용x)
+            Debug.Log("enemy Move");
         }
         else //가만히 있을 때 애니메이션
         {
             playerAniCon.PlayAnimation("Idle");
         }
+
         if (enemyRot != transform.rotation) //회전
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, enemyRot, 0.5f);
         }
 
-        if(objGet==true)
+        if(objGet==true)//물건 들기
         {
             objGet = false;
             getObj = s_itemSpawn2.GetObj(objNum);
@@ -87,13 +91,18 @@ public class EnemyScript : MonoBehaviour
             getObj.transform.position = newPos;
         }
 
-        if(objThrow==true)
+        if(objThrow==true)//물건 던지기
         {
             objThrow = false;
             itemCntrl cntrl = getObj.GetComponent<itemCntrl>();
             cntrl.isDestroyOK = true;
             cntrl.TransferItem(targetPos);
         }
+    }
+
+    bool MoveLimit(float pos1,float pos2)
+    {
+        return pos1 + 0.1 < pos2 || pos1 - 0.1 > pos2;
     }
 
     public void EnemyMove(Vector3 pos, Quaternion rot) //움직인 좌표, 회전각 받아오기
@@ -116,7 +125,7 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    IEnumerator EndAni(float delay)
+    IEnumerator EndAni(float delay)//공격 애니메이션 끝나고 원거리 공격 발사
     {
         yield return new WaitForSeconds(delay);
         if (weaponType == (int)eWEAPON.em_BOW || weaponType == (int)eWEAPON.em_WAND)
@@ -129,7 +138,7 @@ public class EnemyScript : MonoBehaviour
         objNum = num;
     }
 
-    public void ThrowItem(Vector3 pos)
+    public void ThrowObj(Vector3 pos)
     {
         objThrow = true;
         targetPos = pos;

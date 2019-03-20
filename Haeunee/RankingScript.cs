@@ -31,16 +31,16 @@ public class RankingScript : MonoBehaviour
         sendInfo.Append("flag=reqlist");
         sendInfo.Append("&nick=" + nick);
         string url = "http://192.168.0.22:10000/Ranking";
-        string respData = webScript.ConnectServer(url, sendInfo);
+        string respData = webScript.ConnectServer(url, sendInfo);//랭킹 순서대로 서버에서 받아오기
         int y = -25;
-        string[] rankList = respData.Split(',');
+        string[] rankList = respData.Split(',');//받아온 스트링 ,기준으로 나누기
         string[] nickList = new string[100];
         string[] scoreList = new string[100];
         int rankLen = rankList.Length;
-        string userScore = rankList[0];
+        string userScore = rankList[0];//리스트 맨처음 나의 점수 가져오기
         int nickNum = 0;
         int scoreNum = 0;
-        for (int i=1;i< rankLen;i++)
+        for (int i=1;i< rankLen;i++) //점수, 닉네임 나눠 리스트에 저장하기
         {
             if(i%2 == 0)
             {
@@ -55,7 +55,7 @@ public class RankingScript : MonoBehaviour
         }
 
         int userRank = 0;
-        for (int i = 0; i < rankLen/2; i++)
+        for (int i = 0; i < rankLen/2; i++) //순서대로 출력하기
         {
             if (nickList[i] == nick)
                 userRank = i + 1;

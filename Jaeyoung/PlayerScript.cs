@@ -30,7 +30,6 @@ public class PlayerScript : MonoBehaviour
     GameObject getItem = null;
 
     itemSpawn2 s_itemSpawn2;
-    hitEffect s_hitEffect;
 
     int weaponNum = -1;
     int sensibilityX = 10;
