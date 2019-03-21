@@ -116,7 +116,7 @@ enum eATKTYPE
 struct sLogin
 {
     private int flag;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
     public char[] nick;
     public int loginSucc;
     public sLogin(char[] name, int succ, int f = (int)eMSG.em_LOGIN)

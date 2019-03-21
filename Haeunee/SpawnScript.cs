@@ -14,7 +14,7 @@ public class SpawnScript : MonoBehaviour {
     GameObject nowPlayer;
     sCharInfo enemyInfo;
     GameEnterScript enter;
-    GameMgr GM;
+    bool gameEnd = false;
 
     void Start () {
         enter = GetComponent<GameEnterScript>();
@@ -27,6 +27,13 @@ public class SpawnScript : MonoBehaviour {
         {
             StartCoroutine(ItemDelay()); //두 유저가 모두 정보를 주고 받을 때까지 기다리는 코루틴
             spawnPoss = false;
+        }
+        if (gameEnd == true) //상대 유저의 접속 종료
+        {
+            GameObject enemyOutWin = GameObject.Find("Canvas").transform.Find("EnemyOut").gameObject;
+            enemyOutWin.SetActive(true);
+            StartCoroutine(OutDelay());
+            gameEnd = false;
         }
     }
 
@@ -92,5 +99,19 @@ public class SpawnScript : MonoBehaviour {
         SceneManager.LoadScene("GameScene");
         yield return new WaitForSeconds(0.5f);
         Spawn();
+    }
+
+    IEnumerator OutDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+        GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
+        GameObject.Destroy(GameObject.Find("itemFieldMgr"));
+        SceneManager.LoadScene("WaitScene");
+        GameObject.Destroy(gameObject);
+    }
+
+    public void ChangeWaitScene()
+    {
+        gameEnd = true;
     }
 }

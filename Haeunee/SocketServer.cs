@@ -162,7 +162,10 @@ public class SocketServer {
             Type m_type = typeof(sEnd);
             sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);
             gameResult = esc.result;
-            pScript.ChangeWaitScene();
+            if(pScript==null)
+                sScript.ChangeWaitScene();
+            else
+                pScript.ChangeWaitScene();
         }
     }
 

@@ -88,7 +88,7 @@ public class UserScript : MonoBehaviour {
         {
             int blank = 20 - nick.Length;
             for(int i=1;i<=blank;i++)
-                nick += ' ';
+                nick += ',';
             sLogin login = new sLogin(nick.ToCharArray(), 1);
             SocketServer.SingleTonServ().SendMsg(login); //소켓 서버에서 이미 로그인 된 아이디는 아닌지 확인
         }
@@ -101,8 +101,9 @@ public class UserScript : MonoBehaviour {
     string ConnectServer(string Url) //서버에 정보 보내기
     {
         nick = nickInput.text;
+        bool nickOk = nick.Contains(",")|| nick.Contains("&")|| nick.Contains("^")|| nick.Contains(" ")|| nick.Contains("!");
         string password = passInput.text;
-        if (nick != "" && password != "")
+        if (nick != "" && password != "" && nickOk == false)
         {
             nickInput.text = "";
             passInput.text = "";
@@ -124,7 +125,7 @@ public class UserScript : MonoBehaviour {
         for(int i = 0; i< len; i++)
         {
             Debug.Log(loginNick[i]);
-            if (loginNick[i].Equals(' ') || loginNick[i].Equals('\0'))
+            if (loginNick[i].Equals(',') || loginNick[i].Equals('\0'))
                 Debug.Log(loginNick[i].Equals(' ') || loginNick[i].Equals('\0'));
             else
                 nick += loginNick[i];

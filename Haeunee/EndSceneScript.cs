@@ -28,7 +28,7 @@ public class EndSceneScript : MonoBehaviour
         player.transform.rotation = Quaternion.Euler(0, 180, 0);
         playerAni = player.GetComponent<AnimationController>();
         playerScript.enabled = false;
-        playerAni.PlayAnimation("Idle");
+        playerAni.PlayAtkDmg("Idle");
         player.GetComponentInChildren<Camera>().enabled = false;
         Camera.main.enabled = true;
 
@@ -39,7 +39,7 @@ public class EndSceneScript : MonoBehaviour
         enemyScript.enabled = false;
         enemy.transform.Find("Canvas").gameObject.SetActive(false);
         enemy.GetComponent<Rigidbody>().isKinematic = false;
-        enemyAni.PlayAnimation("Idle");
+        enemyAni.PlayAtkDmg("Idle");
 
         server = GameObject.Find("WebServer").GetComponent<WebServerScript>();
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
