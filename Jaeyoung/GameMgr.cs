@@ -14,10 +14,11 @@ public class GameMgr : MonoBehaviour {
     public PlayerInfo CPlayerInfo;
     public GameObject canvas;
     public Scene scene;
+    public RawImage alarmImg;
     bool gameEnter = false;
     bool interactive = true; // 아이템 버튼 interactive 설정
+    bool alarmOn = false;
 
-    float countTimer; //카운트다운 타이머 
     int min; //분
     float timer; //제한 시간 타이머
 
@@ -25,7 +26,6 @@ public class GameMgr : MonoBehaviour {
     {
         CitemCount = new ItemCount();
         CPlayerInfo = new PlayerInfo();
-        countTimer = 10;
         min = 0;
         timer = 0;
     }
@@ -43,11 +43,12 @@ public class GameMgr : MonoBehaviour {
         {
             if (min >= 1 && gameEnter == false)
             {
+                waitImg.gameObject.SetActive(true);
                 changeLayerToWeapon();
                 gameEnter = true;
                 min = 0;
                 DontDestroyObject();
-                StartCoroutine(waitChangeScene());
+                sendPlayerInfoToServ();
             }
             else
                 showTime();
@@ -66,34 +67,6 @@ public class GameMgr : MonoBehaviour {
         }
 	}
 
-    /*fightScene 전환하기 전 카운트 다운 : CountDown, waitChangeScene , sendPlayerInfoToServ */
-    void countDown ()
-    {
-        waitImg.SetActive(true);
-        int count = (int)countTimer;
-        GameObject fightStart = GameObject.Find("Canvas").transform.Find("fightGameStartMSG").gameObject;
-        fightStart.SetActive(true);
-        Text countText = GameObject.Find("countDown").GetComponent<Text>();
-        string s_count;
-        
-        if(countTimer>=0)
-        {
-            s_count = string.Format("{0:00}", count);
-            countText.text = s_count;
-            countTimer -= 1;
-        }
-    }
-  
-    IEnumerator waitChangeScene() 
-    {
-        while(countTimer >= 0)
-        {
-            yield return new WaitForSeconds(1);
-            countDown();
-        }
-       sendPlayerInfoToServ();
-    }
-
     void changeLayerToWeapon()
     {
         LayerChange LC = this.transform.GetComponent<LayerChange>();
@@ -101,7 +74,7 @@ public class GameMgr : MonoBehaviour {
             LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON; 
     }
 
-    void sendPlayerInfoToServ() //카운트 다운 끝난 후 씬 전환 전 최종 playerInfo 서버 전달 
+    void sendPlayerInfoToServ() //씬 전환 전 최종 playerInfo 서버 전달 
     {
         enter.savCharInfo.weapon = CPlayerInfo.getPlayerWeapon(); //선택한 무기, 방어구, 소비아이템 값 저장
         enter.savCharInfo.armor = CPlayerInfo.getPlayerArmor();
@@ -117,24 +90,41 @@ public class GameMgr : MonoBehaviour {
         DontDestroyOnLoad(canvas);
     } //GameScene에도 사용할 게임오브젝트 유지 
 
-    /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시) : showTime, TimerToString */
+    /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시 , 끝나기 10초 전 알람 표시) : showTime, Time2Str, AlarmActive */
     void showTime()
     {
         timer += Time.deltaTime;
-        if (timer > 200)
+        if (timer >= 60)
         {
             timer = 0;
             min++;
         }
+        if (timer >= 50 && alarmOn == false)
+        {
+            alarmOn = true;
+            alarmImg.gameObject.SetActive(true);
+            StartCoroutine(AlarmActive(timer));
+        }
         int sec = (int)timer;
-        string s_time = TimerToString(min, sec);
+        string s_time = Time2Str(min, sec);
         T_timer.text = s_time;
     }
 
-    string TimerToString(int _min, int _sec)
+    string Time2Str(int _min, int _sec) // int를 str로 바꾸기
     {
         string time = string.Format("{0:00} : {1:00}", _min, _sec);
         return time;
+    }
+
+    IEnumerator AlarmActive(float _timer) //끝나기 10초 전 알람  
+    {
+        while (_timer < 60)
+        {
+            alarmImg.CrossFadeAlpha(0, 1.0f, false);
+            yield return new WaitForSeconds(1.0f);
+            alarmImg.CrossFadeAlpha(1, 1.0f, false);
+            yield return new WaitForSeconds(1.0f);
+        }
     }
 
     /* 아이템 가방 : 소비아이템 전용 */
@@ -193,19 +183,19 @@ public class GameMgr : MonoBehaviour {
 
     int changeItemArrInCPlayerInfo(string _itemName) // PlayerInfo 클래스의 멤버 변수 ItemArr정보에 입력 
     {
-        if (_itemName == "hpPotion(Clone)")
+        if (_itemName == "hpPotion")
             return (int)eITEM.em_HP_POTION;
-        else if (_itemName == "speedPotion(Clone)")
+        else if (_itemName == "speedPotion")
             return (int)eITEM.em_SPEED_POTION;
-        else if (_itemName == "damageUpPotion(Clone)")
+        else if (_itemName == "damageUpPotion")
             return (int)eITEM.em_DAMAGE_UP_POTIOM;
-        else if (_itemName == "defenceUpPotion(Clone)")
+        else if (_itemName == "defenceUpPotion")
             return (int)eITEM.em_DEFENCE_UP_POTION;
         else
             return -1;
     }
 
-    public string getAccurateName(string name)
+    public string getAccurateName(string name) //(clone) 부분 삭제한 이름 획득 
     {
         string temp = "";
         int len = name.Length;
@@ -218,4 +208,6 @@ public class GameMgr : MonoBehaviour {
         }
         return temp;
     }
+
+    
 }
