@@ -126,7 +126,7 @@ public class UserScript : MonoBehaviour {
         {
             Debug.Log(loginNick[i]);
             if (loginNick[i].Equals(',') || loginNick[i].Equals('\0'))
-                Debug.Log(loginNick[i].Equals(' ') || loginNick[i].Equals('\0'));
+                loginNick[i] = '\0';
             else
                 nick += loginNick[i];
         }

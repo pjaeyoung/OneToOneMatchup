@@ -11,6 +11,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     public int sensibilityX = 10;
     public Button[] itemButton;
     public LayerChange layerChange;
+    public GameObject giveUpMSG;
     GameMgr GM;
     Scene scene;
     AnimationManager AM;
@@ -19,9 +20,10 @@ public class PlayerCntrl_itemField : MonoBehaviour
     GameObject fullItem;
     GameObject highlightBox;
     Rigidbody playerRigid;
+    Quaternion nowRot;
 
     int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
-
+    
     private void Awake()
     {
         IsJump = (int)eBOOLEAN.FALSE;
@@ -32,6 +34,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
         playerRigid = GetComponent<Rigidbody>();
         highlightBox = GameObject.Find("chkHighlight");
         fullItem = canvas.transform.Find("fullItemMSG").gameObject;
+        nowRot = transform.localRotation;
     }
 
     private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
@@ -61,15 +64,11 @@ public class PlayerCntrl_itemField : MonoBehaviour
         Move();
         if (Input.GetMouseButton(2))
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
             Rot();
         }
         else if (Input.GetMouseButtonUp(2))
-        {
             Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -110,7 +109,9 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     void Rot()
     {
-        transform.Rotate(new Vector3(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0));
+        float RotX = Input.GetAxis("Mouse X") * sensibilityX;
+        nowRot *= Quaternion.Euler(Vector3.up * RotX);
+        transform.rotation = Quaternion.Slerp(transform.localRotation, nowRot, 6 * Time.deltaTime);
     }
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
@@ -126,8 +127,8 @@ public class PlayerCntrl_itemField : MonoBehaviour
             int possess = (int)eBOOLEAN.FALSE;
             if (rayObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단 
                 possess = (int)eBOOLEAN.TRUE;
-
-            if (possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
+            
+            if(possess == (int)eBOOLEAN.TRUE && rayObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
             {
                 if (rayObj.tag == "item")
                 {

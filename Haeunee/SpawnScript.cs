@@ -112,6 +112,7 @@ public class SpawnScript : MonoBehaviour {
 
     public void ChangeWaitScene()
     {
+        Debug.Log("[SpawnScript] ChangeWaitScene()");
         gameEnd = true;
     }
 }

@@ -36,6 +36,7 @@ enum eANIMATION
 enum eMSG //메세지 종류
 {
     em_LOGIN = 1,
+    em_LOGOUT,
     em_ENTER,
     em_CHARINFO,
     em_MOVE,
@@ -124,6 +125,15 @@ struct sLogin
         flag = f;
         nick = name;
         loginSucc = succ;
+    }
+}
+
+struct sLogout
+{
+    private int flag;
+    public sLogout(int f = (int)eMSG.em_LOGOUT)
+    {
+        flag = f;
     }
 }
 

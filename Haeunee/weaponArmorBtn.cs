@@ -4,8 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class weaponArmorBtn : MonoBehaviour
-{
+public class weaponArmorBtn : MonoBehaviour {
 
     GameMgr GM;
     public Button ArmorBtn;
@@ -23,7 +22,7 @@ public class weaponArmorBtn : MonoBehaviour
     {
         Debug.Log("obj.tag : " + obj.tag);
         Vector3 newPos = obj.transform.position;
-        if (obj.tag == "weapon")
+        if(obj.tag == "weapon")
         {
             if (Weapon != null)
             {
@@ -36,7 +35,7 @@ public class weaponArmorBtn : MonoBehaviour
             GM.CPlayerInfo.changeWeapon(itemName);
             changeWeaponImg(itemName);
         }
-        else if (obj.tag == "armor")
+        else if(obj.tag == "armor")
         {
             if (Armor != null)
             {
@@ -48,12 +47,12 @@ public class weaponArmorBtn : MonoBehaviour
             string itemName = GM.getAccurateName(Armor.name);
             GM.CPlayerInfo.changeArmor(itemName);
             changeArmorImg(itemName);
-        }
+        }       
     }
 
     void changeWeaponImg(string _itemName)
     {
-
+        
         Sprite spr = Resources.Load<Sprite>("Sprites/" + _itemName);
         weaponBtn.GetComponent<Image>().sprite = spr;
     }
@@ -64,5 +63,5 @@ public class weaponArmorBtn : MonoBehaviour
         ArmorBtn.GetComponent<Image>().sprite = spr;
     }
 
-
-}
+    
+}   

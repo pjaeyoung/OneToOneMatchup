@@ -32,6 +32,8 @@ public class PlayerScript : MonoBehaviour
     itemSpawn2 s_itemSpawn2;
     hitEffect s_hitEffect;
 
+    Quaternion nowRot;
+
     int weaponNum = -1;
     int sensibilityX = 10;
     int atkAni = 0;
@@ -82,6 +84,8 @@ public class PlayerScript : MonoBehaviour
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
         s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
 
+        nowRot = transform.localRotation;
+
         ItemImg = new GameObject[4];
         ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg").gameObject;
         ItemImg[(int)eITEM.em_SPEED_POTION] = GameObject.Find("SpdPotionImg").gameObject;
@@ -98,15 +102,11 @@ public class PlayerScript : MonoBehaviour
         {
             if (Input.GetMouseButton(2))
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Confined;
                 Rot();
             }
             else if (Input.GetMouseButtonUp(2))
-            {
                 Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
             if (Input.GetMouseButtonDown(0) && idleAni == true && getItem == null)
                 Attack();
             else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
@@ -119,7 +119,7 @@ public class PlayerScript : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space)) //점프
                 Jump();
-            if (aniEnd == true) //애니메이션 다 끝나고
+            if (aniEnd == true) //애니메이션 다끝나고
                 shotMgrStart();
         }
       
@@ -156,20 +156,17 @@ public class PlayerScript : MonoBehaviour
             changeEndScene();
 
         if (Input.GetMouseButtonDown(1) && highlightBox.activeSelf == true) //하이라이트 박스 출력 중일 때만 아이템 클릭 가능
+        {
             itemClick();
-
+        }
         if(getItem != null)
         {
             if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
             {
-                Cursor.lockState = CursorLockMode.Confined;
-                Cursor.visible = false;
                 ActiveTargetZone();
             }
             else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
             {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
                 Vector3 newPos = targetZone.transform.position;
                 itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
                 cntrl.TransferItem(newPos);
@@ -182,12 +179,14 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void Rot() //회전
+    void Rot() // 좌우 회전
     {
-        transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensibilityX, 0);
+        float RotX = Input.GetAxis("Mouse X") * sensibilityX;
+        nowRot *= Quaternion.Euler(Vector3.up * RotX);
+        transform.rotation = Quaternion.Slerp(transform.localRotation, nowRot, 6 * Time.deltaTime);
     }
 
-    void Attack() //공격(애니메이션 재생, 서버에 정보 전송)
+    void Attack() // 공격(애니메이션 재생, 서버에 정보 전송)
     {
         enemyAtk.AtkPoss(true);
         idleAni = false;
@@ -209,7 +208,7 @@ public class PlayerScript : MonoBehaviour
             atkAni = 0;
     }
 
-    void Move() //움직임
+    void Move() // 움직임 
     {
         if (Input.GetKey(KeyCode.W))
         {
@@ -230,7 +229,7 @@ public class PlayerScript : MonoBehaviour
         playerAniCon.PlayAnimation("Move");
     }
 
-    void Jump()//점프
+    void Jump() // 점프 
     {
         if (IsJump == (int)eBOOLEAN.FALSE)
         {
@@ -248,10 +247,10 @@ public class PlayerScript : MonoBehaviour
             enemyAtk.AtkPoss(false); //근거리 공격 불가능
     }
 
-    void useItem()
+    void useItem() //아이템 사용
     {
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3))
-        {//아이템 사용
+        {
             sUseItem useItem = new sUseItem(-1, 0, 0);
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
@@ -267,22 +266,24 @@ public class PlayerScript : MonoBehaviour
             }
             itemPoss = false;
             StartCoroutine(EndItem(useItem.itemNum)); //아이템 끝나는 시간
-            int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 한 번 사용 시 더 이상 사용 못함 
-            if (IsItemUsed == (int)eITEMUSE.UNUSED)//아이템 사용 되었을 때 서버에 정보 전송
+            int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 사용 되었을 때 서버에 정보 전송
+            if (IsItemUsed == (int)eITEMUSE.UNUSED)
                 SocketServer.SingleTonServ().SendMsg(useItem);
         }
     }
 
-    void ActiveBlock()
+    void ActiveBlock() // block 활성화 
     {
         if (Input.GetKeyDown(KeyCode.Escape)) //ESC 눌렀을 때 뜨는 창 
         {
             Block.SetActive(true);
             Block.transform.GetChild(0).gameObject.SetActive(true);
+            GetComponentInChildren<PlayerCameraScript>().enabled = false;
+            this.enabled = false;
         }
     }
 
-    void DamageAniAct() //피격 애니메이션
+    void DamageAniAct() // 피격 애니메이션 
     {
         damaged = false;
         if (dmgAni == 0)
@@ -304,21 +305,22 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void setItemImg() //아이템 사용 이미지
+    void setItemImg() // 아이템 사용 이미지 
     {
         itemImgChange = false;
         if(itemImgNum != -1)
             ItemImg[itemImgNum].SetActive(itemImgSet);
     }
 
-    void changeEndScene()
+    void changeEndScene() // EndScene 전환 
     {
+        Debug.Log("changeEndScene()");
         GameObject.Destroy(GM.gameObject);
         SceneManager.LoadScene("EndScene");
         gameEnd = false;
     }
 
-    void itemClick() //던질 아이템을 클릭
+    void itemClick() // 던질 아이템 클릭 가능 여부 체크 및 클릭한 아이템 머리 위로 위치 이동, targetZone 생성 조건 On! 
     {
         highlightBox.SetActive(false);
         Ray cameraRay = playerCamera.ScreenPointToRay(Input.mousePosition);
@@ -329,6 +331,7 @@ public class PlayerScript : MonoBehaviour
             outline ObjOutline = hitObj.GetComponent<outline>();
             if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
             {
+                Debug.Log("click");
                 hitObj.GetComponent<Rigidbody>().useGravity = false;
                 Vector3 newPos = transform.position;
                 newPos.y += 5;
@@ -351,13 +354,13 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void ActiveTargetZone() //던질 아이템이 날아갈 곳 표시
+    void ActiveTargetZone() // targetZone(던질 아이템이 날아갈 곳) 활성화 
     {
         targetZone.SetActive(true);
         s_drawTZ.drawTargetZone();
     }   
 
-    public void PlayerDamage(sHit hit) //플레이어가 피격당했다는 정보 받음
+    public void PlayerDamage(sHit hit) // 플레이어가 피격 당했다는 정보 받음 
     {
         damaged = true;
         dmgAni = hit.dmgAni;
@@ -376,15 +379,16 @@ public class PlayerScript : MonoBehaviour
         playerSpeed = speed;
     }
 
-    public void ChangeItemImg(int itemNum, bool show) //아이템 이미지를 변경시켜야 한다는 정보
+    public void ChangeItemImg(int itemNum, bool show) // 아이템 이미지를 변경시켜야 한다는 정보
     {
         itemImgChange = true;
         itemImgNum = itemNum;
         itemImgSet = show;
     }
 
-    public void ChangeWaitScene() //게임이 끝났다는 정보
+    public void ChangeWaitScene() //게임이 끝났다는 정보 
     {
+        Debug.Log("[PlayerScript] ChangeWaitScene()");
         gameEnd = true;
     }
 
@@ -393,7 +397,7 @@ public class PlayerScript : MonoBehaviour
         s_itemSpawn2.setItemSpawns(result);
     }
 
-    public void CreateHitEffect(bool b) //아이템 던졌을 때 이펙트
+    public void CreateHitEffect(bool b) //아이템 던졌을 때 이펙트 활성화 조건 
     {
         s_hitEffect.IsAtkMgr = b;
     }

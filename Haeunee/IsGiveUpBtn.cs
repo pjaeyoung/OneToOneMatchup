@@ -2,20 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class IsGiveUpBtn : MonoBehaviour
 {
     GameObject Block;
-    GameObject GiveUpImg;
+    PlayerScript s_Player;
+    SpawnScript s_spawn;
 
     private void Awake()
     {
         Block = transform.parent.transform.parent.gameObject;
-        GiveUpImg = transform.parent.gameObject;
+        s_spawn = GameObject.Find("GameMgr").GetComponent<SpawnScript>();
     }
 
     public void onClickYesBtn()
     {
+        s_Player = SocketServer.SingleTonServ().NowPlayerScript().GetComponent<PlayerScript>();
+        s_Player.enabled = true;
         sEnd end = new sEnd((int)eMSG.em_END);
         SocketServer.SingleTonServ().SendMsg(end);
         Debug.Log("END");
@@ -25,7 +29,10 @@ public class IsGiveUpBtn : MonoBehaviour
 
     public void onClickNoBtn()
     {
-        GiveUpImg.SetActive(false);
+        Debug.Log("No Click");
+        s_Player = SocketServer.SingleTonServ().NowPlayerScript().GetComponent<PlayerScript>();
+        s_Player.GetComponentInChildren<PlayerCameraScript>().enabled = true;
+        s_Player.enabled = true;
         Block.SetActive(false);
     }
 }

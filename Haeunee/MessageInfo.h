@@ -4,6 +4,7 @@
 enum eMSG //메세지 종류
 {
 	em_LOGIN = 1,
+	em_LOGOUT,
 	em_ENTER,
 	em_CHARINFO,
 	em_MOVE,
@@ -42,6 +43,11 @@ struct sLogin : sFlag
 	sLogin() :sFlag(flag = eMSG::em_LOGIN) {};
 	int loginSucc = 0;
 	char nick[30];
+};
+
+struct sLogout : sFlag
+{
+	sLogout() :sFlag(flag = eMSG::em_LOGOUT) {};
 };
 
 struct sGameRoom : sFlag //매칭 정보
