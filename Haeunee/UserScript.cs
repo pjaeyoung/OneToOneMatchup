@@ -86,7 +86,7 @@ public class UserScript : MonoBehaviour {
 
         if (respJson.Equals("login")) //존재하는 아이디와 패스워드일 때
         {
-            int blank = 20 - nick.Length;
+            int blank = 29 - nick.Length;
             for(int i=1;i<=blank;i++)
                 nick += ',';
             sLogin login = new sLogin(nick.ToCharArray(), 1);

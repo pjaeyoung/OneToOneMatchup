@@ -40,8 +40,8 @@ struct sFlag //어떤 정보를 보냈는지 구분할 플래그
 struct sLogin : sFlag
 {
 	sLogin() :sFlag(flag = eMSG::em_LOGIN) {};
-	char nick[30];
 	int loginSucc = 0;
+	char nick[30];
 };
 
 struct sGameRoom : sFlag //매칭 정보
