@@ -125,6 +125,11 @@ struct sThrowObj :sFlag //물건 던지기
 	float throwPosX, throwPosY, throwPosZ = 0;
 };
 
+struct sReady :sFlag
+{
+	sReady() :sFlag(flag = eMSG::em_READY) {};
+};
+
 struct sEnd : sFlag //항복 버튼 사용, 죽음
 {
 	sEnd() : sFlag(flag = eMSG::em_END) {};

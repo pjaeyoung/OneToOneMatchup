@@ -156,9 +156,7 @@ public class AnimationController : MonoBehaviour {
 
     public void PlayAnimation(string aniName)
     {
-        animation.wrapMode = WrapMode.Loop;
-        animation.Play(GetAniName(aniName));
-        //animation.CrossFade(GetAniName(aniName));
+        animation.CrossFade(GetAniName(aniName));
     }
 
     public void PlayAtkDmg(string aniName)

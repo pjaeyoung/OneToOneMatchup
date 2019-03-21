@@ -91,6 +91,10 @@ public class SocketServer {
             else if (enterNum == 2) //상대가 먼저 입장
                 sScript.SpawnInfo("Spawn2", "Spawn1", charInfo);
         }
+        else if (room.flag == (int)eMSG.em_READY) //두 유저 모두 준비되었다는 정보
+        {
+            sScript.SpawnReady();
+        }
         else if (eScript != null && room.flag == (int)eMSG.em_MOVE) //적의 좌표, 회전 정보
         {
             Type m_type = typeof(sMove);

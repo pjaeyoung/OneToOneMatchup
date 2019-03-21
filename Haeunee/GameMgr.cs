@@ -71,18 +71,6 @@ public class GameMgr : MonoBehaviour
     void countDown()
     {
         waitImg.SetActive(true);
-        int count = (int)countTimer;
-        GameObject fightStart = GameObject.Find("Canvas").transform.Find("fightGameStartMSG").gameObject;
-        fightStart.SetActive(true);
-        Text countText = GameObject.Find("countDown").GetComponent<Text>();
-        string s_count;
-
-        if (countTimer >= 0)
-        {
-            s_count = string.Format("{0:00}", count);
-            countText.text = s_count;
-            countTimer -= 1;
-        }
     }
 
     IEnumerator waitChangeScene()
@@ -92,7 +80,6 @@ public class GameMgr : MonoBehaviour
             yield return new WaitForSeconds(1);
             countDown();
         }
-        sendPlayerInfoToServ();
     }
 
     void changeLayerToWeapon()
@@ -126,6 +113,7 @@ public class GameMgr : MonoBehaviour
         {
             timer = 0;
             min++;
+            sendPlayerInfoToServ();
         }
         int sec = (int)timer;
         string s_time = TimerToString(min, sec);

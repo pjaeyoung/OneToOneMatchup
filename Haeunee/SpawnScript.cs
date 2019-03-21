@@ -58,6 +58,10 @@ public class SpawnScript : MonoBehaviour {
         playerPname = playerParent;
         enemyPname = enemyParent;
         enemyInfo = charInfo;
+    }
+
+    public void SpawnReady()
+    {
         spawnPoss = true;
     }
 
