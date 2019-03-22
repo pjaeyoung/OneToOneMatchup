@@ -37,6 +37,8 @@ enum eMSG //메세지 종류
 {
     em_LOGIN = 1,
     em_LOGOUT,
+    em_LOGINCHECK,
+    em_MATCHREQUEST,
     em_ENTER,
     em_CHARINFO,
     em_MOVE,
@@ -134,6 +136,37 @@ struct sLogout
     public sLogout(int f = (int)eMSG.em_LOGOUT)
     {
         flag = f;
+    }
+}
+
+struct sLoginCheck
+{
+    private int flag;
+    public int loginChk;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] nick;
+    public sLoginCheck(char[] name, int chk, int f = (int)eMSG.em_LOGINCHECK)
+    {
+        flag = f;
+        nick = name;
+        loginChk = chk;
+    }
+}
+
+struct sMatchReq
+{
+    private int flag;
+    public int matchSucc;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] recvUserNick;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] sendUserNick;
+    public sMatchReq(char[] user, char[] friend, int succ, int f = (int)eMSG.em_MATCHREQUEST)
+    {
+        flag = f;
+        recvUserNick = friend;
+        sendUserNick = user;
+        matchSucc = succ;
     }
 }
 

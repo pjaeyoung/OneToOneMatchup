@@ -5,6 +5,8 @@ enum eMSG //메세지 종류
 {
 	em_LOGIN = 1,
 	em_LOGOUT,
+	em_LOGINCHECK,
+	em_MATCHREQUEST,
 	em_ENTER,
 	em_CHARINFO,
 	em_MOVE,
@@ -50,6 +52,20 @@ struct sLogout : sFlag
 	sLogout() :sFlag(flag = eMSG::em_LOGOUT) {};
 };
 
+struct sLoginCheck : sFlag
+{
+	sLoginCheck() :sFlag(flag = eMSG::em_LOGINCHECK) {};
+	int loginChk = 0;
+	char nick[30];
+};
+
+struct sMatchReq : sFlag
+{
+	sMatchReq() :sFlag(flag = eMSG::em_MATCHREQUEST) {};
+	int matchSucc = 0;
+	char recvUserNick[30];
+	char sendUserNick[30];
+};
 struct sGameRoom : sFlag //매칭 정보
 {
 	sGameRoom() :sFlag(flag = eMSG::em_ENTER) {};

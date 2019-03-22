@@ -94,6 +94,7 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
 
+        shotMgr.FindPoint();
     }
 
     private void FixedUpdate()

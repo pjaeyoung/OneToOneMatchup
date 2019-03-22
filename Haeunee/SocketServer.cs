@@ -41,6 +41,7 @@ public class SocketServer {
     static sGameRoom room;
     static int enterNum;
     static int gameResult;
+    static FriendsScript fScript;
     IntPtr ptr;
 
     private void MakeServer()
@@ -71,6 +72,18 @@ public class SocketServer {
             Type m_type = typeof(sLogin);
             sLogin loginInfo = (sLogin)Marshal.PtrToStructure(buff, m_type);
             userScript.LoginResult(loginInfo.nick, loginInfo.loginSucc);
+        }
+        else if(room.flag==(int)eMSG.em_LOGINCHECK)
+        {
+            Type m_type = typeof(sLoginCheck);
+            sLoginCheck loginChk = (sLoginCheck)Marshal.PtrToStructure(buff, m_type);
+            fScript.FriendAccCheck(loginChk.nick, loginChk.loginChk);
+        }
+        else if (room.flag == (int)eMSG.em_MATCHREQUEST)
+        {
+            Type m_type = typeof(sMatchReq);
+            sMatchReq matchReq = (sMatchReq)Marshal.PtrToStructure(buff, m_type);
+            fScript.MatchReqResult(matchReq.sendUserNick, matchReq.matchSucc);
         }
         else if (room.flag == (int)eMSG.em_ENTER) //매칭 버튼을 눌렀다는 정보
         {
@@ -179,6 +192,11 @@ public class SocketServer {
         sScript = spawn;
     }
 
+    public void GetFriendScript(FriendsScript friends)
+    {
+        fScript = friends;
+    }
+
     public void GetCharScripts(PlayerScript player, EnemyScript enemy)
     {
         eScript = enemy;
@@ -212,6 +230,7 @@ public class SocketServer {
         int byteSize = Marshal.SizeOf(obj); //구조체를 바이트로 변환
         byte[] byteData = new byte[byteSize];
         ptr = Marshal.AllocHGlobal(byteSize);
+        Marshal.Copy(byteData,0, ptr, byteSize);
         Marshal.StructureToPtr(obj, ptr, false);
         Marshal.Copy(ptr, byteData, 0, byteSize);
         Marshal.FreeHGlobal(ptr);

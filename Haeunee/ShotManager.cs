@@ -14,7 +14,6 @@ public class ShotManager : MonoBehaviour {
 
     void Start () {
         ray = new Ray();
-        FindPoint();
     }
 	
 	void Update () {
@@ -61,7 +60,7 @@ public class ShotManager : MonoBehaviour {
         }
     }
 
-    void FindPoint() //닿은 부분 표시 찾기
+    public void FindPoint() //닿은 부분 표시 찾기
     {
         point = GameObject.Find("PointPrefab");
         point.SetActive(false);

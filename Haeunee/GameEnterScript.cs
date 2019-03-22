@@ -17,10 +17,11 @@ public class GameEnterScript : MonoBehaviour
     HeroCustomize playerCustom; //플레이어의 외형을 변경하는 스크립트
     GameObject enemy; //적
     HeroCustomize enemyCustom; //적의 외형을 변경하는 스크립트
+    public GameObject matchAcceptWin;
 
     void Start()
     {
-        DontDestroyOnLoad(this); //서버 오브젝트 파괴되지 않게 함
+        DontDestroyOnLoad(this); //오브젝트 파괴되지 않게 함
         SocketServer.SingleTonServ().GetEnterScript(this);
         heroCustomize = GameObject.Find("Player").GetComponent<HeroCustomize>();
     }
@@ -33,6 +34,8 @@ public class GameEnterScript : MonoBehaviour
         if (matchSuccess == true) //매칭이 성공되었을 때
         {
             matchSuccess = false;
+            matchAcceptWin.SetActive(true);
+            StartCoroutine(GameStartDelay());
             int gender = 0;
             if (heroCustomize.Gender.Equals("Male"))
                 gender = (int)eGENDER.MALE;
@@ -40,7 +43,6 @@ public class GameEnterScript : MonoBehaviour
                 gender = (int)eGENDER.FEMALE;
             savCharInfo = new sCharInfo(0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
                 heroCustomize.IndexColorHair.CurrentIndex, heroCustomize.IndexFace.CurrentIndex, -1, -1, -1);
-            SceneManager.LoadScene("ItemCollectScene");
         }
     }
 
@@ -59,5 +61,11 @@ public class GameEnterScript : MonoBehaviour
     public void MatchSucc() //매칭 성공 하였음
     {
         matchSuccess = true;
+    }
+
+    IEnumerator GameStartDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+        SceneManager.LoadScene("ItemCollectScene");
     }
 }
