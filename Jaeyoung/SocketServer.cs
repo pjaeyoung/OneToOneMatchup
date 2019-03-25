@@ -18,6 +18,7 @@ public class RecvData //받은 데이터와 소켓을 저장하는 클래스
 
 public class SocketServer {
     private static SocketServer socketServer = null;
+
     public static SocketServer SingleTonServ()
     {
         if(socketServer==null)
@@ -34,36 +35,21 @@ public class SocketServer {
     static EnemyScript eScript;
     static PlayerScript pScript;
     static GameEnterScript gScript; 
-    static SpawnScript sScript; 
+    static SpawnScript sScript;
+    static UserScript userScript;
     RecvData rd = new RecvData();
     static sGameRoom room;
     static int enterNum;
     static int gameResult;
+    static FriendsScript fScript;
+    IntPtr ptr;
 
     private void MakeServer()
     {
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //소켓생성
-        var ep = new IPEndPoint(IPAddress.Parse("192.168.0.22"), 10001); //연결할 서버 정보
-        var connResult = sock.BeginConnect(ep, new AsyncCallback(ConnectCallBack), sock); //커넥트
-        bool connSucc = connResult.AsyncWaitHandle.WaitOne(5, true); //커넥트 성공여부 체크
-        if (connSucc) //성공했을 때
-            sock.EndConnect(connResult); //커넥트를 마무리함
-        else //성공 못했을 때
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            //Application.Quit();
-#endif
-        }
+        IPEndPoint ep = new IPEndPoint(IPAddress.Parse("192.168.0.22"), 10001); //연결할 서버 정보
+        sock.Connect(ep); //커넥트
         rd.socket = sock;
-    }
-
-    private static void ConnectCallBack(IAsyncResult ar) //서버와 연결되었을 때
-    {
-        Socket socket = (Socket)ar.AsyncState;
-        Debug.Log("Socket connected to " + socket.RemoteEndPoint.ToString());
-        conn.Set();
     }
 
     private static void ReceiveCallBack(IAsyncResult ar) //서버에게 신호를 받았을 때
@@ -73,6 +59,7 @@ public class SocketServer {
         if (receive <= 0) //서버 종료
         {
             recvData.socket.Close(); //소켓을 닫음
+            Application.Quit();
             return;
         }
         IntPtr buff = Marshal.AllocHGlobal(recvData.buffer.Length); //받은 byte 데이터를 struct로 변환
@@ -80,7 +67,25 @@ public class SocketServer {
         Type type = typeof(sGameRoom);
         room = (sGameRoom)Marshal.PtrToStructure(buff, type);
 
-        if (room.flag == (int)eMSG.em_ENTER) //매칭 버튼을 눌렀다는 정보
+        if(room.flag==(int)eMSG.em_LOGIN)
+        {
+            Type m_type = typeof(sLogin);
+            sLogin loginInfo = (sLogin)Marshal.PtrToStructure(buff, m_type);
+            userScript.LoginResult(loginInfo.nick, loginInfo.loginSucc);
+        }
+        else if(room.flag==(int)eMSG.em_LOGINCHECK)
+        {
+            Type m_type = typeof(sLoginCheck);
+            sLoginCheck loginChk = (sLoginCheck)Marshal.PtrToStructure(buff, m_type);
+            fScript.FriendAccCheck(loginChk.nick, loginChk.loginChk);
+        }
+        else if (room.flag == (int)eMSG.em_MATCHREQUEST)
+        {
+            Type m_type = typeof(sMatchReq);
+            sMatchReq matchReq = (sMatchReq)Marshal.PtrToStructure(buff, m_type);
+            fScript.MatchReqResult(matchReq.sendUserNick, matchReq.matchSucc);
+        }
+        else if (room.flag == (int)eMSG.em_ENTER) //매칭 버튼을 눌렀다는 정보
         {
             if(room.userNum==0) //상대가 없음
                 gScript.Matching();
@@ -98,6 +103,10 @@ public class SocketServer {
                 sScript.SpawnInfo("Spawn1", "Spawn2", charInfo);
             else if (enterNum == 2) //상대가 먼저 입장
                 sScript.SpawnInfo("Spawn2", "Spawn1", charInfo);
+        }
+        else if (room.flag == (int)eMSG.em_READY) //두 유저 모두 준비되었다는 정보
+        {
+            sScript.SpawnReady();
         }
         else if (eScript != null && room.flag == (int)eMSG.em_MOVE) //적의 좌표, 회전 정보
         {
@@ -131,41 +140,46 @@ public class SocketServer {
             Type m_type = typeof(sItemSpawn);
             sItemSpawn itemSpawn = (sItemSpawn)Marshal.PtrToStructure(buff, m_type);
             pScript.passOnItemSpawnInfo(itemSpawn.itemKind);
-            pScript.CreateHitEffect(true);
+            pScript.GetAtkMgrFromServer(true);
         }
         else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
         {
-            Type m_type = typeof(sEndItem);
-            sEndItem endItem = (sEndItem)Marshal.PtrToStructure(buff, m_type);
-            pScript.ChangeItemImg(endItem.itemNum, true);
-            pScript.ChangePlayerHp(endItem.hp);
-            pScript.ChangePlayerSpeed(endItem.speed);
+            Type m_type = typeof(sUseItem);
+            sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeItemImg(useItem.itemNum, true);
+            pScript.ChangePlayerHp(useItem.hp);
+            pScript.ChangePlayerSpeed(useItem.speed);
         }
         else if (room.flag == (int)eMSG.em_ENDITEM) //아이템 시간 끝
         {
-            Type m_type = typeof(sUseItem);
-            sUseItem useItem = (sUseItem)Marshal.PtrToStructure(buff, m_type);
-            pScript.ChangeItemImg(useItem.itemNum, false);
-            pScript.ChangePlayerSpeed(useItem.speed);
+            Type m_type = typeof(sEndItem);
+            sEndItem endItem = (sEndItem)Marshal.PtrToStructure(buff, m_type);
+            pScript.ChangeItemImg(endItem.itemNum, false);
+            pScript.ChangePlayerSpeed(endItem.speed);
         }
         else if (room.flag == (int)eMSG.em_GETOBJ) //던질 물건 잡기
         {
             Type m_type = typeof(sGetObj);
             sGetObj getObj = (sGetObj)Marshal.PtrToStructure(buff, m_type);
+            Debug.Log("from server get succ");
             eScript.GetThrowObj(getObj.itemNum);
         }
         else if (room.flag == (int)eMSG.em_THROWOBJ) //물건 던지기
         {
             Type m_type = typeof(sThrowObj);
             sThrowObj throwObj = (sThrowObj)Marshal.PtrToStructure(buff, m_type);
-            eScript.ThrowItem(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
+            eScript.ThrowObj(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
+            Debug.Log("from server throw succ");
         }
-        else if (room.flag == (int)eMSG.em_END)
+        else if (room.flag == (int)eMSG.em_END) //게임이 종료되었을 경우
         {
             Type m_type = typeof(sEnd);
             sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);
             gameResult = esc.result;
-            pScript.ChangeWaitScene();
+            if(pScript==null)
+                sScript.ChangeWaitScene();
+            else
+                pScript.ChangeWaitScene();
         }
     }
 
@@ -177,6 +191,11 @@ public class SocketServer {
     public void GetSpawnScript(SpawnScript spawn)
     {
         sScript = spawn;
+    }
+
+    public void GetFriendScript(FriendsScript friends)
+    {
+        fScript = friends;
     }
 
     public void GetCharScripts(PlayerScript player, EnemyScript enemy)
@@ -195,6 +214,11 @@ public class SocketServer {
         return eScript;
     }
 
+    public void GetUserScript(UserScript user)
+    {
+        userScript = user;
+    }
+
     public void WaitRecieve()
     {
         sock.BeginReceive(rd.buffer, 0, rd.buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), rd);
@@ -206,8 +230,9 @@ public class SocketServer {
     {
         int byteSize = Marshal.SizeOf(obj); //구조체를 바이트로 변환
         byte[] byteData = new byte[byteSize];
-        IntPtr ptr = Marshal.AllocHGlobal(byteSize);
-        Marshal.StructureToPtr(obj, ptr, true);
+        ptr = Marshal.AllocHGlobal(byteSize);
+        Marshal.Copy(byteData,0, ptr, byteSize);
+        Marshal.StructureToPtr(obj, ptr, false);
         Marshal.Copy(ptr, byteData, 0, byteSize);
         Marshal.FreeHGlobal(ptr);
 

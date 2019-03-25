@@ -19,12 +19,13 @@ public class PlayerCntrl_itemField : MonoBehaviour
     GameObject fullItem;
     GameObject highlightBox;
     Rigidbody playerRigid;
+    Quaternion nowRot;
 
-    int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
+    bool IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
     
     private void Awake()
     {
-        IsJump = (int)eBOOLEAN.FALSE;
+        IsJump = false;
         GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         scene = SceneManager.GetActiveScene();
@@ -32,6 +33,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
         playerRigid = GetComponent<Rigidbody>();
         highlightBox = GameObject.Find("chkHighlight");
         fullItem = canvas.transform.Find("fullItemMSG").gameObject;
+        nowRot = transform.localRotation;
     }
 
     private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
@@ -61,22 +63,21 @@ public class PlayerCntrl_itemField : MonoBehaviour
         Move();
         if (Input.GetMouseButton(2))
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
             Rot();
         }
         else if (Input.GetMouseButtonUp(2))
-        {
             Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 
     void OnTriggerEnter(Collider other)
     {
         GameObject obj = other.gameObject;
         if (obj.tag == "floor")
-            IsJump = (int)eBOOLEAN.FALSE;
+        {
+            Debug.Log("floor!");
+            IsJump = false;
+        }
     }
 
     void Update()
@@ -89,6 +90,14 @@ public class PlayerCntrl_itemField : MonoBehaviour
     void Move()
     {
         AM.PlayAnimation("Idle");
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (IsJump == false && transform.position.y < 2)
+            {
+                IsJump = true;
+                playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
+            }
+        }
         if (Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
         else if (Input.GetKey(KeyCode.A))
@@ -98,19 +107,13 @@ public class PlayerCntrl_itemField : MonoBehaviour
         else if (Input.GetKey(KeyCode.W))
             this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (IsJump == (int)eBOOLEAN.FALSE)
-            {
-                IsJump = (int)eBOOLEAN.TRUE;
-                playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
-            }
-        }
     }
 
     void Rot()
     {
-        transform.Rotate(new Vector3(0,Input.GetAxisRaw("Mouse X") * sensibilityX, 0));
+        float RotX = Input.GetAxis("Mouse X") * sensibilityX;
+        nowRot *= Quaternion.Euler(Vector3.up * RotX);
+        transform.rotation = Quaternion.Slerp(transform.localRotation, nowRot, 6 * Time.deltaTime);
     }
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
