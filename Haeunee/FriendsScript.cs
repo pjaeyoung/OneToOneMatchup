@@ -57,9 +57,6 @@ public class FriendsScript : MonoBehaviour {
     public GameObject searchInfoImg;
     public GameObject refuseWin;
     string url;
-    bool friendChk = false;
-    string chkFriendNick;
-    int friendAcc = -1;
     string matchReqFriendNick;
     bool matchReqRecv = false;
     int matchSucc;
@@ -177,7 +174,8 @@ public class FriendsScript : MonoBehaviour {
 
     public void FriendList()//친구 리스트 불러오기
     {
-        if(tmpObj != null)
+        friendEntList.Clear();
+        if (tmpObj != null)
         {
             int objLen = tmpObj.Count;
             for (int i = 0; i < objLen; i++)
@@ -207,18 +205,12 @@ public class FriendsScript : MonoBehaviour {
             Button tmpBtn = tmp.GetComponent<Button>();
             tmpBtn.onClick.AddListener(FriendNameClick);
             y -= 20;
-        }
-        
-        for (int i = 0; i < friendLen; i++)
-        {
-            string sendNick = friendList[i];
-            sLoginCheck loginChk = new sLoginCheck(sendNick.ToCharArray(), 0);
+            sLoginCheck loginChk = new sLoginCheck(friendList[i].ToCharArray(), 0);
             SocketServer.SingleTonServ().SendMsg(loginChk);
         }
 
         StartCoroutine(FriendEntCheckPoint());
 
-        friendEntList.Clear();
         searchWin.SetActive(false);
         friendListWin.SetActive(true);
         requestListWin.SetActive(false);
@@ -495,6 +487,7 @@ public class FriendsScript : MonoBehaviour {
 
     public void MatchRefuseBtnClick()
     {
+        matchReqWin.SetActive(false);
         sMatchReq matchReq = new sMatchReq(nick.ToCharArray(), matchReqFriendNick.ToCharArray(), 1);
         SocketServer.SingleTonServ().SendMsg(matchReq);
         matchRefuseWin.SetActive(true);
