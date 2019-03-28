@@ -49,8 +49,6 @@ public class SpawnScript : MonoBehaviour {
         Custom(nowPlayer, enter.savCharInfo);
         Custom(nowEnemy, enemyInfo);
 
-        Camera mainCam = Camera.main; //내 캐릭터가 가진 카메라를 화면에 띄우기
-        mainCam.enabled = false;
         Camera playerCam = nowPlayer.GetComponentInChildren<Camera>();
         nowEnemy.GetComponentInChildren<Canvas>().worldCamera = playerCam; //enemyHp바를 내 캐릭터 카메라 화면에 출력 
         playerCam.enabled = true;
@@ -96,7 +94,8 @@ public class SpawnScript : MonoBehaviour {
     IEnumerator ItemDelay() 
     {
         yield return new WaitForSeconds(1.0f);
-        SceneManager.LoadScene("GameScene");
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("GameScene");
         yield return new WaitForSeconds(0.5f);
         Spawn();
     }
@@ -106,7 +105,8 @@ public class SpawnScript : MonoBehaviour {
         yield return new WaitForSeconds(1.0f);
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
         GameObject.Destroy(GameObject.Find("itemFieldMgr"));
-        SceneManager.LoadScene("WaitScene");
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("WaitScene");
         GameObject.Destroy(gameObject);
     }
 

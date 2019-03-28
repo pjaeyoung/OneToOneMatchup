@@ -11,7 +11,7 @@ public class EnemyScript : MonoBehaviour
     AnimationController playerAniCon;
     bool atkAni = false;
     int atkAniNum = 0;
-    int weaponType = -1;
+    public int weaponType = -1;
     ShotManager shotMgr;
     int enemyHp = 0;
     Text hpText;
@@ -24,6 +24,8 @@ public class EnemyScript : MonoBehaviour
     bool objThrow = false;
     Vector3 targetPos;
 
+    public EffSoundController effSound;
+
     void Start()
     {
         DontDestroyOnLoad(transform.parent);
@@ -34,6 +36,7 @@ public class EnemyScript : MonoBehaviour
         hpText = GameObject.Find("Canvas").transform.GetChild(1).GetComponent<Text>();
         enemyHpBar = transform.Find("Canvas").transform.GetChild(0).GetComponent<HpBar>();
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
+        effSound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 
     private void Update()
@@ -63,7 +66,17 @@ public class EnemyScript : MonoBehaviour
                 atkName = "Critical01";
             else if (atkAniNum == 3)
                 atkName = "Critical02";
+
             playerAniCon.PlayAtkDmg(atkName);
+            if (weaponType == (int)eWEAPON.em_BOW)
+                effSound.PlayEff((int)eEFFSOUND.em_ARROW);
+            else
+            {
+                if (atkAniNum % 2 == 0)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWING1);
+                if (atkAniNum % 2 == 1)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWING2);
+            }
             StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
         }
         else if (MoveLimit(enemyPos.x, transform.position.x) || MoveLimit(enemyPos.z, transform.position.z))

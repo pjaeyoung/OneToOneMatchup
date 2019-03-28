@@ -11,8 +11,8 @@ public class WebServerScript : MonoBehaviour {
     void Start () {
         DontDestroyOnLoad(this);
         Screen.SetResolution(Screen.width, (Screen.width / 16) * 9, false);
-        SocketServer.SingleTonServ();
-	}
+        SocketServer.SingleTonServ();      
+    }
 
     private void Update()
     {

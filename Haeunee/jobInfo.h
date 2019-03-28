@@ -56,35 +56,35 @@ public:
 			hp = 200;
 			atk = 10;
 			def = 5;
-			speed = 1;
+			speed = 2;
 		}
 		else if (flag == eWEAPON::em_SHIElD)
 		{
 			hp = 400;
 			atk = 30;
 			def = 20;
-			speed = 1;
+			speed = 2;
 		}
 		else if (flag == eWEAPON::em_SWORD)
 		{
 			hp = 400;
 			atk = 40;
 			def = 10;
-			speed = 1;
+			speed = 2;
 		}
 		else if (flag == eWEAPON::em_BOW)
 		{
 			hp = 300;
 			atk = 20;
 			def = 5;
-			speed = 2;
+			speed = 3;
 		}
 		else if (flag == eWEAPON::em_WAND)
 		{
 			hp = 250;
 			atk = 30;
 			def = 5;
-			speed = 1;
+			speed = 2;
 		}
 		else if (flag == 10+ eARMOR::em_DEFAULT_AMR)
 		{

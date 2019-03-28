@@ -66,6 +66,7 @@ public class GameEnterScript : MonoBehaviour
     IEnumerator GameStartDelay()
     {
         yield return new WaitForSeconds(1.0f);
-        SceneManager.LoadScene("ItemCollectScene");
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("ItemCollectScene");
     }
 }

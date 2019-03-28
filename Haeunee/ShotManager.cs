@@ -6,14 +6,17 @@ public class ShotManager : MonoBehaviour {
     Ray ray;
     RaycastHit rayHit;
     public GameObject point;
-    public GameObject ball;
-    public GameObject arrow;
     float maxDistance = 20;
     int myWeaponType;
     GameObject nowShot;
+    GameObject arrow;
+    GameObject magic;
 
     void Start () {
         ray = new Ray();
+
+        arrow = GameObject.Find("ArrowPrefab");
+        magic = GameObject.Find("MagicPrefab");
     }
 	
 	void Update () {
@@ -40,9 +43,11 @@ public class ShotManager : MonoBehaviour {
     public void Shooting()
     { //샷 생성
         if (myWeaponType == (int)eWEAPON.em_BOW)
-            nowShot = Instantiate(arrow, transform.position, Quaternion.identity);
+            nowShot = arrow;
         else if (myWeaponType == (int)eWEAPON.em_WAND)
-            nowShot = Instantiate(ball, transform.position, Quaternion.identity);
+            nowShot = magic;
+        nowShot.transform.position = transform.position;
+        nowShot.GetComponent<ShotController>().enabled = true;
         nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
         nowShot.GetComponent<ShotController>().rayPoint = ray.direction * 10;
     }

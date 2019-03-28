@@ -5,8 +5,12 @@ using UnityEngine;
 public class AttackMgr : MonoBehaviour {
     public bool aktPossible = false;
     AnimationController aniCon;
+    EnemyScript enemyScript;
+    public int playerWeapon = -1;
+
 	void Start () {
         aniCon = GetComponent<AnimationController>();
+        enemyScript = GetComponent<EnemyScript>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -27,6 +31,25 @@ public class AttackMgr : MonoBehaviour {
         else if (randDmgAni == 1)
             aniCon.PlayAtkDmg("GetDamage02");
         SocketServer.SingleTonServ().SendMsg(hit);
+
+        if (playerWeapon == (int)eWEAPON.em_SWORDANDSHIELD)
+        {
+            if (randDmgAni == 0)
+                enemyScript.effSound.PlayEff((int)eEFFSOUND.em_SWORD1);
+            else if (randDmgAni == 1)
+                enemyScript.effSound.PlayEff((int)eEFFSOUND.em_SWORD2);
+        }
+        else if (playerWeapon == (int)eWEAPON.em_GREATESWORD)
+        {
+            if (randDmgAni == 0)
+                enemyScript.effSound.PlayEff((int)eEFFSOUND.em_SWORD3);
+            else if (randDmgAni == 1)
+                enemyScript.effSound.PlayEff((int)eEFFSOUND.em_SWORD4);
+        }
+        else if (playerWeapon == (int)eWEAPON.em_BOW)
+            enemyScript.effSound.PlayEff((int)eEFFSOUND.em_ARROWHIT);
+        else if (enemyScript.weaponType == (int)eWEAPON.em_WAND)
+            enemyScript.effSound.PlayEff((int)eEFFSOUND.em_MAGIHIT);
 
         Debug.Log("Hit");
     }
