@@ -16,12 +16,14 @@ public class tutorial : MonoBehaviour
     Quaternion CameraPredictRot; //카메라 예측 회전 각도
     GameObject getItem; // 클릭한 아이템
     Button itemBtn;
+    GameObject itemInfo; // tuto = 3 일 때 생성되는 아이템 정보 설명하는 창 
     GameObject targetZone;
     AnimationController animationCntrl;
+    Slider hpBar;
     public GameObject sword;
     public GameObject wand;
     GameObject magicPrefab;
-    GameObject point;
+    GameObject point; // 사정거리 표시 
     GameObject nowShot;
     GameObject shotMgr;
     Ray shotRay;
@@ -29,7 +31,6 @@ public class tutorial : MonoBehaviour
     GameObject Enemy;
     GameObject hpPotion;
     GameObject beerBox;
-    GameObject loading;
 
     float moveSpeed = 5.0f;
     float sensibilityX = 2.0f;
@@ -43,21 +44,18 @@ public class tutorial : MonoBehaviour
 
     int weaponIdx = 0;
     int atkAni = 0;
-    bool idleAni = true;
     bool aniEnd = false;
+    bool set = false;
 
     float maxDistance = 20; //point 한계치 
-
-    int fill = 0; // loading amount
+    Vector3 rayPoint;
 
     public int tuto = -1; //튜토리얼 chapter 번호 (0: 이동키/ 1: 회전 / 2: 아이템 획득/ 3: 아이템, 무기 종류 설명/ 4: 무기공격 / 5: 던지기 공격) 
+    int readLine = -1;
     bool readOn = false;
     List<string> textList; //튜토리얼 설명 내용 
-    int count = 0; /*                              [ 행동 카운트]
-                     이동키 각각 1번 이상, 회전 1번, 아이템 클릭-getItem != null / count = 1,
-                     아이템 빼기-getItem ==null / count = 1, 칼 휘두르기 - enemy 격파 / count = 3, 마법 공격 - enemy 격파 / count = 5,
-                     던지기아이템 클릭-getItem !=null / count = 1, 던지기 아이템 targetZone 생성 및 던지기 실행 - getItem == null / count = 1
-                   */
+    int ActCount = 0; //튜토리얼에 따라 행동 수행 여부 측정 
+
     private void Awake()
     {
         getItem = null;
@@ -69,34 +67,37 @@ public class tutorial : MonoBehaviour
         camera = player.transform.GetChild(6).GetComponent<Camera>();
         CameraInitRot = camera.transform.localRotation;
         CameraPredictRot = camera.transform.localRotation;
-        itemBtn = GameObject.Find("Canvas").transform.Find("itemBtn").GetComponent<Button>();
+        itemBtn = GameObject.Find("Canvas/itemBtn").GetComponent<Button>();
+        itemBtn.gameObject.SetActive(false);
+        itemInfo = GameObject.Find("Canvas/itemInfo").gameObject;
+        itemInfo.gameObject.SetActive(false);
         targetZone = player.transform.Find("targetZone").gameObject;
         animationCntrl = player.GetComponent<AnimationController>();
         magicPrefab = GameObject.Find("MagicPrefab");
+        magicPrefab.SetActive(false);
         point = GameObject.Find("PointPrefab");
         point.SetActive(false);
         shotMgr = player.transform.GetChild(7).gameObject;
         TextBtn = GameObject.Find("Canvas").transform.Find("TextBtn").gameObject;
         TextBtn.SetActive(false);
         Enemy = GameObject.Find("enemy");
+        hpBar = Enemy.transform.Find("enemyHp/Slider").GetComponent<Slider>();
         Enemy.SetActive(false);
         hpPotion = GameObject.Find("hpPotion");
         hpPotion.SetActive(false);
         beerBox = GameObject.Find("BeerBox_Green");
         beerBox.SetActive(false);
-        loading = GameObject.Find("Canvas").transform.Find("loading").gameObject;
-        loading.SetActive(false);
-        StartCoroutine(textBtnActive());
     }
 
     void Start()
     {
-        
+        StartCoroutine(textBtnActive());
     }
 
     private void FixedUpdate()
     {
-        if(getItem == null)
+        animationCntrl.PlayAnimation("Idle");
+        if (getItem == null && tuto != 6)
         {
             move();
             jump();
@@ -113,7 +114,6 @@ public class tutorial : MonoBehaviour
             {
                 TransferItem();
                 getItem = null;
-                count = 1;
             }
         }
     }
@@ -122,63 +122,94 @@ public class tutorial : MonoBehaviour
     {
         if (other.tag == "floor")
             IsJump = false;
-        if(other.tag == "item")
+        if (other.tag == "item")
             other.GetComponent<outline>().enabled = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.tag == "item")
+        if (other.tag == "item")
             other.GetComponent<outline>().enabled = false;
     }
 
     void Update()
     {
-        if(readOn == true)
+        if (readOn == true)
         {
             readOn = false;
-            Text text = TextBtn.GetComponentInChildren<Text>();
-            text.text = textList[tuto];
-            text.color = Color.white;
-            text.fontSize = 20;
+            int cpy = tuto;
+            readLine++;
+            showText(readLine);
+            if (cpy != tuto)
+            {
+                ActCount = 0;
+                if(tuto == 5)
+                    set = false;
+            }
         }
-       
-        if(tuto == 2)
+
+        if (tuto == 2)
         {
-            if(hpPotion.activeSelf == false && itemBtn.gameObject.activeSelf == false)
+            if (hpPotion.activeSelf == false && itemBtn.gameObject.activeSelf == false)
             {
                 itemBtn.gameObject.SetActive(true);
                 hpPotion.SetActive(true);
             }
-            clickItem(2);
+            if (Input.GetMouseButtonDown(0) && player.GetComponent<BoxCollider>().enabled == true)
+            {
+                player.transform.GetComponent<BoxCollider>().enabled = false;
+                clickItem(2);
+            }
+            else if (Input.GetMouseButtonUp(0))
+                player.GetComponent<BoxCollider>().enabled = true;
         }
         else if (tuto == 3)
         {
-            if(hpPotion.activeSelf == true || itemBtn.gameObject.activeSelf == true)
+            if (hpPotion.activeSelf == true || itemBtn.gameObject.activeSelf == true)
             {
                 itemBtn.gameObject.SetActive(false);
                 hpPotion.SetActive(false);
                 getItem = null;
             }
+            if (itemInfo.activeSelf == false)
+                itemInfo.SetActive(true);
         }
         else if (tuto == 4)
         {
-            if (Enemy.activeSelf == false)
-                Enemy.SetActive(true);
-            setWeapon();
-            Attack();
-            if(aniEnd == true && weaponIdx == (int)eWEAPON.em_WAND)
+            if (itemInfo.activeSelf == true)
+                itemInfo.SetActive(false);
+            if(set == false)
             {
-                Shot();
+                setWeapon();
+                set = true;
             }
+                Attack();
         }
-        else if (tuto == 5 && count != 1)
+        else if (tuto == 5)
+        {
+            if (set == false)
+            {
+                setWeapon();
+                set = true;
+            }
+            Attack();
+            drawPoint();
+            if (aniEnd == true)
+                Shot();
+        }
+        else if (tuto == 6)
         {
             if (Enemy.activeSelf == true)
                 Enemy.SetActive(false);
-            if(beerBox.activeSelf == false)
+            if (beerBox.activeSelf == false)
                 beerBox.SetActive(true);
-            clickItem(5);
+            if (Input.GetMouseButtonDown(1) && player.GetComponent<BoxCollider>().enabled == true)
+            {
+                player.transform.GetComponent<BoxCollider>().enabled = false;
+                clickItem(5);
+            }
+            else if (Input.GetMouseButtonUp(1))
+                player.GetComponent<BoxCollider>().enabled = true;
         }
     }
 
@@ -200,7 +231,13 @@ public class tutorial : MonoBehaviour
         {
             transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
         }
-    }
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+        {
+            if(tuto == 0)
+                ActCount = 1;
+            animationCntrl.PlayAnimation("Move");
+        }
+    } // 전후좌우 움직임 
 
     void jump()
     {
@@ -212,7 +249,7 @@ public class tutorial : MonoBehaviour
                 playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
             }
         }
-    }
+    } // 점프
 
     void Rot()
     {
@@ -230,27 +267,40 @@ public class tutorial : MonoBehaviour
             float angle = Quaternion.Angle(CameraInitRot, CameraPredictRot);
             if (angle >= 0 && angle <= 10)
                 camera.transform.localRotation = Quaternion.Slerp(CameraInitRot, CameraPredictRot, 40);
-
+            if (tuto == 1)
+                ActCount = 1;
         }
-    }
+    } // 상하좌우 회전 
 
     void setWeapon()
     {
-        if(weaponIdx == (int)eWEAPON.em_GREATESWORD)
+        Enemy.SetActive(true);
+        if (weaponIdx == (int)eWEAPON.em_GREATESWORD)
         {
             sword.SetActive(true);
+            hpBar.maxValue = 3;
+            hpBar.value = 3;
         }
-        else if(weaponIdx == (int)eWEAPON.em_WAND)
+        else if (weaponIdx == (int)eWEAPON.em_WAND)
         {
+           
             sword.SetActive(false);
             magicPrefab.SetActive(true);
             wand.SetActive(true);
+            hpBar.maxValue = 4;
+            hpBar.value = 4;
         }
-    }
+    } // tuto = 4 : sword,  tuto = 5 : wand
 
-    void Attack()
+    void Attack() //공격
     {
-        if (Input.GetMouseButtonDown(0))
+        float distance = 0;
+        if (tuto == 4)
+            distance = Vector3.Distance(player.transform.position, Enemy.transform.position);
+        else if (tuto == 5)
+            distance = Vector3.Distance(magicPrefab.transform.position, Enemy.transform.position);
+
+        if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != TextBtn)
         {
             string atkName = "";
             if (atkAni == 0)
@@ -264,43 +314,50 @@ public class tutorial : MonoBehaviour
 
             if (weaponIdx == (int)eWEAPON.em_GREATESWORD)
             {
-                animationCntrl.weaponIndex = 0;
+                animationCntrl.weaponIndex = (int)eWEAPON.em_GREATESWORD;
                 animationCntrl.PlayAtkDmg(atkName);
             }
             else if (weaponIdx == (int)eWEAPON.em_WAND)
             {
-                animationCntrl.weaponIndex = 1;
+                animationCntrl.weaponIndex = (int)eWEAPON.em_WAND;
                 animationCntrl.PlayAtkDmg(atkName);
             }
             StartCoroutine(EndAni(animationCntrl.GetAniLength(atkName)));
+
+           if(distance <= 0.8f)
+            {
+                hpBar.value -= 1;
+                if (hpBar.value == 0)
+                {
+                    ActCount = 1;
+                    Enemy.SetActive(false);
+                }
+            }
+
             atkAni++;
             if (atkAni >= 4)
                 atkAni = 0;
         }
     }
 
-    void clickItem(int num)
-    { 
-        if (Input.GetMouseButtonDown(0) && player.GetComponent<BoxCollider>().enabled == true)
+    void clickItem(int _tuto)
+    {
+        Ray cameraRay = camera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit rayHit;
+        if (Physics.Raycast(cameraRay, out rayHit))
         {
-            player.transform.GetComponent<BoxCollider>().enabled = false;
-            Ray cameraRay = camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit rayHit;
-            if (Physics.Raycast(cameraRay, out rayHit))
+            if (rayHit.collider.tag == "item" && rayHit.collider.GetComponent<outline>().enabled)
             {
-                if(rayHit.collider.tag == "item" && rayHit.collider.GetComponent<outline>().enabled)
+                getItem = rayHit.collider.gameObject;
+                if (_tuto == 2)
                 {
-                    getItem = rayHit.collider.gameObject;
-                    if(num == 2)
-                    {
-                        getItem.SetActive(false);
-                        changeItemImg(getItem.name);
-                    }
-                    else if(num == 5)
-                    {
-                        getItem.transform.position = player.transform.position + Vector3.up * 2;
-                        getItem.GetComponent<Rigidbody>().useGravity = false;
-                    }
+                    getItem.SetActive(false);
+                    changeItemImg(getItem.name);
+                }
+                else if (_tuto == 5)
+                {
+                    getItem.transform.position = player.transform.position + Vector3.up * 2;
+                    getItem.GetComponent<Rigidbody>().useGravity = false;
                 }
             }
         }
@@ -308,13 +365,13 @@ public class tutorial : MonoBehaviour
         {
             player.transform.GetComponent<BoxCollider>().enabled = true;
         }
-    }
+    } //아이템 outline활성화시 클릭 가능 
 
     void changeItemImg(string name)
     {
         Sprite spr = Resources.Load<Sprite>("Sprites/" + name);
         itemBtn.gameObject.GetComponent<Image>().sprite = spr;
-    }
+    } // itemBtn 이미지 변경 
 
     public void ItemDragDrop()
     {
@@ -327,14 +384,15 @@ public class tutorial : MonoBehaviour
             getItem.transform.position = pos;
             getItem.SetActive(true);
             getItem = null;
+            ActCount = 1;
         }
-    }
+    } // itemBtn에 들어간 아이템 다시 화면 밖으로 내보내기 
 
     void ActiveTargetZone()
     {
         targetZone.SetActive(true);
-    }
-
+    } //targetZone 활성화
+     
     void drawTargetZone()
     {
         float x = Input.GetAxisRaw("Mouse X");
@@ -351,7 +409,7 @@ public class tutorial : MonoBehaviour
         else if (nowPos.z < minZ)
             nowPos.z = minZ;
         targetZone.transform.localPosition = nowPos;
-    }
+    } //targetZone 마우스 움직임에 따라 이동
 
     void TransferItem()
     {
@@ -359,9 +417,9 @@ public class tutorial : MonoBehaviour
         Vector3 dir = targetZone.transform.position - transform.position;
         getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z);
         targetZone.SetActive(false);
-    }
+    } //targetZone이 마지막으로 그려진 위치에 아이템 던지기 
 
-    void drawPoint()
+    void drawPoint() //point 보이기 
     {
         shotRay = new Ray();
         shotRay.origin = shotMgr.transform.position;
@@ -382,25 +440,38 @@ public class tutorial : MonoBehaviour
         }
     }
 
-    void Shot()
+    void Shot() // MagicPrefab 쏘기 
     {
-        nowShot = Instantiate(magicPrefab, shotMgr.transform.position, Quaternion.identity);
-        nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
-        nowShot.GetComponentInChildren<ShotController>().rayPoint = shotRay.direction * 10;
-    }
-
-    public void ReadOnTrue() //textBtn 누를 때 마다 readOn = true; 
-    {
-        if(EventSystem.current.currentSelectedGameObject == TextBtn && count != 1)
+        if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != TextBtn)
         {
-            Debug.Log("ReadOnTrue");
-            readOn = true;
-            if (tuto < 5)
-                tuto++;
+            nowShot = Instantiate(magicPrefab, shotMgr.transform.position, Quaternion.identity);
+            nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
+            rayPoint = shotRay.direction * 10;
         }
     }
 
-    void ReadData() // 텍스트 파일 읽기
+    public void ReadOnTrue() //텍스트 넘길 수 있는 조건
+    {
+        if(EventSystem.current.currentSelectedGameObject == TextBtn)
+        {
+            Debug.Log("ReadOnTrue");
+            if (tuto == -1)
+                readOn = true;
+            else
+            {
+                int pass = int.Parse(textList[readLine].Substring(1, 1));
+                if (pass == 1 || ActCount >= 1)
+                {
+                    readOn = true;
+                    pass = 0;
+                }
+                else
+                    readOn = false;
+            }
+        }
+    }
+
+    void ReadData() // 텍스트 외부 파일 읽기
     {
         TextAsset data = Resources.Load<TextAsset>("Data");
         StringReader sr = new StringReader(data.text);
@@ -412,15 +483,33 @@ public class tutorial : MonoBehaviour
         sr.Close();
     }
     
-    public void ChangeScene()
+    void showText(int idx) // 리스트에 저장된 텍스트 출력 
     {
-        if(tuto == 5 && count == 1 && EventSystem.current.currentSelectedGameObject == TextBtn)
+        Text text = TextBtn.GetComponentInChildren<Text>();
+        text.text = subtractTutoNum(textList[idx]);
+        text.color = Color.white;
+        text.fontSize = 20;
+    }
+
+    string subtractTutoNum(string str) //텍스트 파일에 있는 숫자 제외하고 출력하기 
+    {
+        tuto = int.Parse(str.Substring(0, 1));
+        if (tuto == 4 || tuto == 5)
         {
-            loading.SetActive(true);
-            StartCoroutine(Loading());
-            int len = textList.Count;
-            TextBtn.GetComponentInChildren<Text>().text = textList[len - 1];
-            SceneManager.LoadScene("WaitScene");
+            weaponIdx = int.Parse(str.Substring(2, 1));
+            return str.Substring(3);
+        }
+        else
+            return str.Substring(2);
+
+    }
+
+    public void ChangeScene() //튜토리얼 종료 알림 및 WaitScene으로 돌아가기 
+    {
+        if(tuto == 7 && EventSystem.current.currentSelectedGameObject == TextBtn ) //튜토5에서 
+        {
+            showText(readLine);
+            StartCoroutine(OnDelay(1f));
         }
     }
 
@@ -428,25 +517,19 @@ public class tutorial : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         TextBtn.SetActive(true);
-    }
+    } //튜토리얼 씬에 진입 직후 텍스트 출력 시간 제어
 
     IEnumerator EndAni(float delay)
     {
         yield return new WaitForSeconds(delay);
-        idleAni = true;
         aniEnd = true;
-    }
+    } //animation 끝난 후 delay
 
-    IEnumerator Loading() // thread로 바꾸기 
+    IEnumerator OnDelay(float delay)  
     {
-        Scene scene = SceneManager.GetActiveScene();
-        while (scene.name == "TutorialScene")
-        {
-            fill++;
-            if (fill == 1)
-                fill = 0;
-            yield return new WaitForSeconds(0.01f);
-            loading.GetComponent<Image>().fillAmount = fill;
-        }
-    }
+        yield return new WaitForSeconds(delay);
+        showText(readLine);
+        yield return new WaitForSeconds(delay);
+        loading.LoadScene("WaitScene");
+    } //씬 전환 할 때 delay
 }
