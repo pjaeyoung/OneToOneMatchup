@@ -19,15 +19,15 @@ public class tutorial : MonoBehaviour
     GameObject itemInfo; // tuto = 3 일 때 생성되는 아이템 정보 설명하는 창 
     GameObject targetZone;
     AnimationController animationCntrl;
-    Slider hpBar;
+    public Slider hpBar;
     public GameObject sword;
     public GameObject wand;
     GameObject magicPrefab;
     GameObject point; // 사정거리 표시 
-    GameObject nowShot;
     GameObject shotMgr;
     Ray shotRay;
     GameObject TextBtn;
+    GameObject skipBtn;
     GameObject Enemy;
     GameObject hpPotion;
     GameObject beerBox;
@@ -45,7 +45,7 @@ public class tutorial : MonoBehaviour
     int weaponIdx = 0;
     int atkAni = 0;
     bool aniEnd = false;
-    bool set = false;
+    bool weaponSet = false;
 
     float maxDistance = 20; //point 한계치 
     Vector3 rayPoint;
@@ -53,6 +53,7 @@ public class tutorial : MonoBehaviour
     public int tuto = -1; //튜토리얼 chapter 번호 (0: 이동키/ 1: 회전 / 2: 아이템 획득/ 3: 아이템, 무기 종류 설명/ 4: 무기공격 / 5: 던지기 공격) 
     int readLine = -1;
     bool readOn = false;
+    bool coroutineOn = false;
     List<string> textList; //튜토리얼 설명 내용 
     int ActCount = 0; //튜토리얼에 따라 행동 수행 여부 측정 
 
@@ -78,8 +79,9 @@ public class tutorial : MonoBehaviour
         point = GameObject.Find("PointPrefab");
         point.SetActive(false);
         shotMgr = player.transform.GetChild(7).gameObject;
-        TextBtn = GameObject.Find("Canvas").transform.Find("TextBtn").gameObject;
+        TextBtn = GameObject.Find("Canvas/TextBtn").gameObject;
         TextBtn.SetActive(false);
+        skipBtn = GameObject.Find("Canvas/skipBtn").gameObject;
         Enemy = GameObject.Find("enemy");
         hpBar = Enemy.transform.Find("enemyHp/Slider").GetComponent<Slider>();
         Enemy.SetActive(false);
@@ -97,23 +99,25 @@ public class tutorial : MonoBehaviour
     private void FixedUpdate()
     {
         animationCntrl.PlayAnimation("Idle");
-        if (getItem == null && tuto != 6)
+        if (getItem == null)
         {
             move();
             jump();
         }
         Rot();
 
-        if (getItem != null && tuto == 5)
+        if (getItem != null && tuto == 6)
         {
-            if (Input.GetMouseButtonDown(1) && getItem != null)
+            if (Input.GetMouseButton(1))
+            {
                 ActiveTargetZone();
-            else if (Input.GetMouseButton(1) && getItem != null)
                 drawTargetZone();
-            else if (Input.GetMouseButtonUp(1) && getItem != null)
+            }
+            else if (Input.GetMouseButtonUp(1))
             {
                 TransferItem();
                 getItem = null;
+                ActCount = 1;
             }
         }
     }
@@ -138,13 +142,16 @@ public class tutorial : MonoBehaviour
         {
             readOn = false;
             int cpy = tuto;
-            readLine++;
-            showText(readLine);
+            if(tuto != 7)
+            {
+                readLine++;
+                 showText(readLine);
+            }
             if (cpy != tuto)
             {
                 ActCount = 0;
                 if(tuto == 5)
-                    set = false;
+                    weaponSet = false;
             }
         }
 
@@ -178,19 +185,19 @@ public class tutorial : MonoBehaviour
         {
             if (itemInfo.activeSelf == true)
                 itemInfo.SetActive(false);
-            if(set == false)
+            if(weaponSet == false)
             {
                 setWeapon();
-                set = true;
+                weaponSet = true;
             }
                 Attack();
         }
         else if (tuto == 5)
         {
-            if (set == false)
+            if (weaponSet == false)
             {
                 setWeapon();
-                set = true;
+                weaponSet = true;
             }
             Attack();
             drawPoint();
@@ -199,8 +206,13 @@ public class tutorial : MonoBehaviour
         }
         else if (tuto == 6)
         {
-            if (Enemy.activeSelf == true)
+            if (Enemy.activeSelf == true || magicPrefab.activeSelf == true || wand.activeSelf == true || point.activeSelf == true)
+            {
                 Enemy.SetActive(false);
+                magicPrefab.SetActive(false);
+                wand.SetActive(false);
+                point.SetActive(false);
+            }
             if (beerBox.activeSelf == false)
                 beerBox.SetActive(true);
             if (Input.GetMouseButtonDown(1) && player.GetComponent<BoxCollider>().enabled == true)
@@ -247,6 +259,8 @@ public class tutorial : MonoBehaviour
             {
                 IsJump = true;
                 playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
+                if (tuto == 0)
+                    ActCount = 1;
             }
         }
     } // 점프
@@ -255,6 +269,7 @@ public class tutorial : MonoBehaviour
     {
         if (Input.GetMouseButton(2))
         {
+            Cursor.lockState = CursorLockMode.Confined;
             float mouseX = Input.GetAxis("Mouse X") * sensibilityX;
             float mouseY = Input.GetAxis("Mouse Y") * sensibilityY;
 
@@ -270,6 +285,8 @@ public class tutorial : MonoBehaviour
             if (tuto == 1)
                 ActCount = 1;
         }
+        else if (Input.GetMouseButtonUp(2))
+            Cursor.lockState = CursorLockMode.None;
     } // 상하좌우 회전 
 
     void setWeapon()
@@ -295,12 +312,9 @@ public class tutorial : MonoBehaviour
     void Attack() //공격
     {
         float distance = 0;
-        if (tuto == 4)
-            distance = Vector3.Distance(player.transform.position, Enemy.transform.position);
-        else if (tuto == 5)
-            distance = Vector3.Distance(magicPrefab.transform.position, Enemy.transform.position);
+        distance = Vector3.Distance(player.transform.position, Enemy.transform.position);
 
-        if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != TextBtn)
+        if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != TextBtn && EventSystem.current.currentSelectedGameObject != skipBtn)
         {
             string atkName = "";
             if (atkAni == 0)
@@ -324,14 +338,13 @@ public class tutorial : MonoBehaviour
             }
             StartCoroutine(EndAni(animationCntrl.GetAniLength(atkName)));
 
-           if(distance <= 0.8f)
-            {
+            if (tuto == 4 && distance <= 0.8f)
                 hpBar.value -= 1;
-                if (hpBar.value == 0)
-                {
-                    ActCount = 1;
-                    Enemy.SetActive(false);
-                }
+
+            if (hpBar.value == 0)
+            {
+                ActCount = 1;
+                Enemy.SetActive(false);
             }
 
             atkAni++;
@@ -444,15 +457,16 @@ public class tutorial : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject != TextBtn)
         {
-            nowShot = Instantiate(magicPrefab, shotMgr.transform.position, Quaternion.identity);
-            nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
-            rayPoint = shotRay.direction * 10;
+            magicPrefab.transform.position = shotMgr.transform.position;
+            magicPrefab.GetComponentInChildren<ShotController>().enabled = true;
+            magicPrefab.transform.GetChild(0).eulerAngles = shotMgr.GetComponentInParent<Transform>().eulerAngles;
+            magicPrefab.GetComponentInChildren<ShotController>().rayPoint = shotRay.direction * 10;
         }
     }
 
     public void ReadOnTrue() //텍스트 넘길 수 있는 조건
     {
-        if(EventSystem.current.currentSelectedGameObject == TextBtn)
+        if (EventSystem.current.currentSelectedGameObject == TextBtn)
         {
             Debug.Log("ReadOnTrue");
             if (tuto == -1)
@@ -464,10 +478,17 @@ public class tutorial : MonoBehaviour
                 {
                     readOn = true;
                     pass = 0;
+                    if (tuto == 0)
+                        ActCount = 0;
                 }
                 else
                     readOn = false;
             }
+        }
+        else if (tuto != 7 && EventSystem.current.currentSelectedGameObject == skipBtn)
+        {
+            Skip();
+            showText(readLine);
         }
     }
 
@@ -509,9 +530,26 @@ public class tutorial : MonoBehaviour
         if(tuto == 7 && EventSystem.current.currentSelectedGameObject == TextBtn ) //튜토5에서 
         {
             showText(readLine);
-            StartCoroutine(OnDelay(1f));
+            if(coroutineOn == false)
+            {
+                coroutineOn = true;
+                StartCoroutine(SceneChangeDelay(1f));
+            }
         }
     }
+
+    public void Skip() //스킵 버튼 
+    {
+        int cpy = tuto;
+        while (cpy == tuto)
+        {
+            readLine++;
+            tuto = int.Parse(textList[readLine].Substring(0, 1));
+        }
+        if (tuto == 5)
+            weaponSet = false;
+
+    } 
 
     IEnumerator textBtnActive()
     {
@@ -525,9 +563,11 @@ public class tutorial : MonoBehaviour
         aniEnd = true;
     } //animation 끝난 후 delay
 
-    IEnumerator OnDelay(float delay)  
+
+    IEnumerator SceneChangeDelay(float delay)  
     {
         yield return new WaitForSeconds(delay);
+        readLine++;
         showText(readLine);
         yield return new WaitForSeconds(delay);
         loading.LoadScene("WaitScene");
