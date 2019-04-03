@@ -56,6 +56,8 @@ public class itemSpawn2 : MonoBehaviour
 
     public GameObject GetObj(int itemNum)
     {
+        Debug.Log("itemNum: " + itemNum);
+        Debug.Log("itemName: " + spawnItemList[itemNum].name);
         return spawnItemList[itemNum];
     }
 }

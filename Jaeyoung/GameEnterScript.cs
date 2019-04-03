@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 
 //매칭 버튼을 누르고 아이템 씬으로 전환시키기 위한 스크립트
-public class GameEnterScript : MonoBehaviour {
+public class GameEnterScript : MonoBehaviour
+{
     public GameObject matchingImg; //매칭중 이미지
     bool matchActive = false; //매칭 버튼을 누르고 매칭이 아직 되지 않았을 때를 체크
     public sCharInfo savCharInfo; //플레이어 캐릭터의 정보를 모두 저장할 구조체
@@ -16,22 +17,25 @@ public class GameEnterScript : MonoBehaviour {
     HeroCustomize playerCustom; //플레이어의 외형을 변경하는 스크립트
     GameObject enemy; //적
     HeroCustomize enemyCustom; //적의 외형을 변경하는 스크립트
+    public GameObject matchAcceptWin;
 
-    void Start () {
-        DontDestroyOnLoad(this); //서버 오브젝트 파괴되지 않게 함
+    void Start()
+    {
+        DontDestroyOnLoad(this); //오브젝트 파괴되지 않게 함
         SocketServer.SingleTonServ().GetEnterScript(this);
         heroCustomize = GameObject.Find("Player").GetComponent<HeroCustomize>();
     }
 
     private void Update()
     {
-        SocketServer.SingleTonServ().WaitRecieve();
-        if(matchingImg!=null && matchingImg.activeSelf==false) //매칭중이라는 이미지 띄우기
+        if (matchingImg != null && matchingImg.activeSelf == false) //매칭중이라는 이미지 띄우기
             matchingImg.SetActive(matchActive);
 
         if (matchSuccess == true) //매칭이 성공되었을 때
         {
             matchSuccess = false;
+            matchAcceptWin.SetActive(true);
+            StartCoroutine(GameStartDelay());
             int gender = 0;
             if (heroCustomize.Gender.Equals("Male"))
                 gender = (int)eGENDER.MALE;
@@ -39,7 +43,6 @@ public class GameEnterScript : MonoBehaviour {
                 gender = (int)eGENDER.FEMALE;
             savCharInfo = new sCharInfo(0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
                 heroCustomize.IndexColorHair.CurrentIndex, heroCustomize.IndexFace.CurrentIndex, -1, -1, -1);
-            SceneManager.LoadScene("ItemCollectScene");
         }
     }
 
@@ -58,5 +61,12 @@ public class GameEnterScript : MonoBehaviour {
     public void MatchSucc() //매칭 성공 하였음
     {
         matchSuccess = true;
+    }
+
+    IEnumerator GameStartDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("ItemCollectScene");
     }
 }

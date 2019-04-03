@@ -35,7 +35,7 @@ public class PlayerScript : MonoBehaviour
 
     Quaternion nowRot;
 
-    int weaponNum = -1;
+    public int weaponNum = -1;
     int sensibilityX = 10;
     int atkAni = 0;
 
@@ -56,6 +56,9 @@ public class PlayerScript : MonoBehaviour
     bool itemPoss = true;
 
     GameObject[] ItemImg;
+
+    BgmController sound;
+    EffSoundController effSound;
 
     void Awake()
     {
@@ -97,6 +100,9 @@ public class PlayerScript : MonoBehaviour
         ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg").gameObject;
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
+
+        sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        effSound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 
     private void FixedUpdate()
@@ -206,6 +212,17 @@ public class PlayerScript : MonoBehaviour
         StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
         sAtk atk = new sAtk(atkAni);
         SocketServer.SingleTonServ().SendMsg(atk);
+
+        if (weaponNum == (int)eWEAPON.em_BOW)
+            effSound.PlayEff((int)eEFFSOUND.em_ARROW);
+        else
+        {
+            if (atkAni % 2 == 0)
+                effSound.PlayEff((int)eEFFSOUND.em_SWING1);
+            if (atkAni % 2 == 1)
+                effSound.PlayEff((int)eEFFSOUND.em_SWING2);
+        }
+
         atkAni++;
         if (atkAni >= 4)
             atkAni = 0;
@@ -296,6 +313,25 @@ public class PlayerScript : MonoBehaviour
         if (spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_GREATESWORD || spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_SWORDANDSHIELD)
             ChinkEffect.transform.position = transform.position + Vector3.up * 2;
         Debug.Log("Damaged");
+        EnemyScript enemyScript = enemyObj.GetComponent<EnemyScript>();
+        if (enemyScript.weaponType == (int)eWEAPON.em_SWORDANDSHIELD)
+        {
+            if (dmgAni == 0)
+                effSound.PlayEff((int)eEFFSOUND.em_SWORD1);
+            else if (dmgAni == 1)
+                effSound.PlayEff((int)eEFFSOUND.em_SWORD2);
+        }
+        else if (enemyScript.weaponType == (int)eWEAPON.em_GREATESWORD)
+        {
+            if (dmgAni == 0)
+                effSound.PlayEff((int)eEFFSOUND.em_SWORD3);
+            else if (dmgAni == 1)
+                effSound.PlayEff((int)eEFFSOUND.em_SWORD4);
+        }
+        else if (enemyScript.weaponType == (int)eWEAPON.em_BOW)
+            effSound.PlayEff((int)eEFFSOUND.em_ARROWHIT);
+        else if (enemyScript.weaponType == (int)eWEAPON.em_WAND)
+            effSound.PlayEff((int)eEFFSOUND.em_MAGIHIT);
     }
 
     void changeHPTextAndDeathAniAct()
@@ -410,6 +446,7 @@ public class PlayerScript : MonoBehaviour
         yield return new WaitForSeconds(0.31f);
         enemyObj = spawnInfo.nowEnemy;
         enemyAtk = enemyObj.GetComponent<AttackMgr>();
+        enemyAtk.playerWeapon = weaponNum;
         while (true)
         {
             Vector3 pos = transform.position;

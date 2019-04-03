@@ -74,10 +74,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     {
         GameObject obj = other.gameObject;
         if (obj.tag == "floor")
-        {
-            Debug.Log("floor!");
             IsJump = false;
-        }
     }
 
     void Update()

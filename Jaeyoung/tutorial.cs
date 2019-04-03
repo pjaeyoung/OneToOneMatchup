@@ -16,7 +16,7 @@ public class tutorial : MonoBehaviour
     Quaternion CameraPredictRot; //카메라 예측 회전 각도
     GameObject getItem; // 클릭한 아이템
     Button itemBtn;
-    GameObject itemInfo; // tuto = 3 일 때 생성되는 아이템 정보 설명하는 창 
+    GameObject itemInfo1; // tuto = 3 일 때 생성되는 아이템 정보 설명하는 창 
     GameObject targetZone;
     AnimationController animationCntrl;
     public Slider hpBar;
@@ -31,6 +31,7 @@ public class tutorial : MonoBehaviour
     GameObject Enemy;
     GameObject hpPotion;
     GameObject beerBox;
+    GameObject SetUp;
 
     float moveSpeed = 5.0f;
     float sensibilityX = 2.0f;
@@ -70,8 +71,8 @@ public class tutorial : MonoBehaviour
         CameraPredictRot = camera.transform.localRotation;
         itemBtn = GameObject.Find("Canvas/itemBtn").GetComponent<Button>();
         itemBtn.gameObject.SetActive(false);
-        itemInfo = GameObject.Find("Canvas/itemInfo").gameObject;
-        itemInfo.gameObject.SetActive(false);
+        itemInfo1 = GameObject.Find("Canvas/itemInfo1").gameObject;
+        itemInfo1.gameObject.SetActive(false);
         targetZone = player.transform.Find("targetZone").gameObject;
         animationCntrl = player.GetComponent<AnimationController>();
         magicPrefab = GameObject.Find("MagicPrefab");
@@ -93,6 +94,8 @@ public class tutorial : MonoBehaviour
 
     void Start()
     {
+        SetUp = GameObject.Find("SoundMgr/SettingBtn");
+        SetUp.SetActive(false);
         StartCoroutine(textBtnActive());
     }
 
@@ -178,13 +181,13 @@ public class tutorial : MonoBehaviour
                 hpPotion.SetActive(false);
                 getItem = null;
             }
-            if (itemInfo.activeSelf == false)
-                itemInfo.SetActive(true);
+            if (itemInfo1.activeSelf == false)
+                itemInfo1.SetActive(true);
         }
         else if (tuto == 4)
         {
-            if (itemInfo.activeSelf == true)
-                itemInfo.SetActive(false);
+            if (itemInfo1.activeSelf == true)
+                itemInfo1.SetActive(false);
             if(weaponSet == false)
             {
                 setWeapon();
@@ -553,7 +556,7 @@ public class tutorial : MonoBehaviour
 
     IEnumerator textBtnActive()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         TextBtn.SetActive(true);
     } //튜토리얼 씬에 진입 직후 텍스트 출력 시간 제어
 

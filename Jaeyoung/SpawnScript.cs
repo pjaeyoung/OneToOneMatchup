@@ -11,10 +11,10 @@ public class SpawnScript : MonoBehaviour {
     string enemyPname;
     bool spawnPoss = false;
     public GameObject nowEnemy;
+    public sCharInfo enemyInfo;
     GameObject nowPlayer;
-    sCharInfo enemyInfo;
     GameEnterScript enter;
-    GameMgr GM;
+    bool gameEnd = false;
 
     void Start () {
         enter = GetComponent<GameEnterScript>();
@@ -27,6 +27,13 @@ public class SpawnScript : MonoBehaviour {
         {
             StartCoroutine(ItemDelay()); //두 유저가 모두 정보를 주고 받을 때까지 기다리는 코루틴
             spawnPoss = false;
+        }
+        if (gameEnd == true) //상대 유저의 접속 종료
+        {
+            GameObject enemyOutWin = GameObject.Find("Canvas").transform.Find("EnemyOut").gameObject;
+            enemyOutWin.SetActive(true);
+            StartCoroutine(OutDelay());
+            gameEnd = false;
         }
     }
 
@@ -42,8 +49,6 @@ public class SpawnScript : MonoBehaviour {
         Custom(nowPlayer, enter.savCharInfo);
         Custom(nowEnemy, enemyInfo);
 
-        Camera mainCam = Camera.main; //내 캐릭터가 가진 카메라를 화면에 띄우기
-        mainCam.enabled = false;
         Camera playerCam = nowPlayer.GetComponentInChildren<Camera>();
         nowEnemy.GetComponentInChildren<Canvas>().worldCamera = playerCam; //enemyHp바를 내 캐릭터 카메라 화면에 출력 
         playerCam.enabled = true;
@@ -58,6 +63,10 @@ public class SpawnScript : MonoBehaviour {
         playerPname = playerParent;
         enemyPname = enemyParent;
         enemyInfo = charInfo;
+    }
+
+    public void SpawnReady()
+    {
         spawnPoss = true;
     }
 
@@ -85,8 +94,31 @@ public class SpawnScript : MonoBehaviour {
     IEnumerator ItemDelay() 
     {
         yield return new WaitForSeconds(1.0f);
-        SceneManager.LoadScene("GameScene");
-        yield return new WaitForSeconds(0.5f);
-        Spawn();
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("GameScene");
+        while (true)
+        {
+            yield return new WaitForSeconds(0.2f);
+            if(SceneManager.GetActiveScene().name == "GameScene")
+            {
+                Spawn();
+                break;
+            }
+        }
+    }
+
+    IEnumerator OutDelay()
+    {
+        yield return new WaitForSeconds(1.0f);
+        GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
+        GameObject.Destroy(GameObject.Find("itemFieldMgr"));
+        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound.ChangeBgm("WaitScene");
+        GameObject.Destroy(gameObject);
+    }
+
+    public void ChangeWaitScene()
+    {
+        gameEnd = true;
     }
 }

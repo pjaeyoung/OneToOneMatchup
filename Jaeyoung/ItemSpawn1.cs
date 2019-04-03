@@ -13,7 +13,7 @@ public class ItemSpawn1 : MonoBehaviour
 
     void Awake()
     {
-        enter = GameObject.Find("SocketServer").GetComponent<GameEnterScript>();
+        enter = GameObject.Find("GameMgr").GetComponent<GameEnterScript>();
         int spawnCount = itemSpawn.Length;
         int weaponCount = weapons.Length;
         int armorCount = weaponCount + 3;

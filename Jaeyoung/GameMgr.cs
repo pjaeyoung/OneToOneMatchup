@@ -18,6 +18,7 @@ public class GameMgr : MonoBehaviour {
     bool gameEnter = false;
     bool interactive = true; // 아이템 버튼 interactive 설정
     bool alarmOn = false;
+    bool timerOn = true;
 
     int min; //분
     float timer; //제한 시간 타이머
@@ -93,11 +94,13 @@ public class GameMgr : MonoBehaviour {
     /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시 , 끝나기 10초 전 알람 표시) : showTime, Time2Str, AlarmActive */
     void showTime()
     {
-        timer += Time.deltaTime;
-        if (timer >= 60)
+        if (timerOn == true)
+            timer += Time.deltaTime;
+        if (timer >= 2)
         {
             timer = 0;
             min++;
+            timerOn = false;
         }
         if (timer >= 50 && alarmOn == false)
         {

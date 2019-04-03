@@ -35,7 +35,11 @@ enum eANIMATION
 
 enum eMSG //메세지 종류
 {
-    em_ENTER = 1,
+    em_LOGIN = 1,
+    em_LOGOUT,
+    em_LOGINCHECK,
+    em_MATCHREQUEST,
+    em_ENTER,
     em_CHARINFO,
     em_MOVE,
     em_ATK,
@@ -111,6 +115,60 @@ enum eATKTYPE
     em_NORMAL = 1,
     em_OBJTHROW,
 };
+
+struct sLogin
+{
+    private int flag;
+    public int loginSucc;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] nick;
+    public sLogin(char[] name, int succ, int f = (int)eMSG.em_LOGIN)
+    {
+        flag = f;
+        nick = name;
+        loginSucc = succ;
+    }
+}
+
+struct sLogout
+{
+    private int flag;
+    public sLogout(int f = (int)eMSG.em_LOGOUT)
+    {
+        flag = f;
+    }
+}
+
+struct sLoginCheck
+{
+    private int flag;
+    public int loginChk;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] nick;
+    public sLoginCheck(char[] name, int chk, int f = (int)eMSG.em_LOGINCHECK)
+    {
+        flag = f;
+        nick = name;
+        loginChk = chk;
+    }
+}
+
+struct sMatchReq
+{
+    private int flag;
+    public int matchSucc;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] recvUserNick;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] sendUserNick;
+    public sMatchReq(char[] user, char[] friend, int succ, int f = (int)eMSG.em_MATCHREQUEST)
+    {
+        flag = f;
+        recvUserNick = friend;
+        sendUserNick = user;
+        matchSucc = succ;
+    }
+}
 
 struct sGameRoom //매칭 정보
 {
@@ -336,30 +394,30 @@ public class PlayerInfo
         getItemArr[index] = i;
     }
 
-    public void changeArmor(string a)
+    public void changeArmor(string armorName)
     {
-        string ArmorGender = a.Substring(0, 16);
-        string ArmorNumStr = a.Substring(17);
+        string ArmorGender = armorName.Substring(0, 1);
+        string ArmorNumStr = armorName.Substring(8, 1);
         int ArmorNumInt = int.Parse(ArmorNumStr);
-        if (ArmorGender == "img_armor_F_Suit" || ArmorGender == "img_armor_M_Suit")
+        if (ArmorGender == "F" || ArmorGender == "M")
             armor = ArmorNumInt;
     }
 
     public void changeWeapon(string w)
     {
-        if (w == "img_weapon_greatSword")
+        if (w == "greatSword")
         {
             weapon = (int)eWEAPON.em_GREATESWORD;
         }
-        else if (w == "img_weapon_wand")
+        else if (w == "wand")
         {
             weapon = (int)eWEAPON.em_WAND;
         }
-        else if (w == "img_weapon_bow")
+        else if (w == "bow")
         {
             weapon = (int)eWEAPON.em_BOW;
         }
-        else if (w == "img_weapon_swordAndShield")
+        else if (w == "swordAndShield")
         {
             weapon = (int)eWEAPON.em_SWORDANDSHIELD;
         }

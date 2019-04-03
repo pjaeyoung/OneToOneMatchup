@@ -10,19 +10,19 @@ public class CustomBtn : MonoBehaviour {
         StartCoroutine(HideWeapon());
     }
 	
-    public void MaleBtn()
+    public void MaleBtn() //남자로 바꾸기
     {
         heroCustomize.Gender = "Male";
         heroCustomize.UpdateVisual();
     }
 
-    public void FemaleBtn()
+    public void FemaleBtn() //여자로 바꾸기
     {
         heroCustomize.Gender = "Female";
         heroCustomize.UpdateVisual();
     }
 
-    public void HairBtn()
+    public void HairBtn() //머리 변경
     {
         heroCustomize.IndexHair.CurrentIndex++;
 
@@ -32,7 +32,7 @@ public class CustomBtn : MonoBehaviour {
         heroCustomize.UpdateVisual();
     }
 
-    public void HairColorBtn()
+    public void HairColorBtn() //머리색 변경
     {
         heroCustomize.IndexColorHair.CurrentIndex++;
 
@@ -42,7 +42,7 @@ public class CustomBtn : MonoBehaviour {
         heroCustomize.UpdateVisual();
     }
 
-    public void FaceBtn()
+    public void FaceBtn() //얼굴 변경
     {
         heroCustomize.IndexFace.CurrentIndex++;
 
@@ -52,7 +52,7 @@ public class CustomBtn : MonoBehaviour {
         heroCustomize.UpdateVisual();
     }
 
-    IEnumerator HideWeapon()
+    IEnumerator HideWeapon() //무기 숨기기
     {
         yield return new WaitForSeconds(0.01f);
         heroCustomize.HideWeapon();

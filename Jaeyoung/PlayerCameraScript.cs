@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerCameraScript : MonoBehaviour {
     Quaternion initRot; //초기 회전각
     Quaternion preRot; //예측한 회전각 
-    public float sensibility = 2f; //회전운동 민감도
+    public float sensibility = 5f; //회전운동 민감도
     public int MaxRot = 30; //최대 회전각 크기 
     public int MinRot = -30; //최소 회전각 크기 
     public float rotSpeed = 40; //회전 속도 
@@ -34,7 +34,7 @@ public class PlayerCameraScript : MonoBehaviour {
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButton(2))
+        if (Input.GetMouseButton(2)) //카메라 위 아래 회전 
         {
             float RotY = Input.GetAxis("Mouse Y") * sensibility;
             preRot *= Quaternion.Euler(Vector3.left * RotY);

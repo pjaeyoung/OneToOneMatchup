@@ -161,6 +161,7 @@ public class AnimationController : MonoBehaviour {
 
     public void PlayAtkDmg(string aniName)
     {
+        animation.wrapMode = WrapMode.Once;
         animation.Play(GetAniName(aniName));
     }
 
