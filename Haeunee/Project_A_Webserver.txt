@@ -40,33 +40,27 @@ def Login(): #로그인
         _userPass = request.form['password']
         
     msg = str()
-    sql="select idx from user where nick='"+_userNick+"' and pass=password('"+_userPass+"')"
+    sql="select idx, tuto from user where nick='"+_userNick+"' and pass=password('"+_userPass+"')"
     data = DB.DBSelect(sql) #아이디와 패스워드 일치하는지
     if data:
         msg = "login"
+        msg+=","+str(data[0]["tuto"])
     else:
         msg = "fail"
         
     DB.DBClose()    
     return msg
 
-@app.route("/Items", methods = ["GET","POST"])
+@app.route("/Tuto",methods = ["GET","POST"])
 
-def ItemInfo():
-    DB.DBConn() 
-    if 'name' in request.form:
-        _itemName = request.form['name']
-    
-    msg = str()
-    sql = "select hp, atk, def, speed from item where name='"+_itemName+"'"
-    data = DB.DBSelect(sql)
-    if data:
-        hp = data[0]['hp']
-        atk=data[0]['atk']
-        deff=data[0]['def']
-        speed=data[0]['speed']
-        msg = str(hp)+","+str(atk)+","+str(deff)+","+str(speed)
-        return msg
+def Tutorial():
+    DB.DBConn()  
+    if 'nick'  in request.form:
+        _userNick =  request.form['nick']
+    sql="update user set tuto = 1 where nick = '"+_userNick+"'"
+    DB.DBChange(sql) 
+    DB.DBClose()    
+    return "succ"
 
 @app.route("/Friends", methods = ["GET","POST"])
 
