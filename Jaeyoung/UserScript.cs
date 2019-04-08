@@ -63,6 +63,7 @@ public class UserScript : MonoBehaviour {
                 alreadyLogin.SetActive(true);
             }
         }
+
         if(tutorialWin.activeSelf == true)
         {
             if (EventSystem.current.currentSelectedGameObject == YesBtn)

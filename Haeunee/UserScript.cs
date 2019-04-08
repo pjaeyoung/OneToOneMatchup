@@ -24,6 +24,13 @@ public class UserScript : MonoBehaviour
     bool loginResult = false;
     int loginSucc = 0;
 
+    public GameObject signUpWin;
+    public InputField signUpNick;
+    public InputField signUpPass;
+    public InputField signUpPhone;
+    public GameObject phoneWin;
+    public GameObject wrongNumWin;
+
     int tuto = -1;
     public GameObject tutorialWin; //튜토리얼 진행여부 묻는 화면 
     public GameObject YesBtn;
@@ -40,7 +47,8 @@ public class UserScript : MonoBehaviour
 
     private void Update()
     {
-        if (overlapWin.activeSelf || succWin.activeSelf || failWin.activeSelf || alreadyLogin.activeSelf)
+        if (overlapWin.activeSelf || succWin.activeSelf || failWin.activeSelf 
+            || alreadyLogin.activeSelf|| phoneWin.activeSelf|| wrongNumWin.activeSelf)
         { //켜져있는 창 시간지나면 닫기
             winTime += Time.deltaTime;
             if (winTime >= 1)
@@ -50,6 +58,8 @@ public class UserScript : MonoBehaviour
                 succWin.SetActive(false);
                 failWin.SetActive(false);
                 alreadyLogin.SetActive(false);
+                phoneWin.SetActive(false);
+                wrongNumWin.SetActive(false);
             }
         }
 
@@ -59,6 +69,7 @@ public class UserScript : MonoBehaviour
             if (loginSucc == 0) //로그인 성공
             {
                 web.nick = nick;
+                GameObject.Find("SoundMgr").transform.GetChild(2).GetChild(6).gameObject.SetActive(true);
                 if (tuto == 0)
                 {
                     tutorialWin.SetActive(true);
@@ -93,21 +104,63 @@ public class UserScript : MonoBehaviour
 
     public void SignUp() //회원가입
     {
-        string respJson = ConnectServer("http://192.168.0.22:10000/SignUp");
-        Debug.Log(respJson);
+        signUpWin.SetActive(true);
+    }
 
-        if (respJson.Equals("succ"))
+    public void SignUpClick()
+    {
+        string phoneNum = signUpPhone.text;
+        int phoneLen = phoneNum.Length;
+        StringBuilder sendInfo = new StringBuilder();
+        sendInfo.Append("nick=" + signUpNick.text);
+        sendInfo.Append("&password=" + signUpPass.text);
+        sendInfo.Append("&phone=" + phoneNum);
+        signUpNick.text = "";
+        signUpPass.text = "";
+        signUpPhone.text = "";
+
+        if (phoneLen<10)
         {
-            succWin.SetActive(true);
+            wrongNumWin.SetActive(true);
         }
-        else if (respJson.Equals("overlap"))
+        else
         {
-            overlapWin.SetActive(true);
+            for(int i=0;i<phoneLen; i++)
+            {
+                if(phoneNum[i]!='0'|| phoneNum[i] != '1'|| phoneNum[i] != '2'|| phoneNum[i] != '3'|| phoneNum[i] != '4'
+                    || phoneNum[i] != '5'|| phoneNum[i] != '6'|| phoneNum[i] != '7'|| phoneNum[i] != '8' || phoneNum[i] != '9')
+                {
+                    wrongNumWin.SetActive(true);
+                    return;
+                }
+            }
+
+            string respJson = web.ConnectServer("http://192.168.0.22:10000/SignUp", sendInfo);
+            Debug.Log(respJson);
+
+            if (respJson.Equals("succ"))
+            {
+                succWin.SetActive(true);
+            }
+            else if (respJson.Equals("overlap"))
+            {
+                overlapWin.SetActive(true);
+            }
+            else if (respJson.Equals("phone overlap"))
+            {
+                phoneWin.SetActive(true);
+            }
+            else if (respJson.Equals("fail"))
+            {
+                failWin.SetActive(true);
+            }
         }
-        else if (respJson.Equals("fail"))
-        {
-            failWin.SetActive(true);
-        }
+    }
+
+    public void CloseBtn()
+    {
+        GameObject nowBtnObj = EventSystem.current.currentSelectedGameObject;
+        nowBtnObj.transform.parent.gameObject.SetActive(false);
     }
 
     public void Login() //로그인
