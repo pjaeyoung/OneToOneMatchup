@@ -22,6 +22,7 @@ public class GameEnterScript : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(this); //오브젝트 파괴되지 않게 함
+        DontDestroyOnLoad(GameObject.Find("JoystickCanvas"));
         SocketServer.SingleTonServ().GetEnterScript(this);
         heroCustomize = GameObject.Find("Player").GetComponent<HeroCustomize>();
     }

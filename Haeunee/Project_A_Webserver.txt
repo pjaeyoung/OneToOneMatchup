@@ -15,17 +15,22 @@ DB=DBController()
 
 def SignUp(): #회원가입
     DB.DBConn()    
-    if 'nick'  in request.form and 'password'  in request.form:
+    if 'nick'  in request.form and 'password'  in request.form and 'phone'  in request.form:
         _userNick=request.form['nick']         
         _userPass = request.form['password']
+        _userPhone = request.form['phone']
         
         msg=str() #닉네임 중복 체크
         sql="select nick from user where nick='"+_userNick+"'"
         data = DB.DBSelect(sql)
+        sql="select nick from user where phone='"+_userPhone+"'" #전화번호 중복체크
+        _phoneData = DB.DBSelect(sql)
         if data:
             msg = "overlap"
+        elif _phoneData:
+            msg = "phone overlap"
         else:
-            sql = "insert into user(nick, pass) value('"+_userNick+"', password('"+_userPass+"'))"
+            sql = "insert into user(nick, pass, phone) value('"+_userNick+"', password('"+_userPass+"'), '"+_userPhone+"')"
             DB.DBChange(sql) #데이터베이스에 유저정보 저장
             msg = "succ"
     DB.DBClose()
@@ -59,6 +64,66 @@ def Tutorial():
         _userNick =  request.form['nick']
     sql="update user set tuto = 1 where nick = '"+_userNick+"'"
     DB.DBChange(sql) 
+    DB.DBClose()    
+    return "succ"
+
+@app.route("/UserDel", methods = ["GET","POST"])
+
+def UserDelete():
+    DB.DBConn()  
+    if 'nick'  in request.form and 'password'  in request.form:
+        _userNick=request.form['nick']         
+        _userPass = request.form['password']
+        
+        msg = str()
+        sql="select idx, tuto from user where nick='"+_userNick+"' and pass=password('"+_userPass+"')"
+        data = DB.DBSelect(sql) #아이디와 패스워드 일치하는지
+        if data:
+            sql = "delete from user where nick='"+_userNick+"'"
+            DB.DBChange(sql)
+            msg = "succ"
+        else:
+            msg = "fail"        
+    DB.DBClose()    
+    return msg
+
+@app.route("/UserSearch", methods=["GET", "POST"])
+
+def UserSearch():
+    DB.DBConn()  
+    if 'flag'  in request.form:
+        _flag=request.form['flag']         
+        _userPhone = request.form['phone']
+        
+        if _flag=="nick":
+            sql="select nick from user where phone='"+_userPhone+"'"
+            data = DB.DBSelect(sql) #아이디와 패스워드 일치하는지
+            if data:
+                msg = data[0]['nick']
+            else:
+                msg = "fail"
+        elif _flag=="pass":
+            _userNick=request.form['nick']
+            sql="select nick from user where phone='"+_userPhone+"' and nick='"+_userNick+"'"
+            data = DB.DBSelect(sql)
+            if data:
+                msg = "succ"
+            else:
+                msg = "fail"        
+    DB.DBClose()    
+    return msg
+
+@app.route("/ChangePassword", methods=["GET", "POST"])
+
+def ChangePassword():  
+    DB.DBConn()  
+    if 'nick'  in request.form:
+        _userNick=request.form['nick']         
+        _userPass = request.form['pass']
+        
+        sql="update user set pass=password('"+_userPass+"') where nick='"+_userNick+"'"
+        DB.DBChange(sql) #아이디와 패스워드 일치하는지
+   
     DB.DBClose()    
     return "succ"
 
@@ -200,10 +265,10 @@ def GameEnd():
     if "flag" in request.form and 'nick'  in request.form: #닉네임과 이겼는지 졌는지 불러오기
         _flag = request.form["flag"]
         _userNick = request.form["nick"]
+        sql = "SELECT score FROM user WHERE user.nick = '"+_userNick+"'"
+        data = DB.DBSelect(sql)      
         
         if _flag == "win" : #이겼을 경우
-            sql = "select score from user where nick = '"+_userNick+"'"
-            data = DB.DBSelect(sql)      
             _score = data[0]["score"] + 20 #이기면 점수 20점 더하기
             sql = "update user set score ="  + str(_score) +" where nick = '"+_userNick+"'"
             DB.DBChange(sql)
@@ -211,8 +276,6 @@ def GameEnd():
             return str(msg)
         
         elif _flag =="lose":
-            sql = "select score from user where nick = '"+_userNick+"'"
-            data = DB.DBSelect(sql)   
             _score = data[0]["score"] 
             if  _score>=10:
                 _score -= 10 #지면 점수 10점 빼기
