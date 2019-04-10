@@ -11,8 +11,8 @@ public class SpawnScript : MonoBehaviour {
     string enemyPname;
     bool spawnPoss = false;
     public GameObject nowEnemy;
+    public sCharInfo enemyInfo;
     GameObject nowPlayer;
-    sCharInfo enemyInfo;
     GameEnterScript enter;
     bool gameEnd = false;
 
@@ -96,8 +96,15 @@ public class SpawnScript : MonoBehaviour {
         yield return new WaitForSeconds(1.0f);
         BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
         sound.ChangeBgm("GameScene");
-        yield return new WaitForSeconds(0.5f);
-        Spawn();
+        while (true)
+        {
+            yield return new WaitForSeconds(0.2f);
+            if(SceneManager.GetActiveScene().name == "GameScene")
+            {
+                Spawn();
+                break;
+            }
+        }
     }
 
     IEnumerator OutDelay()
@@ -112,7 +119,6 @@ public class SpawnScript : MonoBehaviour {
 
     public void ChangeWaitScene()
     {
-        Debug.Log("[SpawnScript] ChangeWaitScene()");
         gameEnd = true;
     }
 }

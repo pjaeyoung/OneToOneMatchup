@@ -7,13 +7,13 @@ public class itemCntrl : MonoBehaviour
 {
     PlayerScript s_player;
     GameObject highlightBox;
+    GameObject hitEffect;
     outline s_outline;
     outline[] s_outline2;
     Scene scene;
+    AttackMgr atkMgr;
     bool IsInHighlightBox = false; //아이템이 하이라이트 박스과 충돌했는지 여부 
     public bool isDestroyOK = false;
-    AttackMgr atkMgr;
-    ParticleSystem particle;
 
     private void Awake()
     {
@@ -24,9 +24,9 @@ public class itemCntrl : MonoBehaviour
         }
         else if (scene.name == "GameScene")
         {
+            hitEffect = GameObject.Find("HitEffect");
             s_player = SocketServer.SingleTonServ().NowPlayerScript();
             highlightBox = s_player.gameObject.transform.Find("chkHighlight").gameObject;
-            particle = GameObject.Find("HitEffect").GetComponentInChildren<ParticleSystem>();
         }
         highlightBox.SetActive(true);
         if(transform.name == "swordAndShield(Clone)") //swordAndShield 자식 오브젝트 둘 모두에게 적용 
@@ -58,6 +58,8 @@ public class itemCntrl : MonoBehaviour
             else
                 s_outline.enabled = true;
         }
+        if (transform.position.y < -2)
+            transform.position += Vector3.up * 3;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -74,8 +76,7 @@ public class itemCntrl : MonoBehaviour
             {
                 if(obj.tag=="Shootable"||obj.tag=="floor"|| obj.tag == "Enemy"|| obj.tag == "Player")
                 {
-                    particle.gameObject.transform.parent.position = transform.position;
-                    particle.Play();
+                    hitEffect.transform.position = transform.position;
                     highlightBox.SetActive(true);
                     Destroy(gameObject);
                     isDestroyOK = false;

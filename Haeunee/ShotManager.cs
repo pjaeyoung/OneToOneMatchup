@@ -14,7 +14,6 @@ public class ShotManager : MonoBehaviour {
 
     void Start () {
         ray = new Ray();
-
         arrow = GameObject.Find("ArrowPrefab");
         magic = GameObject.Find("MagicPrefab");
     }
@@ -47,18 +46,18 @@ public class ShotManager : MonoBehaviour {
         else if (myWeaponType == (int)eWEAPON.em_WAND)
             nowShot = magic;
         nowShot.transform.position = transform.position;
-        nowShot.GetComponent<ShotController>().enabled = true;
+        nowShot.GetComponentInChildren<ShotController>().enabled = true;
         nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;
-        nowShot.GetComponent<ShotController>().rayPoint = ray.direction * 10;
+        nowShot.GetComponentInChildren<ShotController>().rayPoint = ray.direction * 10;
     }
 
     public void ShotPosChange(int weaponType)
     { //무기에 따라 샷이 날아갈 곳 변경
         myWeaponType = weaponType;
         if (weaponType==(int)eWEAPON.em_WAND)
-            transform.localPosition = new Vector3(8, 20, 0);
+            transform.localPosition = new Vector3(4, 20, 17);
         else if (weaponType == (int)eWEAPON.em_BOW)
-            transform.localPosition = new Vector3(0, 12, 7);
+            transform.localPosition = new Vector3(6, 12, 22);
         else
         {
             GetComponent<ShotManager>().enabled = false;

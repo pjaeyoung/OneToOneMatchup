@@ -52,6 +52,7 @@ enum eMSG //메세지 종류
     em_THROWOBJ,
     em_READY,
     em_END,
+    em_CHAT,
 }
 
 // 참, 거짓 판단 
@@ -343,6 +344,18 @@ public struct sEnd //항복 버튼 사용, 죽음
     {
         flag = f;
         result = res;
+    }
+}
+
+public struct sChat //채팅
+{
+    private int flag;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] chat;
+    public sChat(char[] ch, int f = (int)eMSG.em_CHAT)
+    {
+        flag = f;
+        chat = ch;
     }
 }
 

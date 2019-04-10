@@ -127,8 +127,10 @@ public class UserScript : MonoBehaviour
         {
             for(int i=0;i<phoneLen; i++)
             {
-                if(phoneNum[i]!='0'|| phoneNum[i] != '1'|| phoneNum[i] != '2'|| phoneNum[i] != '3'|| phoneNum[i] != '4'
-                    || phoneNum[i] != '5'|| phoneNum[i] != '6'|| phoneNum[i] != '7'|| phoneNum[i] != '8' || phoneNum[i] != '9')
+                if (phoneNum[i] == '0' || phoneNum[i] == '1' || phoneNum[i] == '2' || phoneNum[i] == '3' || phoneNum[i] == '4'
+                    || phoneNum[i] == '5' || phoneNum[i] == '6' || phoneNum[i] == '7' || phoneNum[i] == '8' || phoneNum[i] == '9')
+                    continue;
+                else
                 {
                     wrongNumWin.SetActive(true);
                     return;

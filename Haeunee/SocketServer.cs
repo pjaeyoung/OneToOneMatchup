@@ -43,6 +43,7 @@ public class SocketServer {
     static int gameResult;
     static FriendsScript fScript;
     IntPtr ptr;
+    static ChatScript chatScript;
 
     private void MakeServer()
     {
@@ -140,7 +141,7 @@ public class SocketServer {
             Type m_type = typeof(sItemSpawn);
             sItemSpawn itemSpawn = (sItemSpawn)Marshal.PtrToStructure(buff, m_type);
             pScript.passOnItemSpawnInfo(itemSpawn.itemKind);
-            pScript.CreateHitEffect(true);
+            pScript.GetAtkMgrFromServer(true);
         }
         else if (room.flag == (int)eMSG.em_USEITEM) //아이템 사용
         {
@@ -161,7 +162,7 @@ public class SocketServer {
         {
             Type m_type = typeof(sGetObj);
             sGetObj getObj = (sGetObj)Marshal.PtrToStructure(buff, m_type);
-            Debug.Log("server get succ");
+            Debug.Log("from server get succ");
             eScript.GetThrowObj(getObj.itemNum);
         }
         else if (room.flag == (int)eMSG.em_THROWOBJ) //물건 던지기
@@ -169,6 +170,7 @@ public class SocketServer {
             Type m_type = typeof(sThrowObj);
             sThrowObj throwObj = (sThrowObj)Marshal.PtrToStructure(buff, m_type);
             eScript.ThrowObj(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
+            Debug.Log("from server throw succ");
         }
         else if (room.flag == (int)eMSG.em_END) //게임이 종료되었을 경우
         {
@@ -179,6 +181,13 @@ public class SocketServer {
                 sScript.ChangeWaitScene();
             else
                 pScript.ChangeWaitScene();
+        }
+        else if (room.flag == (int)eMSG.em_CHAT) //채팅
+        {
+            Type m_type = typeof(sChat);
+            sChat chat = (sChat)Marshal.PtrToStructure(buff, m_type);
+            string nowChat = new string(chat.chat);
+            chatScript.ChatRecv(nowChat);
         }
     }
 
@@ -216,6 +225,11 @@ public class SocketServer {
     public void GetUserScript(UserScript user)
     {
         userScript = user;
+    }
+
+    public void GetChatScript(ChatScript chat)
+    {
+        chatScript = chat;
     }
 
     public void WaitRecieve()

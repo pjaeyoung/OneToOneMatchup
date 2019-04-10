@@ -23,7 +23,7 @@ public class EffSoundController : MonoBehaviour
     Slider effVolSlider;
     public AudioClip[] effClip;
 
-    private void Start()
+    private void Awake()
     {
         GameObject soundMgr = GameObject.Find("SoundMgr");
         GameObject setWin = soundMgr.transform.Find("SettingWin").gameObject;

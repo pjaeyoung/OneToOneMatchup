@@ -3,22 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackMgr : MonoBehaviour {
-    public bool aktPossible = false;
+    bool aktPossible = false;
     AnimationController aniCon;
+    GameObject ChinkEffect;
     EnemyScript enemyScript;
     public int playerWeapon = -1;
 
-	void Start () {
+    void Start ()
+    {
         aniCon = GetComponent<AnimationController>();
+        ChinkEffect = GameObject.Find("ChinkEffect");
         enemyScript = GetComponent<EnemyScript>();
     }
 
     private void OnTriggerEnter(Collider other)
     {//공격 애니메이션 재생되고 있을 때, 무기에만 피격되게 함
+        GameObject obj = other.gameObject;
         if (aktPossible==true && other.gameObject.layer == (int)eLAYER.WEAPON)
         {
             aktPossible = false;
             HitSucc((int)eATKTYPE.em_NORMAL);
+            if(obj.name == "Sword6" || obj.name == "GreatSword6")
+                ChinkEffect.transform.position = obj.transform.position + Vector3.up * 2;
         }
     }
 

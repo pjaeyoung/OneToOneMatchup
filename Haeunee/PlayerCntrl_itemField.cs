@@ -11,7 +11,6 @@ public class PlayerCntrl_itemField : MonoBehaviour
     public int sensibilityX = 10;
     public Button[] itemButton;
     public LayerChange layerChange;
-    public GameObject giveUpMSG;
     GameMgr GM;
     Scene scene;
     AnimationManager AM;
@@ -22,11 +21,11 @@ public class PlayerCntrl_itemField : MonoBehaviour
     Rigidbody playerRigid;
     Quaternion nowRot;
 
-    int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
+    bool IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
     
     private void Awake()
     {
-        IsJump = (int)eBOOLEAN.FALSE;
+        IsJump = false;
         GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         scene = SceneManager.GetActiveScene();
@@ -75,7 +74,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     {
         GameObject obj = other.gameObject;
         if (obj.tag == "floor")
-            IsJump = (int)eBOOLEAN.FALSE;
+            IsJump = false;
     }
 
     void Update()
@@ -88,6 +87,14 @@ public class PlayerCntrl_itemField : MonoBehaviour
     void Move()
     {
         AM.PlayAnimation("Idle");
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (IsJump == false && transform.position.y < 2)
+            {
+                IsJump = true;
+                playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
+            }
+        }
         if (Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
         else if (Input.GetKey(KeyCode.A))
@@ -97,14 +104,6 @@ public class PlayerCntrl_itemField : MonoBehaviour
         else if (Input.GetKey(KeyCode.W))
             this.transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (IsJump == (int)eBOOLEAN.FALSE)
-            {
-                IsJump = (int)eBOOLEAN.TRUE;
-                playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
-            }
-        }
     }
 
     void Rot()

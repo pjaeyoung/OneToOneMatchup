@@ -14,8 +14,11 @@ public class GameMgr : MonoBehaviour {
     public PlayerInfo CPlayerInfo;
     public GameObject canvas;
     public Scene scene;
+    public RawImage alarmImg;
     bool gameEnter = false;
     bool interactive = true; // 아이템 버튼 interactive 설정
+    bool alarmOn = false;
+    bool timerOn = true;
 
     int min; //분
     float timer; //제한 시간 타이머
@@ -88,14 +91,22 @@ public class GameMgr : MonoBehaviour {
         DontDestroyOnLoad(canvas);
     } //GameScene에도 사용할 게임오브젝트 유지 
 
-    /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시) : showTime, TimerToString */
+    /* 타이머(아이템 필드에서 사용. 60초 측정 및 UI 표시 , 끝나기 10초 전 알람 표시) : showTime, Time2Str, AlarmActive */
     void showTime()
     {
-        timer += Time.deltaTime;
-        if (timer > 60)
+        if (timerOn == true)
+            timer += Time.deltaTime;
+        if (timer >= 2)
         {
             timer = 0;
             min++;
+            timerOn = false;
+        }
+        if (timer >= 50 && alarmOn == false)
+        {
+            alarmOn = true;
+            alarmImg.gameObject.SetActive(true);
+            StartCoroutine(AlarmActive(timer));
         }
         int sec = (int)timer;
         string s_time = Time2Str(min, sec);
@@ -106,6 +117,17 @@ public class GameMgr : MonoBehaviour {
     {
         string time = string.Format("{0:00} : {1:00}", _min, _sec);
         return time;
+    }
+
+    IEnumerator AlarmActive(float _timer) //끝나기 10초 전 알람  
+    {
+        while (_timer < 60)
+        {
+            alarmImg.CrossFadeAlpha(0, 1.0f, false);
+            yield return new WaitForSeconds(1.0f);
+            alarmImg.CrossFadeAlpha(1, 1.0f, false);
+            yield return new WaitForSeconds(1.0f);
+        }
     }
 
     /* 아이템 가방 : 소비아이템 전용 */
@@ -189,4 +211,6 @@ public class GameMgr : MonoBehaviour {
         }
         return temp;
     }
+
+    
 }

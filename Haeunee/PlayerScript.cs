@@ -31,6 +31,7 @@ public class PlayerScript : MonoBehaviour
 
     itemSpawn2 s_itemSpawn2;
     hitEffect s_hitEffect;
+    GameObject ChinkEffect;
 
     Quaternion nowRot;
 
@@ -71,6 +72,8 @@ public class PlayerScript : MonoBehaviour
         GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         shotMgr = GetComponentInChildren<ShotManager>();
         shotMgr.ShotPosChange(weaponNum);
+        shotMgr.point = GameObject.Find("PointPrefab");
+        shotMgr.point.SetActive(false);
 
         playerRigidBody = GetComponent<Rigidbody>();
         playerAniCon = GetComponent<AnimationController>();
@@ -86,6 +89,7 @@ public class PlayerScript : MonoBehaviour
 
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
         s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
+        ChinkEffect = GameObject.Find("ChinkEffect");
 
         nowRot = transform.localRotation;
 
@@ -99,8 +103,6 @@ public class PlayerScript : MonoBehaviour
 
         sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
         effSound = gameObject.GetComponentInChildren<EffSoundController>();
-
-        shotMgr.FindPoint();
     }
 
     private void FixedUpdate()
@@ -210,6 +212,7 @@ public class PlayerScript : MonoBehaviour
         StartCoroutine(EndAni(playerAniCon.GetAniLength(atkName)));
         sAtk atk = new sAtk(atkAni);
         SocketServer.SingleTonServ().SendMsg(atk);
+
         if (weaponNum == (int)eWEAPON.em_BOW)
             effSound.PlayEff((int)eEFFSOUND.em_ARROW);
         else
@@ -307,6 +310,8 @@ public class PlayerScript : MonoBehaviour
             playerAniCon.PlayAtkDmg("GetDamage01");
         else if (dmgAni == 1)
             playerAniCon.PlayAtkDmg("GetDamage02");
+        if (spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_GREATESWORD || spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_SWORDANDSHIELD)
+            ChinkEffect.transform.position = transform.position + Vector3.up * 2;
         Debug.Log("Damaged");
         EnemyScript enemyScript = enemyObj.GetComponent<EnemyScript>();
         if (enemyScript.weaponType == (int)eWEAPON.em_SWORDANDSHIELD)
@@ -350,7 +355,6 @@ public class PlayerScript : MonoBehaviour
 
     void changeEndScene() // EndScene 전환 
     {
-        Debug.Log("changeEndScene()");
         GameObject.Destroy(GM.gameObject);
         SceneManager.LoadScene("EndScene");
         gameEnd = false;
@@ -424,7 +428,6 @@ public class PlayerScript : MonoBehaviour
 
     public void ChangeWaitScene() //게임이 끝났다는 정보 
     {
-        Debug.Log("[PlayerScript] ChangeWaitScene()");
         gameEnd = true;
     }
 
@@ -433,9 +436,9 @@ public class PlayerScript : MonoBehaviour
         s_itemSpawn2.setItemSpawns(result);
     }
 
-    public void CreateHitEffect(bool b) //아이템 던졌을 때 이펙트 활성화 조건 
+    public void GetAtkMgrFromServer(bool b) //AttackMgr 스크립트를 hitEffect에 전달 
     {
-        s_hitEffect.IsAtkMgr = b;
+        s_hitEffect.getAtkMgr = b;
     }
 
     IEnumerator MoveDelay() //0.031초마다 플레이어의 위치, 회전을 상대 유저에게 보냄

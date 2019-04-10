@@ -14,6 +14,7 @@ public class weaponArmorBtn : MonoBehaviour {
 
     private void Awake()
     {
+        
         GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
     }
 
