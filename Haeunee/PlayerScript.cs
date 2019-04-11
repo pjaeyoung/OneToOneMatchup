@@ -11,7 +11,7 @@ public class PlayerScript : MonoBehaviour
     GameEnterScript playerInfo;
     SpawnScript spawnInfo;
     Rigidbody playerRigidBody;
-    AnimationController playerAniCon; //애니메이션
+    public AnimationController playerAniCon; //애니메이션
     AttackMgr enemyAtk;
     GameMgr GM;
 
@@ -60,6 +60,8 @@ public class PlayerScript : MonoBehaviour
     BgmController sound;
     EffSoundController effSound;
 
+    Joystick joystick;
+
     void Awake()
     {
         DontDestroyOnLoad(transform.parent);
@@ -103,12 +105,25 @@ public class PlayerScript : MonoBehaviour
 
         sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
         effSound = gameObject.GetComponentInChildren<EffSoundController>();
+
+#if UNITY_ANDROID
+        GameObject joystickCanvas = GameObject.Find("JoystickCanvas");
+        GameObject joystickBg = joystickCanvas.transform.GetChild(0).gameObject;
+        GameObject atkBtn = joystickCanvas.transform.GetChild(1).gameObject;
+        atkBtn.GetComponentInChildren<Text>().text = "Attack";
+        GameObject jumpBtn = joystickCanvas.transform.GetChild(2).gameObject;
+        jumpBtn.SetActive(true);
+        joystickBg.SetActive(true);
+        joystick = joystickBg.GetComponent<Joystick>();
+        joystick.ChangePlayer(gameObject);
+#endif
     }
 
     private void FixedUpdate()
     {
         if (Block.activeSelf == false)
         {
+#if UNITY_EDITOR || UNITY_EDITOR_WIN
             if (Input.GetMouseButton(2))
             {
                 Cursor.lockState = CursorLockMode.Confined;
@@ -128,10 +143,10 @@ public class PlayerScript : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space)) //점프
                 Jump();
+#endif
             if (aniEnd == true) //애니메이션 다끝나고
                 shotMgrStart();
-        }
-      
+        }      
     }
 
     void OnTriggerEnter(Collider other)
@@ -195,7 +210,7 @@ public class PlayerScript : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.localRotation, nowRot, 6 * Time.deltaTime);
     }
 
-    void Attack() // 공격(애니메이션 재생, 서버에 정보 전송)
+    public void Attack() // 공격(애니메이션 재생, 서버에 정보 전송)
     {
         enemyAtk.AtkPoss(true);
         idleAni = false;
@@ -249,7 +264,7 @@ public class PlayerScript : MonoBehaviour
         playerAniCon.PlayAnimation("Move");
     }
 
-    void Jump() // 점프 
+    public void Jump() // 점프 
     {
         if (IsJump == (int)eBOOLEAN.FALSE)
         {
@@ -417,6 +432,7 @@ public class PlayerScript : MonoBehaviour
     public void ChangePlayerSpeed(int speed) //속도 변화
     {
         playerSpeed = speed;
+        joystick.ChangeSpeed(speed);
     }
 
     public void ChangeItemImg(int itemNum, bool show) // 아이템 이미지를 변경시켜야 한다는 정보

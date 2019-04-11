@@ -23,6 +23,10 @@ public class EndSceneScript : MonoBehaviour
 
     void Start()
     { //플레이어 캐릭터와 적 캐릭터만 나오게 하기
+        GameObject.Find("JoystickCanvas").transform.GetChild(0).gameObject.SetActive(false);
+        GameObject.Find("JoystickCanvas").transform.GetChild(1).gameObject.SetActive(false);
+        GameObject.Find("JoystickCanvas").transform.GetChild(2).gameObject.SetActive(false);
+
         PlayerScript playerScript = SocketServer.SingleTonServ().NowPlayerScript();
         player = playerScript.transform.gameObject;
         player.transform.rotation = Quaternion.Euler(0, 180, 0);

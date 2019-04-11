@@ -70,7 +70,7 @@ public class GameMgr : MonoBehaviour {
 
     void changeLayerToWeapon()
     {
-        LayerChange LC = this.transform.GetComponent<LayerChange>();
+        LayerChange LC = GetComponent<LayerChange>();
         for(int i = 0; i<4; i++)
             LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON; 
     }
@@ -96,7 +96,7 @@ public class GameMgr : MonoBehaviour {
     {
         if (timerOn == true)
             timer += Time.deltaTime;
-        if (timer >= 2)
+        if (timer >= 60)
         {
             timer = 0;
             min++;
