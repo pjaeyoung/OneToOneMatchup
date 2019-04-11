@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 //매칭 버튼을 누르고 아이템 씬으로 전환시키기 위한 스크립트
 public class GameEnterScript : MonoBehaviour
@@ -24,6 +25,7 @@ public class GameEnterScript : MonoBehaviour
         DontDestroyOnLoad(this); //오브젝트 파괴되지 않게 함
         SocketServer.SingleTonServ().GetEnterScript(this);
         heroCustomize = GameObject.Find("Player").GetComponent<HeroCustomize>();
+
     }
 
     private void Update()
@@ -35,7 +37,6 @@ public class GameEnterScript : MonoBehaviour
         {
             matchSuccess = false;
             matchAcceptWin.SetActive(true);
-            StartCoroutine(GameStartDelay());
             int gender = 0;
             if (heroCustomize.Gender.Equals("Male"))
                 gender = (int)eGENDER.MALE;
@@ -43,12 +44,13 @@ public class GameEnterScript : MonoBehaviour
                 gender = (int)eGENDER.FEMALE;
             savCharInfo = new sCharInfo(0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
                 heroCustomize.IndexColorHair.CurrentIndex, heroCustomize.IndexFace.CurrentIndex, -1, -1, -1);
+            StartCoroutine(GameStartDelay());
         }
     }
 
     public void RandomClick()
     {//매칭 버튼을 눌렀을 때 플레이어의 정보를 저장하고 플레이어가 매칭버튼을 눌렀다는 것을 서버에 전달
-        EventSystem.current.currentSelectedGameObject.SetActive(false);
+        EventSystem.current.currentSelectedGameObject.GetComponent<Button>().interactable = false;
         sGameRoom enter = new sGameRoom(0);
         SocketServer.SingleTonServ().SendMsg(enter);
     }
@@ -66,7 +68,8 @@ public class GameEnterScript : MonoBehaviour
     IEnumerator GameStartDelay()
     {
         yield return new WaitForSeconds(1.0f);
+        loading.LoadScene("ItemCollectScene");
         BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("ItemCollectScene");
+        sound.ChangeBgm();
     }
 }

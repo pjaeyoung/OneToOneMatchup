@@ -15,6 +15,7 @@ public class GameMgr : MonoBehaviour {
     public GameObject canvas;
     public Scene scene;
     public RawImage alarmImg;
+
     bool gameEnter = false;
     bool interactive = true; // 아이템 버튼 interactive 설정
     bool alarmOn = false;
@@ -45,6 +46,7 @@ public class GameMgr : MonoBehaviour {
             if (min >= 1 && gameEnter == false)
             {
                 waitImg.gameObject.SetActive(true);
+                alarmImg.gameObject.SetActive(false);
                 changeLayerToWeapon();
                 gameEnter = true;
                 min = 0;
@@ -96,7 +98,7 @@ public class GameMgr : MonoBehaviour {
     {
         if (timerOn == true)
             timer += Time.deltaTime;
-        if (timer >= 2)
+        if (timer >= 60)
         {
             timer = 0;
             min++;

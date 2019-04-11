@@ -95,7 +95,8 @@ public class SpawnScript : MonoBehaviour {
     {
         yield return new WaitForSeconds(1.0f);
         BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("GameScene");
+        sound.ChangeBgm();
+        loading.LoadScene("GameScene");
         while (true)
         {
             yield return new WaitForSeconds(0.2f);
@@ -113,7 +114,7 @@ public class SpawnScript : MonoBehaviour {
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
         GameObject.Destroy(GameObject.Find("itemFieldMgr"));
         BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("WaitScene");
+        sound.ChangeBgm();
         GameObject.Destroy(gameObject);
     }
 

@@ -72,7 +72,8 @@ public class EndSceneScript : MonoBehaviour
         GameObject.Destroy(player.transform.parent.gameObject);
         GameObject.Destroy(enemy.transform.parent.gameObject);
         BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("WaitScene");
+        sound.ChangeBgm();
+        loading.LoadScene("WaitScene");
     }
 
     string ResultSave(string result) //웹서버와 연결, 승률 계산하여 가져오기

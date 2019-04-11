@@ -11,12 +11,36 @@ public class exitBtn : MonoBehaviour
 
     public void showMSG()
     {
-        exitMSG.gameObject.transform.parent.gameObject.SetActive(true);
+        string name = SceneManager.GetActiveScene().name;
+        string msg = "";
+        if (name == "LoginScene")
+            msg = "게임을 종료하시겠습니까?";
+        else
+            msg = "로그아웃하시겠습니까?";
+        exitMSG.GetComponentInChildren<Text>().text = msg; 
         exitMSG.gameObject.SetActive(true);
         block.SetActive(true);
     }
 
-    public void ExitOk()
+    public void YesBtn()
+    {
+        string name = SceneManager.GetActiveScene().name;
+        if (name == "LoginScene")
+            ExitOk();
+        else
+            LogOutOk();
+    }
+
+    public void NoBtn()
+    {
+        string name = SceneManager.GetActiveScene().name;
+        if (name == "LoginScene")
+            ExitNo();
+        else
+            LogOutNo();
+    }
+
+    void ExitOk()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -25,7 +49,7 @@ public class exitBtn : MonoBehaviour
 #endif
 }
 
-    public void ExitNo()
+    void ExitNo()
     {
         exitMSG.gameObject.SetActive(false);
         if (block == null)
@@ -33,7 +57,7 @@ public class exitBtn : MonoBehaviour
         block.SetActive(false);
     }
 
-    public void LogOutOk()
+    void LogOutOk()
     {
         sLogout logout = new sLogout((int)eMSG.em_LOGOUT);
         SocketServer.SingleTonServ().SendMsg(logout);
@@ -42,18 +66,12 @@ public class exitBtn : MonoBehaviour
         for (int i = 0; i < len; i++)
             Destroy(dontDestroy[i]);
         block.SetActive(false);
-        StartCoroutine(OnDelay());
+        loading.LoadScene("LoginScene");
     }
 
-    public void LogOutNo()
+    void LogOutNo()
     {
         block.SetActive(false);
         exitMSG.gameObject.SetActive(false);
-    }
-
-    IEnumerator OnDelay()
-    {
-        yield return new WaitForSeconds(0.5f);
-        loading.LoadScene("LoginScene");
     }
 }
