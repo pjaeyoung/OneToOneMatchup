@@ -49,6 +49,8 @@ public class UserScript : MonoBehaviour
             if (winTime >= 0.8f)
             {
                 winTime = 0;
+                if(!MSGWin.transform.GetChild(1).gameObject.activeSelf)
+                    MSGWin.transform.GetChild(1).gameObject.SetActive(false);
                 MSGWin.SetActive(false);
             }
         }
@@ -59,7 +61,7 @@ public class UserScript : MonoBehaviour
             if (loginSucc == 0) //로그인 성공
             {
                 web.nick = nick;
-                GameObject.Find("SoundMgr").gameObject.transform.GetChild(3).GetChild(5).gameObject.SetActive(true);
+                GameObject.Find("GameMgr").gameObject.transform.GetChild(3).GetChild(5).gameObject.SetActive(true);
 
                 if (tuto == 0)
                     tutorialWin.SetActive(true);

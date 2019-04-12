@@ -13,7 +13,7 @@ public class PlayerScript : MonoBehaviour
     Rigidbody playerRigidBody;
     AnimationController playerAniCon; //애니메이션
     AttackMgr enemyAtk;
-    GameMgr GM;
+    ItemFieldCntrl GM;
 
     ShotManager shotMgr;
     GameObject enemyObj;
@@ -63,13 +63,13 @@ public class PlayerScript : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(transform.parent);
-        sockServObj = GameObject.Find("GameMgr");
+        sockServObj = GameObject.Find("GameMgr/MatchingCntrl");
         playerInfo = sockServObj.GetComponent<GameEnterScript>();
         weaponNum = playerInfo.savCharInfo.weapon;
 
         spawnInfo = sockServObj.GetComponent<SpawnScript>();
 
-        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("GameMgr/itemFieldCntrl").GetComponent<ItemFieldCntrl>();
         shotMgr = GetComponentInChildren<ShotManager>();
         shotMgr.ShotPosChange(weaponNum);
         shotMgr.point = GameObject.Find("PointPrefab");
@@ -101,7 +101,7 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
 
-        sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
         effSound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 

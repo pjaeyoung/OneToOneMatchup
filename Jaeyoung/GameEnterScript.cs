@@ -8,7 +8,7 @@ using UnityEngine.UI;
 //매칭 버튼을 누르고 아이템 씬으로 전환시키기 위한 스크립트
 public class GameEnterScript : MonoBehaviour
 {
-    public GameObject matchingImg; //매칭중 이미지
+    GameObject matchingImg; //매칭중 이미지
     bool matchActive = false; //매칭 버튼을 누르고 매칭이 아직 되지 않았을 때를 체크
     public sCharInfo savCharInfo; //플레이어 캐릭터의 정보를 모두 저장할 구조체
     HeroCustomize heroCustomize;
@@ -18,14 +18,18 @@ public class GameEnterScript : MonoBehaviour
     HeroCustomize playerCustom; //플레이어의 외형을 변경하는 스크립트
     GameObject enemy; //적
     HeroCustomize enemyCustom; //적의 외형을 변경하는 스크립트
-    public GameObject matchAcceptWin;
+    public GameObject MSGWin;
+
+    private void Awake()
+    {
+        matchingImg = GameObject.Find("WinCanvas/MatchingImg");
+        matchingImg.SetActive(false);
+    }
 
     void Start()
     {
-        DontDestroyOnLoad(this); //오브젝트 파괴되지 않게 함
         SocketServer.SingleTonServ().GetEnterScript(this);
         heroCustomize = GameObject.Find("Player").GetComponent<HeroCustomize>();
-
     }
 
     private void Update()
@@ -36,7 +40,8 @@ public class GameEnterScript : MonoBehaviour
         if (matchSuccess == true) //매칭이 성공되었을 때
         {
             matchSuccess = false;
-            matchAcceptWin.SetActive(true);
+            MSGWin.GetComponentInChildren<Text>().text = "대전으로 입장합니다.";
+            MSGWin.SetActive(true);
             int gender = 0;
             if (heroCustomize.Gender.Equals("Male"))
                 gender = (int)eGENDER.MALE;
@@ -44,6 +49,7 @@ public class GameEnterScript : MonoBehaviour
                 gender = (int)eGENDER.FEMALE;
             savCharInfo = new sCharInfo(0, 0, gender, heroCustomize.IndexHair.CurrentIndex,
                 heroCustomize.IndexColorHair.CurrentIndex, heroCustomize.IndexFace.CurrentIndex, -1, -1, -1);
+
             StartCoroutine(GameStartDelay());
         }
     }
@@ -68,8 +74,10 @@ public class GameEnterScript : MonoBehaviour
     IEnumerator GameStartDelay()
     {
         yield return new WaitForSeconds(1.0f);
+        matchingImg.SetActive(false);
+        MSGWin.SetActive(false);
         loading.LoadScene("ItemCollectScene");
-        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        BgmController sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
         sound.ChangeBgm();
     }
 }

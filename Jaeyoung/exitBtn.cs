@@ -19,6 +19,7 @@ public class exitBtn : MonoBehaviour
             msg = "로그아웃하시겠습니까?";
         exitMSG.GetComponentInChildren<Text>().text = msg; 
         exitMSG.gameObject.SetActive(true);
+        exitMSG.transform.GetChild(1).gameObject.SetActive(true);
         block.SetActive(true);
     }
 

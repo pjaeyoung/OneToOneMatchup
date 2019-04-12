@@ -11,7 +11,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
     public int sensibilityX = 10;
     public Button[] itemButton;
     public LayerChange layerChange;
-    GameMgr GM;
+    public ItemFieldCntrl GM;
     Scene scene;
     AnimationManager AM;
     GameObject canvas;
@@ -22,11 +22,11 @@ public class PlayerCntrl_itemField : MonoBehaviour
     Quaternion nowRot;
 
     bool IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
+    bool IsLayerChange = false; //layerchage를 했는 지 여부 
     
     private void Awake()
     {
         IsJump = false;
-        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
         AM = transform.GetComponent<AnimationManager>();
         scene = SceneManager.GetActiveScene();
         canvas = GameObject.Find("Canvas");
@@ -34,28 +34,6 @@ public class PlayerCntrl_itemField : MonoBehaviour
         highlightBox = GameObject.Find("chkHighlight");
         fullItem = canvas.transform.Find("fullItemMSG").gameObject;
         nowRot = transform.localRotation;
-    }
-
-    private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
-    {
-        layerChange = GM.GetComponent<LayerChange>();
-        ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
-        int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
-
-        GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-        int len = Items.Length;
-        touchableItems = new GameObject[itemSpawnLens];
-        int idx = 0;
-        for (int i = 0; i < len; i++)
-        {
-            if (Items[i].layer == (int)eLAYER.TOUCHABLE)
-            {
-                touchableItems[idx] = Items[i];
-                if (touchableItems[idx].tag == "weapon")
-                    layerChange.InputWeaponArr(touchableItems[idx]);
-                idx++;
-            }
-        }
     }
 
     private void FixedUpdate()
@@ -79,6 +57,28 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     void Update()
     {
+        if (!IsLayerChange) //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
+        {
+            IsLayerChange = true;
+            layerChange = GM.gameObject.GetComponent<LayerChange>();
+            ItemSpawn1 s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn1>();
+            int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
+
+            GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+            int len = Items.Length;
+            touchableItems = new GameObject[itemSpawnLens];
+            int idx = 0;
+            for (int i = 0; i < len; i++)
+            {
+                if (Items[i].layer == (int)eLAYER.TOUCHABLE)
+                {
+                    touchableItems[idx] = Items[i];
+                    if (touchableItems[idx].tag == "weapon")
+                        layerChange.InputWeaponArr(touchableItems[idx]);
+                    idx++;
+                }
+            }
+        }
         if (Input.GetMouseButtonDown(0) && highlightBox.activeSelf == true)
             TouchItem();
     }
@@ -138,9 +138,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
                     {
                         fullItem.SetActive(false);
                         int emtyNum = GM.getEmtyImgIndex();
-                        itemBtn s_itemBtn = itemButton[emtyNum].GetComponent<itemBtn>(); //아이템 버튼 스크립트에서 아이템 목록 입력! 
-                        s_itemBtn.InputGetItemArr(rayObj, emtyNum);
-
+                        GameObject.Find("itemBtnCanvas/btn_GetItem").GetComponent<itemBtn>().InputGetItemArr(rayObj, emtyNum);
                         GM.changeItemImg(rayObj);
                         rayObj.SetActive(false);
                     }
@@ -151,18 +149,9 @@ public class PlayerCntrl_itemField : MonoBehaviour
                         StartCoroutine("fullItemMsgEnd", fullItem);
                     }
                 }
-                else
+                else if (rayObj.tag == "weapon" || rayObj.tag == "armor")
                 {
-                    if (rayObj.tag == "weapon" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineVisible)
-                    {
-                        weaponArmorBtn s_weaponBtn = canvas.transform.Find("btn_GetWeapon").GetComponent<weaponArmorBtn>();
-                        s_weaponBtn.inputGameObj(rayObj);
-                    }
-                    else if (rayObj.tag == "armor" && rayObj.GetComponentInChildren<outline>().OutlineMode == outline.Mode.OutlineVisible)
-                    {
-                        weaponArmorBtn s_ArmorBtn = canvas.transform.Find("btn_GetArmor").GetComponent<weaponArmorBtn>();
-                        s_ArmorBtn.inputGameObj(rayObj);
-                    }
+                     canvas.GetComponent<weaponArmorBtn>().inputGameObj(rayObj);
                 }
             }
         }

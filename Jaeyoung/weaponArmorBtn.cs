@@ -6,17 +6,11 @@ using UnityEngine.EventSystems;
 
 public class weaponArmorBtn : MonoBehaviour {
 
-    GameMgr GM;
+    public ItemFieldCntrl GM;
     public Button ArmorBtn;
     public Button weaponBtn;
     GameObject Armor;
     GameObject Weapon;
-
-    private void Awake()
-    {
-        
-        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
-    }
 
     /* 무기, 방어구 버튼과 연결된 게임오브젝트 정보 저장 : inputGameObj, changeWeaponImg, changeArmorImg */
     public void inputGameObj(GameObject obj)
