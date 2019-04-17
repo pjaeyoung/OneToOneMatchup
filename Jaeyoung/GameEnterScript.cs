@@ -18,10 +18,12 @@ public class GameEnterScript : MonoBehaviour
     HeroCustomize playerCustom; //플레이어의 외형을 변경하는 스크립트
     GameObject enemy; //적
     HeroCustomize enemyCustom; //적의 외형을 변경하는 스크립트
-    public GameObject MSGWin;
+    GameObject MSGWin;
 
     private void Awake()
     {
+        DontDestroyOnLoad(this.transform.parent.gameObject);
+        MSGWin = GameObject.Find("GameMgr").transform.GetChild(4).gameObject;
         matchingImg = GameObject.Find("WinCanvas/MatchingImg");
         matchingImg.SetActive(false);
     }
@@ -34,6 +36,12 @@ public class GameEnterScript : MonoBehaviour
 
     private void Update()
     {
+        if (matchingImg == null && SceneManager.GetActiveScene().name == "WaitScene")
+        {
+            matchingImg = GameObject.Find("WinCanvas/MatchingImg");
+            matchingImg.SetActive(false);
+        }
+
         if (matchingImg != null && matchingImg.activeSelf == false) //매칭중이라는 이미지 띄우기
             matchingImg.SetActive(matchActive);
 
@@ -74,10 +82,9 @@ public class GameEnterScript : MonoBehaviour
     IEnumerator GameStartDelay()
     {
         yield return new WaitForSeconds(1.0f);
-        matchingImg.SetActive(false);
         MSGWin.SetActive(false);
-        loading.LoadScene("ItemCollectScene");
         BgmController sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
         sound.ChangeBgm();
+        loading.LoadScene("ItemCollectScene");
     }
 }

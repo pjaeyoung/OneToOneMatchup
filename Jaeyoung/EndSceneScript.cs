@@ -21,6 +21,12 @@ public class EndSceneScript : MonoBehaviour
     AnimationController playerAni;
     AnimationController enemyAni;
 
+    private void Awake()
+    {
+        if(GameObject.Find("GameMgr/MSGWin") != null && GameObject.Find("GameMgr/MSGWin").activeSelf)
+            GameObject.Find("GameMgr/MSGWin").SetActive(false);
+    }
+
     void Start()
     { //플레이어 캐릭터와 적 캐릭터만 나오게 하기
         PlayerScript playerScript = SocketServer.SingleTonServ().NowPlayerScript();
@@ -43,7 +49,6 @@ public class EndSceneScript : MonoBehaviour
 
         server = GameObject.Find("WebServer").GetComponent<WebServerScript>();
         GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
-        GameObject.Destroy(GameObject.Find("GameMgr"));
         result = SocketServer.SingleTonServ().GetResult();
         //결과에 따라 맞는 위치에 배치하기
         if (result == (int)eRESULT.em_WIN)
@@ -69,11 +74,9 @@ public class EndSceneScript : MonoBehaviour
     
     public void HomeBtn()
     {
-        GameObject.Destroy(player.transform.parent.gameObject);
-        GameObject.Destroy(enemy.transform.parent.gameObject);
-        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        BgmController sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
         sound.ChangeBgm();
-        loading.LoadScene("WaitScene");
+        StartCoroutine(OutDelay());        
     }
 
     string ResultSave(string result) //웹서버와 연결, 승률 계산하여 가져오기
@@ -92,5 +95,17 @@ public class EndSceneScript : MonoBehaviour
             enemyAni.PlayDeath("Death");
         else if (result == (int)eRESULT.em_LOSE)
             playerAni.PlayDeath("Death");
+    }
+
+    IEnumerator OutDelay() 
+    {
+        GameObject.Destroy(player.transform.parent.gameObject);
+        GameObject.Destroy(enemy.transform.parent.gameObject);
+        GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
+        GameObject.Destroy(GameObject.Find("GameMgr2"));
+        BgmController sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
+        sound.ChangeBgm();
+        yield return new WaitForSeconds(1.0f);
+        loading.LoadScene("WaitScene");
     }
 }

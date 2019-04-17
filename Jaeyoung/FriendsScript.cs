@@ -7,13 +7,6 @@ using System.Text;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-enum Friend
-{
-    em_LIST=1,
-    em_SEARCH,
-    em_REQUEST,
-}
-
 struct sFriendEnter
 {
     public string friendName;
@@ -29,33 +22,23 @@ public class FriendsScript : MonoBehaviour {
     Button friendBtn; //등록된 친구를 선택하기 위해 버튼으로 형성
     Text friendText; //친구 이름을 변경시키기 위해 텍스트 가져옴
     bool friendListOn = false; //친구리스트가 켜져 있는지 체크
-    public GameObject delWin;
-    float winTime = 0.0f;
     GameObject nowBtnObj;
+    GameObject MSGWin;
     public GameObject friendWin;
     public GameObject friendListWin;
     public GameObject searchWin;
     public InputField searchNickInput;
-    public GameObject searchFailWin;
-    public GameObject alreadyFriendWin;
-    public GameObject reqSuccWin;
     public GameObject matchReqWin;
-    public GameObject matchRefuseWin;
-    public Text searchInfo;
     public GameObject requestListWin;
     public GameObject reqScroll;
-    public GameObject acceptWin;
     public GameObject existImg;
     public GameObject matchingImg;
     public GameObject randBtn;
     public GameObject friendMatchBtn;
-    public GameObject alreadyMatchingWin;
     List<GameObject> tmpObj;
     float reqExist = 10;
     string[] savReqList;
     string btnText;
-    public GameObject searchInfoImg;
-    public GameObject refuseWin;
     string url;
     bool friendChk = false;
     string chkFriendNick;
@@ -92,24 +75,8 @@ public class FriendsScript : MonoBehaviour {
     }
 	
 	void Update () {
-		if(delWin== true||searchFailWin==true|| alreadyMatchingWin==true
-            || alreadyFriendWin==true|| reqSuccWin==true
-            || acceptWin == true|| refuseWin==true|| matchRefuseWin==true)//알림창 시간따라 닫기
-        {
-            winTime += Time.deltaTime;
-            if(winTime>=1.5f)
-            {
-                delWin.SetActive(false);
-                searchFailWin.SetActive(false);
-                alreadyFriendWin.SetActive(false);
-                reqSuccWin.SetActive(false);
-                acceptWin.SetActive(false);
-                refuseWin.SetActive(false);
-                //matchRefuseWin.SetActive(false);
-                //alreadyMatchingWin.SetActive(false);
-                winTime = 0;
-            }
-        }
+        if (MSGWin == null && GameObject.Find("GameMgr") != null)
+            MSGWin = GameObject.Find("GameMgr").transform.GetChild(4).gameObject;
 
         reqExist += Time.deltaTime;
         if(friendListOn == false && reqExist >= 10) //10초마다 새로운 친구요청이 있는지 확인
@@ -144,7 +111,9 @@ public class FriendsScript : MonoBehaviour {
             matchReqRecv = false;
             if (matchSucc == 1)
             {
-                matchRefuseWin.SetActive(true);
+                string text = "대전신청이 거절되었습니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
                 randBtn.SetActive(true);
                 friendMatchBtn.SetActive(true);
                 matchingImg.SetActive(false);
@@ -159,12 +128,14 @@ public class FriendsScript : MonoBehaviour {
                 randBtn.SetActive(true);
                 friendMatchBtn.SetActive(true);
                 matchingImg.SetActive(false);
-                alreadyMatchingWin.SetActive(true);
+                string text = "상대 유저가 이미 매칭중입니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
             }
         }
     }
 
-    public void FriendBtnClick()
+    public void FriendBtnClick() //소셜창 열기 
     {
         existImg.SetActive(false);
         if (friendListOn == false)
@@ -237,7 +208,9 @@ public class FriendsScript : MonoBehaviour {
             string respData = webScript.ConnectServer(url, sendInfo);
             if (nowBtnObj != null && respData == "succ")
             {
-                delWin.SetActive(true);
+                string text = "친구가 삭제되었습니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
                 nowBtnObj.SetActive(false);
                 nowBtnObj = null;
             }
@@ -274,13 +247,16 @@ public class FriendsScript : MonoBehaviour {
 
         if(respData == "fail")
         {
-            searchFailWin.SetActive(true);
+            string text = "존재하지 않는 유저입니다.";
+            MSGWin.SetActive(true);
+            MSGWin.GetComponent<PrintMSG>().print(text);
         }
         else
         {
-            searchInfo.text = "이름 : " + searchName + "\n점수 : " + respData;
+            string text = "이름 : " + searchName + "\n점수 : " + respData;
             requestName = searchName;
-            searchInfoImg.SetActive(true);
+            MSGWin.SetActive(true);
+            MSGWin.GetComponent<PrintMSG>().print(text);
         }
     }
 
@@ -377,7 +353,7 @@ public class FriendsScript : MonoBehaviour {
 
     public void RequestBtnClick() //친구 신청하기 버튼 클릭, 신청 전송
     {
-        if(requestName!=""&&searchInfoImg.activeSelf==true)
+        if(requestName!="")
         {
             StringBuilder sendInfo = new StringBuilder();
             sendInfo.Append("flag=request");
@@ -388,13 +364,16 @@ public class FriendsScript : MonoBehaviour {
 
             if (respData == "already")
             {
-                alreadyFriendWin.SetActive(true);
+                string text = "이미 등록된 친구입니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
             }
             else if (respData == "succ")
             {
-                reqSuccWin.SetActive(true);
+                string text = "친구신청되었습니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
             }
-            searchInfoImg.SetActive(false);
         }
     }
 
@@ -423,7 +402,9 @@ public class FriendsScript : MonoBehaviour {
                         }
                     }
                 }
-                acceptWin.SetActive(true);
+                string text = "친구신청이 완료되었습니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
                 nowBtnObj.SetActive(false);
                 nowBtnObj = null;
             }
@@ -455,7 +436,9 @@ public class FriendsScript : MonoBehaviour {
                         }
                     }
                 }
-                refuseWin.SetActive(true);
+                string text = "친구신청이 거절되었습니다.";
+                MSGWin.SetActive(true);
+                MSGWin.GetComponent<PrintMSG>().print(text);
                 nowBtnObj.SetActive(false);
                 nowBtnObj = null;
             }
@@ -474,7 +457,7 @@ public class FriendsScript : MonoBehaviour {
         }
     }
 
-    public void MatchReqResult(char[] enemyNick, int succ)
+    public void MatchReqResult(char[] enemyNick, int succ)//친선매칭 신청 결과
     {
         matchReqFriendNick = "";
         int i = 0;
@@ -487,20 +470,23 @@ public class FriendsScript : MonoBehaviour {
         matchReqRecv = true;
     }
 
-    public void MatchAcceptBtnClick()
+    public void MatchAcceptBtnClick() //친선매칭 수락
     {
         sMatchReq matchReq = new sMatchReq(nick.ToCharArray(), matchReqFriendNick.ToCharArray(), 0);
         SocketServer.SingleTonServ().SendMsg(matchReq);
     }
 
-    public void MatchRefuseBtnClick()
+    public void MatchRefuseBtnClick() //친선매칭 거절
     {
         sMatchReq matchReq = new sMatchReq(nick.ToCharArray(), matchReqFriendNick.ToCharArray(), 1);
         SocketServer.SingleTonServ().SendMsg(matchReq);
-        matchRefuseWin.SetActive(true);
+        matchReqWin.SetActive(false);
+        string text = "매칭이 취소되었습니다.";
+        MSGWin.SetActive(true);
+        MSGWin.GetComponent<PrintMSG>().print(text);
     }
 
-    public void CloseBtnClick()
+    public void CloseBtnClick() //소셜창 닫기
     {
         friendWin.SetActive(false);
         friendListOn = false;
