@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class ExitBtn : MonoBehaviour
 {
@@ -56,7 +57,7 @@ public class ExitBtn : MonoBehaviour
         string name = SceneManager.GetActiveScene().name;
         if (name == "LoginScene")
             ExitOk();
-        else if(name == "WaitScene")
+        else if(name == "WaitScene" && MSGWin.GetComponentInChildren<Text>().text == "로그아웃하시겠습니까?")
             LogOutOk();
         else if(name == "GameScene")
         {

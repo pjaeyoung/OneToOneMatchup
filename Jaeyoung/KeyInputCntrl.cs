@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class KeyInputCntrl : MonoBehaviour
 {
@@ -31,25 +32,48 @@ public class KeyInputCntrl : MonoBehaviour
         /* 키입력 예외처리 */
         if (gameWinActive) // 활성화된 게임창에서만 키입력 받기 
         {
-            if (Input.GetKeyDown(KeyCode.Escape) && sceneName != "LoadingScene" && sceneName != "ItemCollectScene") //일시정지 
+            if (Input.GetKeyDown(KeyCode.Escape)) //일시정지 
             {
-                GameObject.Find("GameMgr").GetComponent<ExitBtn>().showMSG();
+                if (sceneName == "LoadingScene" || sceneName == "ItemCollectScene")
+                    return;
+                else if (sceneName == "LoginScene")
+                {
+                    if (GameObject.Find("Canvas").transform.Find("SignUpWin").gameObject.activeSelf
+                        || GameObject.Find("Canvas").transform.Find("SearchWin").gameObject.activeSelf
+                        || GameObject.Find("Canvas").transform.Find("tutorialWin").gameObject.activeSelf)
+                        return;
+                    else
+                        GameObject.Find("GameMgr").GetComponent<ExitBtn>().showMSG();
+                }
+                else if (sceneName == "WaitScene")
+                {
+                    if (GameObject.Find("WinCanvas").transform.GetChild(1).gameObject.activeSelf
+                        || GameObject.Find("WinCanvas").transform.GetChild(2).gameObject.activeSelf)
+                        return;
+                    else
+                        GameObject.Find("GameMgr").GetComponent<ExitBtn>().showMSG();
+                }     
             }
             else if (Input.GetKeyDown(KeyCode.Return)) //login 혹은 chat send
             {
                 if (sceneName == "LoginScene" && GameObject.Find("Canvas/loginWin").activeSelf)
                     GameObject.Find("Canvas/loginWin/LoginBtn").GetComponent<UserScript>().Login();
-                else if (sceneName == "WaitScene")
-                {
+                else if (sceneName == "WaitScene" && 
+                    GameObject.Find("btnCanvas/ChatScroll/ChatInput/Text").GetComponent<Text>().text != "")
                     GameObject.Find("btnCanvas/ChatScroll").GetComponent<ChatScript>().SendBtnClick();
-                }
             }
-            else if (sceneName == "LoginScene" && Input.GetKeyDown(KeyCode.Tab) && NickInput.gameObject.activeSelf && PassInput.gameObject.activeSelf) // id, password inputField 간 이동 
+            else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                if (NickInput.isFocused)
-                    PassInput.Select();
-                else if (PassInput.isFocused)
-                    NickInput.Select();
+                if(sceneName == "LoginScene")
+                {
+                    if (NickInput.IsActive() && PassInput.IsActive() && NickInput.gameObject.activeSelf && PassInput.gameObject.activeSelf) // id, password inputField 간 이동
+                    {
+                        if (NickInput.isFocused)
+                            PassInput.Select();
+                        else if (PassInput.isFocused)
+                            NickInput.Select();
+                    }
+                }
             }
         }
     }

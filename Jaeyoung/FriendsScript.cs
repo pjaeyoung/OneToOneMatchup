@@ -46,6 +46,7 @@ public class FriendsScript : MonoBehaviour {
     string matchReqFriendNick;
     bool matchReqRecv = false;
     int matchSucc;
+    bool winActive = false; //friendWin창 활성화 여부 
 
     string requestName;
 
@@ -77,6 +78,23 @@ public class FriendsScript : MonoBehaviour {
 	void Update () {
         if (MSGWin == null && GameObject.Find("GameMgr") != null)
             MSGWin = GameObject.Find("GameMgr").transform.GetChild(4).gameObject;
+
+        if (friendWin.activeSelf && !winActive) //friendWin창이 활성화되어 있는 경우 GameMgr의 Layer 앞으로 보내기 
+        {
+            winActive = true;
+            GameObject gameMgr = GameObject.Find("GameMgr");
+            gameMgr.GetComponent<Canvas>().sortingOrder = 3;
+            gameMgr.transform.GetChild(0).gameObject.SetActive(false);
+            gameMgr.transform.GetChild(1).gameObject.SetActive(false);
+        }
+        else if(!friendWin.activeSelf && winActive)
+        {
+            winActive = false;
+            GameObject gameMgr = GameObject.Find("GameMgr");
+            gameMgr.GetComponent<Canvas>().sortingOrder = 2;
+            gameMgr.transform.GetChild(0).gameObject.SetActive(true);
+            gameMgr.transform.GetChild(1).gameObject.SetActive(true);
+        }
 
         reqExist += Time.deltaTime;
         if(friendListOn == false && reqExist >= 10) //10초마다 새로운 친구요청이 있는지 확인
@@ -211,6 +229,7 @@ public class FriendsScript : MonoBehaviour {
                 string text = "친구가 삭제되었습니다.";
                 MSGWin.SetActive(true);
                 MSGWin.GetComponent<PrintMSG>().print(text);
+                MSGWin.transform.GetChild(1).gameObject.SetActive(false);
                 nowBtnObj.SetActive(false);
                 nowBtnObj = null;
             }
@@ -244,20 +263,18 @@ public class FriendsScript : MonoBehaviour {
         sendInfo.Append("&nick=" + nick);
         sendInfo.Append("&search=" + searchName);
         string respData = webScript.ConnectServer(url, sendInfo);
+        string text = "";
 
         if(respData == "fail")
-        {
-            string text = "존재하지 않는 유저입니다.";
-            MSGWin.SetActive(true);
-            MSGWin.GetComponent<PrintMSG>().print(text);
-        }
+            text = "존재하지 않는 유저입니다.";
         else
         {
-            string text = "이름 : " + searchName + "\n점수 : " + respData;
+            text = "이름 : " + searchName + "\n점수 : " + respData;
             requestName = searchName;
-            MSGWin.SetActive(true);
-            MSGWin.GetComponent<PrintMSG>().print(text);
         }
+        MSGWin.SetActive(true);
+        MSGWin.GetComponent<PrintMSG>().print(text);
+        MSGWin.transform.GetChild(1).gameObject.SetActive(false);
     }
 
     public void FriendSearch() //친구 신청하는 창 켜기
@@ -361,19 +378,15 @@ public class FriendsScript : MonoBehaviour {
             sendInfo.Append("&request=" + requestName);
             requestName = "";
             string respData = webScript.ConnectServer(url, sendInfo);
-
+            string text = "" ;
             if (respData == "already")
-            {
-                string text = "이미 등록된 친구입니다.";
-                MSGWin.SetActive(true);
-                MSGWin.GetComponent<PrintMSG>().print(text);
-            }
+                text = "이미 등록된 친구입니다.";
             else if (respData == "succ")
-            {
-                string text = "친구신청되었습니다.";
-                MSGWin.SetActive(true);
-                MSGWin.GetComponent<PrintMSG>().print(text);
-            }
+                text = "친구신청되었습니다.";
+
+            MSGWin.SetActive(true);
+            MSGWin.GetComponent<PrintMSG>().print(text);
+            MSGWin.transform.GetChild(1).gameObject.SetActive(false);
         }
     }
 
@@ -405,6 +418,7 @@ public class FriendsScript : MonoBehaviour {
                 string text = "친구신청이 완료되었습니다.";
                 MSGWin.SetActive(true);
                 MSGWin.GetComponent<PrintMSG>().print(text);
+                MSGWin.transform.GetChild(1).gameObject.SetActive(false);
                 nowBtnObj.SetActive(false);
                 nowBtnObj = null;
             }
@@ -491,4 +505,5 @@ public class FriendsScript : MonoBehaviour {
         friendWin.SetActive(false);
         friendListOn = false;
     }
+
 }

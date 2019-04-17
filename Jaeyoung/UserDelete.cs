@@ -64,6 +64,7 @@ public class UserDelete : MonoBehaviour
         }
         MSGWin.SetActive(true);
         MSGWin.GetComponent<PrintMSG>().print(text);
+        MSGWin.transform.GetChild(1).gameObject.SetActive(false);
     }
 
     public void CancelBtnClick()
