@@ -11,7 +11,7 @@ public class PlayerScript : MonoBehaviour
     GameEnterScript playerInfo;
     SpawnScript spawnInfo;
     Rigidbody playerRigidBody;
-    public AnimationController playerAniCon; //애니메이션
+    AnimationController playerAniCon; //애니메이션
     AttackMgr enemyAtk;
     GameMgr GM;
 
@@ -24,8 +24,6 @@ public class PlayerScript : MonoBehaviour
     GameObject Block;
 
     GameObject highlightBox;
-    GameObject targetZone;
-    DrawTargetZone s_drawTZ;
     Camera playerCamera;
     GameObject getItem = null;
 
@@ -43,6 +41,7 @@ public class PlayerScript : MonoBehaviour
     bool aniEnd = false;
     bool damaged = false;
     int dmgAni = 0;
+    int atkType = 0;
     int playerHp = 0;
     int playerSpeed = 1;
     int nowHp = 0;
@@ -59,8 +58,6 @@ public class PlayerScript : MonoBehaviour
 
     BgmController sound;
     EffSoundController effSound;
-
-    Joystick joystick;
 
     void Awake()
     {
@@ -86,8 +83,6 @@ public class PlayerScript : MonoBehaviour
 
         highlightBox = transform.Find("chkHighlight").gameObject;
         playerCamera = transform.Find("Camera").GetComponent<Camera>();
-        targetZone = transform.Find("targetZone").gameObject;
-        s_drawTZ = targetZone.GetComponent<DrawTargetZone>();
 
         s_itemSpawn2 = GameObject.Find("itemSpawnArr").GetComponent<itemSpawn2>();
         s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
@@ -105,31 +100,35 @@ public class PlayerScript : MonoBehaviour
 
         sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
         effSound = gameObject.GetComponentInChildren<EffSoundController>();
-
-#if UNITY_ANDROID
-        GameObject joystickCanvas = GameObject.Find("JoystickCanvas");
-        GameObject joystickBg = joystickCanvas.transform.GetChild(0).gameObject;
-        GameObject atkBtn = joystickCanvas.transform.GetChild(1).gameObject;
-        atkBtn.GetComponentInChildren<Text>().text = "Attack";
-        GameObject jumpBtn = joystickCanvas.transform.GetChild(2).gameObject;
-        jumpBtn.SetActive(true);
-        joystickBg.SetActive(true);
-        joystick = joystickBg.GetComponent<Joystick>();
-        joystick.ChangePlayer(gameObject);
-#endif
     }
 
     private void FixedUpdate()
     {
         if (Block.activeSelf == false)
         {
-#if UNITY_EDITOR || UNITY_EDITOR_WIN
-            if (Input.GetMouseButton(2))
+            if (Input.GetMouseButtonDown(0) && highlightBox.activeSelf == true) //하이라이트 박스 출력 중일 때만 아이템 클릭 가능
+            {
+                itemClick();
+            }
+            else if(getItem!=null)
+            {
+                if(Input.GetMouseButton(0))
+                {
+                    Cursor.lockState = CursorLockMode.Confined;
+                    Rot();
+                }
+                else if(Input.GetMouseButtonUp(0))
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    ItemThrow();
+                }
+            }
+            if (Input.GetMouseButton(1))
             {
                 Cursor.lockState = CursorLockMode.Confined;
                 Rot();
             }
-            else if (Input.GetMouseButtonUp(2))
+            else if (Input.GetMouseButtonUp(1))
                 Cursor.lockState = CursorLockMode.None;
             if (Input.GetMouseButtonDown(0) && idleAni == true && getItem == null)
                 Attack();
@@ -143,10 +142,10 @@ public class PlayerScript : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space)) //점프
                 Jump();
-#endif
             if (aniEnd == true) //애니메이션 다끝나고
                 shotMgrStart();
-        }      
+        }
+      
     }
 
     void OnTriggerEnter(Collider other)
@@ -179,28 +178,7 @@ public class PlayerScript : MonoBehaviour
         if (gameEnd == true) //게임 끝
             changeEndScene();
 
-        if (Input.GetMouseButtonDown(1) && highlightBox.activeSelf == true) //하이라이트 박스 출력 중일 때만 아이템 클릭 가능
-        {
-            itemClick();
-        }
-        if(getItem != null)
-        {
-            if (Input.GetMouseButton(1)) //드레그 중일 때 targetZone 출력 및 위치 조정
-            {
-                ActiveTargetZone();
-            }
-            else if (Input.GetMouseButtonUp(1)) //마우스에서 손을 뗀 시점의 targetZone 위치로 아이템 이동 
-            {
-                Vector3 newPos = targetZone.transform.position;
-                itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
-                cntrl.TransferItem(newPos);
-                cntrl.isDestroyOK = true;
-                targetZone.SetActive(false);
-                getItem = null;
-                sThrowObj thObj = new sThrowObj(newPos.x, newPos.y, newPos.z);
-                SocketServer.SingleTonServ().SendMsg(thObj);
-            }
-        }
+     
     }
 
     void Rot() // 좌우 회전
@@ -210,7 +188,7 @@ public class PlayerScript : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.localRotation, nowRot, 6 * Time.deltaTime);
     }
 
-    public void Attack() // 공격(애니메이션 재생, 서버에 정보 전송)
+    void Attack() // 공격(애니메이션 재생, 서버에 정보 전송)
     {
         enemyAtk.AtkPoss(true);
         idleAni = false;
@@ -264,7 +242,7 @@ public class PlayerScript : MonoBehaviour
         playerAniCon.PlayAnimation("Move");
     }
 
-    public void Jump() // 점프 
+    void Jump() // 점프 
     {
         if (IsJump == (int)eBOOLEAN.FALSE)
         {
@@ -329,24 +307,27 @@ public class PlayerScript : MonoBehaviour
             ChinkEffect.transform.position = transform.position + Vector3.up * 2;
         Debug.Log("Damaged");
         EnemyScript enemyScript = enemyObj.GetComponent<EnemyScript>();
-        if (enemyScript.weaponType == (int)eWEAPON.em_SWORDANDSHIELD)
+        if (atkType == (int)eATKTYPE.em_NORMAL)
         {
-            if (dmgAni == 0)
-                effSound.PlayEff((int)eEFFSOUND.em_SWORD1);
-            else if (dmgAni == 1)
-                effSound.PlayEff((int)eEFFSOUND.em_SWORD2);
+            if (enemyScript.weaponType == (int)eWEAPON.em_SWORDANDSHIELD)
+            {
+                if (dmgAni == 0)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWORD1);
+                else if (dmgAni == 1)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWORD2);
+            }
+            else if (enemyScript.weaponType == (int)eWEAPON.em_GREATESWORD)
+            {
+                if (dmgAni == 0)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWORD3);
+                else if (dmgAni == 1)
+                    effSound.PlayEff((int)eEFFSOUND.em_SWORD4);
+            }
+            else if (enemyScript.weaponType == (int)eWEAPON.em_BOW)
+                effSound.PlayEff((int)eEFFSOUND.em_ARROWHIT);
+            else if (enemyScript.weaponType == (int)eWEAPON.em_WAND)
+                effSound.PlayEff((int)eEFFSOUND.em_MAGIHIT);
         }
-        else if (enemyScript.weaponType == (int)eWEAPON.em_GREATESWORD)
-        {
-            if (dmgAni == 0)
-                effSound.PlayEff((int)eEFFSOUND.em_SWORD3);
-            else if (dmgAni == 1)
-                effSound.PlayEff((int)eEFFSOUND.em_SWORD4);
-        }
-        else if (enemyScript.weaponType == (int)eWEAPON.em_BOW)
-            effSound.PlayEff((int)eEFFSOUND.em_ARROWHIT);
-        else if (enemyScript.weaponType == (int)eWEAPON.em_WAND)
-            effSound.PlayEff((int)eEFFSOUND.em_MAGIHIT);
     }
 
     void changeHPTextAndDeathAniAct()
@@ -387,16 +368,17 @@ public class PlayerScript : MonoBehaviour
             if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
             {
                 Debug.Log("click");
-                hitObj.GetComponent<Rigidbody>().useGravity = false;
                 Vector3 newPos = transform.position;
                 newPos.y += 5;
                 hitObj.transform.position = newPos;
                 getItem = hitObj;
+                hitObj.GetComponent<Rigidbody>().useGravity = false;
 
                 int itemNum = s_itemSpawn2.GetObjNum(hitObj);
                 sGetObj getObj = new sGetObj(itemNum);
                 SocketServer.SingleTonServ().SendMsg(getObj);
-                Debug.Log("send Succ");
+
+                transform.Find("Canvas").Find("ThrowPoint").gameObject.SetActive(true);
             }
             else
             {
@@ -409,16 +391,24 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void ActiveTargetZone() // targetZone(던질 아이템이 날아갈 곳) 활성화 
+    void ItemThrow()
     {
-        targetZone.SetActive(true);
-        s_drawTZ.drawTargetZone();
-    }   
+        getItem.GetComponent<Rigidbody>().useGravity = true;
+        getItem.GetComponent<Rigidbody>().velocity = transform.forward * 15;
+        itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
+        cntrl.isDestroyOK = true;
+        getItem = null;
+        transform.Find("Canvas").Find("ThrowPoint").gameObject.SetActive(false);
+
+        sThrowObj throwObj = new sThrowObj((int)eMSG.em_THROWOBJ);
+        SocketServer.SingleTonServ().SendMsg(throwObj);
+    }
 
     public void PlayerDamage(sHit hit) // 플레이어가 피격 당했다는 정보 받음 
     {
         damaged = true;
         dmgAni = hit.dmgAni;
+        atkType = hit.atkType;
     }
 
     public void ChangePlayerHp(int hp) //서버에서 hp변화 받아오기
@@ -432,7 +422,6 @@ public class PlayerScript : MonoBehaviour
     public void ChangePlayerSpeed(int speed) //속도 변화
     {
         playerSpeed = speed;
-        joystick.ChangeSpeed(speed);
     }
 
     public void ChangeItemImg(int itemNum, bool show) // 아이템 이미지를 변경시켜야 한다는 정보

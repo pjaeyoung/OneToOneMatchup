@@ -15,6 +15,7 @@ enum eEFFSOUND
     em_SWORD3,
     em_SWORD4,
     em_WIND,
+    em_BOMB,
 }
 
 public class EffSoundController : MonoBehaviour

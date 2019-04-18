@@ -13,10 +13,8 @@ public class UserScript : MonoBehaviour
 {
     public InputField nickInput; //닉네임 입력
     public InputField passInput; //비밀번호 입력
-    public GameObject overlapWin; //중복 알림화면
-    public GameObject succWin; //회원가입 성공 알림 화면
-    public GameObject failWin; //로그인 실패 알림 화면
-    public GameObject alreadyLogin;
+    public GameObject MSGWin; //메세지 전달 창
+    public GameObject SearchWin; //닉네임, 비밀번호 찾기 창 
     GameObject server; //웹서버 오브젝트
     WebServerScript web; //웹 서버 스크립트
     public string nick; //닉네임
@@ -28,8 +26,6 @@ public class UserScript : MonoBehaviour
     public InputField signUpNick;
     public InputField signUpPass;
     public InputField signUpPhone;
-    public GameObject phoneWin;
-    public GameObject wrongNumWin;
 
     int tuto = -1;
     public GameObject tutorialWin; //튜토리얼 진행여부 묻는 화면 
@@ -47,19 +43,13 @@ public class UserScript : MonoBehaviour
 
     private void Update()
     {
-        if (overlapWin.activeSelf || succWin.activeSelf || failWin.activeSelf 
-            || alreadyLogin.activeSelf|| phoneWin.activeSelf|| wrongNumWin.activeSelf)
+        if (MSGWin.activeSelf && !SearchWin.activeSelf)
         { //켜져있는 창 시간지나면 닫기
             winTime += Time.deltaTime;
-            if (winTime >= 1)
+            if (winTime >= 0.8f)
             {
                 winTime = 0;
-                overlapWin.SetActive(false);
-                succWin.SetActive(false);
-                failWin.SetActive(false);
-                alreadyLogin.SetActive(false);
-                phoneWin.SetActive(false);
-                wrongNumWin.SetActive(false);
+                MSGWin.SetActive(false);
             }
         }
 
@@ -69,21 +59,17 @@ public class UserScript : MonoBehaviour
             if (loginSucc == 0) //로그인 성공
             {
                 web.nick = nick;
-                GameObject.Find("SoundMgr").transform.GetChild(2).GetChild(6).gameObject.SetActive(true);
+                GameObject.Find("SoundMgr").gameObject.transform.GetChild(3).GetChild(5).gameObject.SetActive(true);
+
                 if (tuto == 0)
-                {
                     tutorialWin.SetActive(true);
-                    StringBuilder sendInfo = new StringBuilder();
-                    sendInfo.Append("nick=" + nick);
-                    sendInfo.Append("&tuto=" + tuto);
-                    web.ConnectServer("http://192.168.0.22:10000/Tuto", sendInfo);
-                }
                 if (tuto == 1)
-                    SceneManager.LoadScene("WaitScene");
+                    loading.LoadScene("WaitScene");
             }
             else if (loginSucc == 1) //실패
             {
-                alreadyLogin.SetActive(true);
+                MSGWin.GetComponentInChildren<Text>().text = "이미 로그인 중입니다.";
+                MSGWin.SetActive(true);
             }
         }
 
@@ -92,11 +78,19 @@ public class UserScript : MonoBehaviour
             if (EventSystem.current.currentSelectedGameObject == YesBtn)
             {
                 block.SetActive(false);
+                StringBuilder sendInfo = new StringBuilder();
+                sendInfo.Append("nick=" + nick);
+                sendInfo.Append("&tuto=" + tuto);
+                web.ConnectServer("http://192.168.0.22:10000/Tuto", sendInfo);
                 loading.LoadScene("TutorialScene");
             }
             else if (EventSystem.current.currentSelectedGameObject == NoBtn)
             {
                 block.SetActive(false);
+                StringBuilder sendInfo = new StringBuilder();
+                sendInfo.Append("nick=" + nick);
+                sendInfo.Append("&tuto=" + tuto);
+                web.ConnectServer("http://192.168.0.22:10000/Tuto", sendInfo);
                 loading.LoadScene("WaitScene");
             }
         }
@@ -121,18 +115,20 @@ public class UserScript : MonoBehaviour
 
         if (phoneLen<10)
         {
-            wrongNumWin.SetActive(true);
+            MSGWin.GetComponentInChildren<Text>().text = "올바른 전화번호를 입력해주세요.";
+            MSGWin.SetActive(true);
         }
         else
         {
             for(int i=0;i<phoneLen; i++)
             {
-                if (phoneNum[i] == '0' || phoneNum[i] == '1' || phoneNum[i] == '2' || phoneNum[i] == '3' || phoneNum[i] == '4'
-                    || phoneNum[i] == '5' || phoneNum[i] == '6' || phoneNum[i] == '7' || phoneNum[i] == '8' || phoneNum[i] == '9')
+                if(phoneNum[i] =='0'|| phoneNum[i] == '1'|| phoneNum[i] == '2'|| phoneNum[i] == '3'|| phoneNum[i] == '4'
+                    || phoneNum[i] == '5'|| phoneNum[i] == '6'|| phoneNum[i] == '7'|| phoneNum[i] == '8' || phoneNum[i] == '9')
                     continue;
                 else
                 {
-                    wrongNumWin.SetActive(true);
+                    MSGWin.GetComponentInChildren<Text>().text = "올바른 전화번호를 입력해주세요.";
+                    MSGWin.SetActive(true);
                     return;
                 }
             }
@@ -142,20 +138,25 @@ public class UserScript : MonoBehaviour
 
             if (respJson.Equals("succ"))
             {
-                succWin.SetActive(true);
+                MSGWin.GetComponentInChildren<Text>().text = "회원가입 되었습니다.";
+                MSGWin.SetActive(true);
             }
             else if (respJson.Equals("overlap"))
             {
-                overlapWin.SetActive(true);
+                MSGWin.GetComponentInChildren<Text>().text = "이미 등록된 닉네임입니다.";
+                MSGWin.SetActive(true);
             }
             else if (respJson.Equals("phone overlap"))
             {
-                phoneWin.SetActive(true);
+                MSGWin.GetComponentInChildren<Text>().text = "이미 입력된 전화번호입니다. ";
+                MSGWin.SetActive(true);
             }
             else if (respJson.Equals("fail"))
             {
-                failWin.SetActive(true);
+                MSGWin.GetComponentInChildren<Text>().text = "회원정보를 다시 확인해주세요.";
+                MSGWin.SetActive(true);
             }
+            signUpWin.SetActive(false);
         }
     }
 
@@ -163,6 +164,11 @@ public class UserScript : MonoBehaviour
     {
         GameObject nowBtnObj = EventSystem.current.currentSelectedGameObject;
         nowBtnObj.transform.parent.gameObject.SetActive(false);
+    }
+
+    public void SearchWinOpen()
+    {
+        SearchWin.SetActive(true);
     }
 
     public void Login() //로그인
@@ -178,7 +184,8 @@ public class UserScript : MonoBehaviour
         }
         else if (respJson.Equals("fail"))
         {
-            failWin.SetActive(true);
+            MSGWin.GetComponentInChildren<Text>().text = "회원정보를 다시 확인해주세요.";
+            MSGWin.SetActive(true);
         }
     }
 

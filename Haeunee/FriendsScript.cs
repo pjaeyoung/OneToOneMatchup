@@ -7,13 +7,6 @@ using System.Text;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-enum Friend
-{
-    em_LIST=1,
-    em_SEARCH,
-    em_REQUEST,
-}
-
 struct sFriendEnter
 {
     public string friendName;
@@ -57,6 +50,7 @@ public class FriendsScript : MonoBehaviour {
     public GameObject searchInfoImg;
     public GameObject refuseWin;
     string url;
+    bool friendChk = false;
     string chkFriendNick;
     int friendAcc = -1;
     string matchReqFriendNick;
@@ -104,8 +98,8 @@ public class FriendsScript : MonoBehaviour {
                 reqSuccWin.SetActive(false);
                 acceptWin.SetActive(false);
                 refuseWin.SetActive(false);
-                //matchRefuseWin.SetActive(false);
-                //alreadyMatchingWin.SetActive(false);
+                matchRefuseWin.SetActive(false);
+                alreadyMatchingWin.SetActive(false);
                 winTime = 0;
             }
         }

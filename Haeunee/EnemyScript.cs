@@ -104,12 +104,14 @@ public class EnemyScript : MonoBehaviour
             getObj.transform.position = newPos;
         }
 
-        if(objThrow==true)//물건 던지기
+        if(objThrow == true)
         {
             objThrow = false;
+            getObj.GetComponent<Rigidbody>().velocity = transform.forward * 15;
             itemCntrl cntrl = getObj.GetComponent<itemCntrl>();
+            getObj.GetComponent<Rigidbody>().useGravity = true;
             cntrl.isDestroyOK = true;
-            cntrl.TransferItem(targetPos);
+            getObj = null;
         }
     }
 
@@ -151,9 +153,8 @@ public class EnemyScript : MonoBehaviour
         objNum = num;
     }
 
-    public void ThrowObj(Vector3 pos)
+    public void ThrowObj()
     {
         objThrow = true;
-        targetPos = pos;
     }
 }

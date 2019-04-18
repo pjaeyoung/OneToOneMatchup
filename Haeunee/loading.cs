@@ -50,7 +50,6 @@ public class loading : MonoBehaviour
                 fill = 0;
             loadingBar.fillAmount = fill;
             yield return new WaitForSeconds(0.1f);
-            Debug.Log(fill);
         }
     }
 }

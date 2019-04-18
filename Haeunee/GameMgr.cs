@@ -70,7 +70,7 @@ public class GameMgr : MonoBehaviour {
 
     void changeLayerToWeapon()
     {
-        LayerChange LC = GetComponent<LayerChange>();
+        LayerChange LC = this.transform.GetComponent<LayerChange>();
         for(int i = 0; i<4; i++)
             LC.OutputWeapon(i).layer = (int)eLAYER.WEAPON; 
     }
@@ -121,12 +121,14 @@ public class GameMgr : MonoBehaviour {
 
     IEnumerator AlarmActive(float _timer) //끝나기 10초 전 알람  
     {
-        while (_timer < 60)
+        while (_timer <= 56)
         {
             alarmImg.CrossFadeAlpha(0, 1.0f, false);
             yield return new WaitForSeconds(1.0f);
+            _timer += 2.0f;
             alarmImg.CrossFadeAlpha(1, 1.0f, false);
             yield return new WaitForSeconds(1.0f);
+            _timer += 2.0f;
         }
     }
 

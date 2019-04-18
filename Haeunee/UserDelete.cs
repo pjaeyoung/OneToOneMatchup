@@ -13,9 +13,10 @@ public class UserDelete : MonoBehaviour
     GameObject webObj;
     public GameObject userDelWin;
     public InputField passInput;
-    public GameObject delSuccWin;
-    public GameObject delFailWin;
+    public GameObject MSGWin;
     float winTime = 0;
+    bool delete = false;
+
     void Start()
     {
         webObj = GameObject.Find("WebServer");
@@ -24,18 +25,18 @@ public class UserDelete : MonoBehaviour
     
     void Update()
     {
-        if(delSuccWin.activeSelf||delFailWin.activeSelf)
+        if(MSGWin.activeSelf)
         {
             winTime += Time.deltaTime;
             if(winTime>=2)
             {
-                if(delSuccWin.activeSelf)
+                if(delete)
                 {
-                    SceneManager.LoadScene("LoginScene");
+                    loading.LoadScene("LoginScene");
                     GameObject.Destroy(webObj);
                     GameObject.Destroy(transform.parent.transform.parent.gameObject);
                 }
-                delFailWin.SetActive(false);
+                MSGWin.SetActive(false);
                 winTime = 0;
             }
         }
@@ -60,12 +61,15 @@ public class UserDelete : MonoBehaviour
 
         if (respData == "succ")
         {
-            delSuccWin.SetActive(true);
+            MSGWin.GetComponentInChildren<Text>().text = "탈퇴되었습니다.";
+            delete = true;
         }
         else
         {
-            delFailWin.SetActive(true);
+            MSGWin.GetComponentInChildren<Text>().text = "회원정보를 다시 확인해주세요.";
+            delete = false;
         }
+        MSGWin.SetActive(true);
     }
 
     public void CancelBtnClick()

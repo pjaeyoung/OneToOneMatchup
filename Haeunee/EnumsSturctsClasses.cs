@@ -55,6 +55,13 @@ enum eMSG //메세지 종류
     em_CHAT,
 }
 
+enum Friend
+{
+    em_LIST = 1,
+    em_SEARCH,
+    em_REQUEST,
+}
+
 // 참, 거짓 판단 
 enum eBOOLEAN
 {
@@ -239,7 +246,7 @@ public struct sHit //공격 성공
 {
     private int flag;
     public int dmgAni;
-    int atkType;
+    public int atkType;
     public int hp;
     public sHit(int ani,int type, int nowHp, int f = (int)eMSG.em_HIT)
     {
@@ -317,13 +324,9 @@ struct sGetObj
 struct sThrowObj
 {
     int flag;
-    public float throwPosX, throwPosY, throwPosZ;
-    public sThrowObj(float x, float y, float z, int f = (int)eMSG.em_THROWOBJ)
+    public sThrowObj(int f = (int)eMSG.em_THROWOBJ)
     {
         flag = f;
-        throwPosX = x;
-        throwPosY = y;
-        throwPosZ = z;
     }
 };
 

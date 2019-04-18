@@ -16,9 +16,8 @@ public class BgmController : MonoBehaviour
     bool fadeOut = false;
     public GameObject SettingWin;
     public GameObject block;
-    public Button exitBtn;
+    public Button ExitBtn;
     string sceneName;
-
 
     void Start()
     {
@@ -27,7 +26,7 @@ public class BgmController : MonoBehaviour
     
     void Update()
     {
-        if(fadeIn==true)
+        if (fadeIn==true)
         {
             audioBgm.volume += Time.deltaTime;
             if(audioBgm.volume >= bgmVolSlider.value)
@@ -56,36 +55,46 @@ public class BgmController : MonoBehaviour
     {
         SettingWin.SetActive(true);
         block.SetActive(true);
-        exitBtn.interactable = false;
+        ExitBtn.interactable = false;
     }
 
     public void CloseBtnClick()
     {
         SettingWin.SetActive(false);
         block.SetActive(false);
-        exitBtn.interactable = true;
+        ExitBtn.interactable = true;
     }
 
     void SceneChange()
     {
-        SceneManager.LoadScene(sceneName);
-        if (sceneName == "LoginScene"|| sceneName == "WaitScene")
+        loading.LoadScene(sceneName);
+        if (sceneName == "LoginScene" || sceneName == "WaitScene")
         {
             audioBgm.clip = bgmClip[0];
             transform.GetChild(0).gameObject.SetActive(true);
             SetUp.SetActive(true);
-            exitBtn = GameObject.Find("Canvas").transform.Find("ExitBtn").GetComponent<Button>();
+            ExitBtn.gameObject.SetActive(true);
         }
         else if (sceneName == "ItemCollectScene")
         {
             audioBgm.clip = bgmClip[1];
             transform.GetChild(0).gameObject.SetActive(false);
             SetUp.SetActive(false);
+            SettingWin.SetActive(false);
+            ExitBtn.gameObject.SetActive(false);
+            block.SetActive(false);
+        }
+        else if (sceneName == "LoadingScene")
+        {
+            SetUp.SetActive(false);
+            SettingWin.SetActive(false);
+            block.SetActive(false);
         }
         if (sceneName == "GameScene")
         {
             audioBgm.clip = bgmClip[2];
             SetUp.SetActive(false);
+            SettingWin.SetActive(false);
         }
 
         audioBgm.Play();

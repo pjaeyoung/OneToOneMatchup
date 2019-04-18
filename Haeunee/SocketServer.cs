@@ -167,9 +167,7 @@ public class SocketServer {
         }
         else if (room.flag == (int)eMSG.em_THROWOBJ) //물건 던지기
         {
-            Type m_type = typeof(sThrowObj);
-            sThrowObj throwObj = (sThrowObj)Marshal.PtrToStructure(buff, m_type);
-            eScript.ThrowObj(new Vector3(throwObj.throwPosX, throwObj.throwPosY, throwObj.throwPosZ));
+            eScript.ThrowObj();
             Debug.Log("from server throw succ");
         }
         else if (room.flag == (int)eMSG.em_END) //게임이 종료되었을 경우

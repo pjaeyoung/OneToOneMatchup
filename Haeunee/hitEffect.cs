@@ -19,9 +19,12 @@ public class hitEffect : MonoBehaviour
     public bool getAtkMgr = false; // AttackMgr 한 번만 받아서 저장하기 
     string effectName = ""; //이펙트 이름 구별용 
 
+    EffSoundController sound;
+
     private void Awake()
     {
         particle = GetComponentInChildren<ParticleSystem>();
+        sound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -33,6 +36,7 @@ public class hitEffect : MonoBehaviour
         {
             particle.Play();
             StartCoroutine(Delay());
+            sound.PlayEff((int)eEFFSOUND.em_BOMB);
             if (name == "HitEffect" && obj.tag == "Enemy" && getAtkMgr == true)
             {
                 atkMgr.HitSucc((int)eATKTYPE.em_OBJTHROW);

@@ -34,7 +34,7 @@ public class PlayerCameraScript : MonoBehaviour {
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButton(2)) //카메라 위 아래 회전 
+        if (Input.GetMouseButton(1)) //카메라 위 아래 회전 
         {
             float RotY = Input.GetAxis("Mouse Y") * sensibility;
             preRot *= Quaternion.Euler(Vector3.left * RotY);

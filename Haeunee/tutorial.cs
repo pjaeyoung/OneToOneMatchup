@@ -17,6 +17,7 @@ public class tutorial : MonoBehaviour
     GameObject getItem; // 클릭한 아이템
     Button itemBtn;
     GameObject itemInfo1; // tuto = 3 일 때 생성되는 아이템 정보 설명하는 창 
+    GameObject itemInfo2;
     GameObject targetZone;
     AnimationController animationCntrl;
     public Slider hpBar;
@@ -30,7 +31,6 @@ public class tutorial : MonoBehaviour
     GameObject skipBtn;
     GameObject Enemy;
     GameObject hpPotion;
-    GameObject beerBox;
     GameObject SetUp;
 
     float moveSpeed = 5.0f;
@@ -72,7 +72,9 @@ public class tutorial : MonoBehaviour
         itemBtn = GameObject.Find("Canvas/itemBtn").GetComponent<Button>();
         itemBtn.gameObject.SetActive(false);
         itemInfo1 = GameObject.Find("Canvas/itemInfo1").gameObject;
-        itemInfo1.gameObject.SetActive(false);
+        itemInfo1.SetActive(false);
+        itemInfo2 = GameObject.Find("Canvas/itemInfo2").gameObject;
+        itemInfo2.SetActive(false);
         targetZone = player.transform.Find("targetZone").gameObject;
         animationCntrl = player.GetComponent<AnimationController>();
         magicPrefab = GameObject.Find("MagicPrefab");
@@ -88,14 +90,12 @@ public class tutorial : MonoBehaviour
         Enemy.SetActive(false);
         hpPotion = GameObject.Find("hpPotion");
         hpPotion.SetActive(false);
-        beerBox = GameObject.Find("BeerBox_Green");
-        beerBox.SetActive(false);
     }
 
     void Start()
     {
-        SetUp = GameObject.Find("SoundMgr/SettingBtn");
-        SetUp.SetActive(false);
+        //SetUp = GameObject.Find("SoundMgr/SettingBtn");
+        //SetUp.SetActive(false);
         StartCoroutine(textBtnActive());
     }
 
@@ -179,15 +179,18 @@ public class tutorial : MonoBehaviour
             {
                 itemBtn.gameObject.SetActive(false);
                 hpPotion.SetActive(false);
+                itemInfo1.SetActive(true);
+                itemInfo2.SetActive(true);
                 getItem = null;
             }
-            if (itemInfo1.activeSelf == false)
-                itemInfo1.SetActive(true);
         }
         else if (tuto == 4)
         {
-            if (itemInfo1.activeSelf == true)
+            if (itemInfo1.activeSelf == true || itemInfo2.activeSelf == true)
+            {
                 itemInfo1.SetActive(false);
+                itemInfo2.SetActive(false);
+            }
             if(weaponSet == false)
             {
                 setWeapon();
@@ -216,12 +219,12 @@ public class tutorial : MonoBehaviour
                 wand.SetActive(false);
                 point.SetActive(false);
             }
-            if (beerBox.activeSelf == false)
-                beerBox.SetActive(true);
-            if (Input.GetMouseButtonDown(1) && player.GetComponent<BoxCollider>().enabled == true)
+            if (hpPotion.activeSelf == false)
+                hpPotion.SetActive(true);
+            if (Input.GetMouseButtonDown(1))
             {
                 player.transform.GetComponent<BoxCollider>().enabled = false;
-                clickItem(5);
+                clickItem(6);
             }
             else if (Input.GetMouseButtonUp(1))
                 player.GetComponent<BoxCollider>().enabled = true;
@@ -370,10 +373,10 @@ public class tutorial : MonoBehaviour
                     getItem.SetActive(false);
                     changeItemImg(getItem.name);
                 }
-                else if (_tuto == 5)
+                else if (_tuto == 6)
                 {
-                    getItem.transform.position = player.transform.position + Vector3.up * 2;
                     getItem.GetComponent<Rigidbody>().useGravity = false;
+                    getItem.transform.position = player.transform.position + Vector3.up;
                 }
             }
         }
@@ -388,6 +391,21 @@ public class tutorial : MonoBehaviour
         Sprite spr = Resources.Load<Sprite>("Sprites/" + name);
         itemBtn.gameObject.GetComponent<Image>().sprite = spr;
     } // itemBtn 이미지 변경 
+
+    public void ItemInfoClick() //아이템설명창 클릭
+    {
+        if(tuto == 3)
+        {
+            if (itemInfo2.activeSelf == true)
+            {
+                itemInfo2.SetActive(false);
+            }
+            else if (itemInfo2.activeSelf == false)
+            {
+                itemInfo2.SetActive(true);
+            }
+        }
+    }
 
     public void ItemDragDrop()
     {
@@ -575,4 +593,5 @@ public class tutorial : MonoBehaviour
         yield return new WaitForSeconds(delay);
         loading.LoadScene("WaitScene");
     } //씬 전환 할 때 delay
+
 }

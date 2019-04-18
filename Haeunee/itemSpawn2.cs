@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class itemSpawn2 : MonoBehaviour
+public class itemSpawn2 : MonoBehaviour //GameScene에서 아이템 스폰 
 {
     public GameObject[] itemKind; //index 는 spawn index값, [index] 값은 item 종류
     public Transform[] itemSpawns;
 
-    bool IsInstanceItemOK = false; 
+    bool IsInstanceItemOK = false; //서버에서 스폰 정보 받았을 때 true로 바뀜
     int spawnLen;
     int[] result;
     GameObject[] spawnItemList; //스폰된 item 리스트 
@@ -21,7 +21,7 @@ public class itemSpawn2 : MonoBehaviour
         }
     }
 
-    public void setItemSpawns(int[] _result)
+    public void setItemSpawns(int[] _result) //서버에서 보낸 스폰 길이와 클라이언트에 정한 길이 동일 유무 판단 
     {
         spawnLen = itemSpawns.Length;
         result = _result;
@@ -34,7 +34,7 @@ public class itemSpawn2 : MonoBehaviour
         }
     }
 
-    void instanceItem()
+    void instanceItem() //아이템 스폰 
     {
         spawnItemList = new GameObject[10];
         for (int i = 0; i < spawnLen; i++)

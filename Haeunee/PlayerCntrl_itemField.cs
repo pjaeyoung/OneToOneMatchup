@@ -17,10 +17,9 @@ public class PlayerCntrl_itemField : MonoBehaviour
     GameObject canvas;
     GameObject[] touchableItems;
     GameObject fullItem;
-    public GameObject highlightBox;
+    GameObject highlightBox;
     Rigidbody playerRigid;
     Quaternion nowRot;
-    Joystick joystick;
 
     bool IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
     
@@ -35,19 +34,6 @@ public class PlayerCntrl_itemField : MonoBehaviour
         highlightBox = GameObject.Find("chkHighlight");
         fullItem = canvas.transform.Find("fullItemMSG").gameObject;
         nowRot = transform.localRotation;
-
-#if UNITY_ANDROID
-        GameObject joystickBg = GameObject.Find("JoystickCanvas").transform.GetChild(0).gameObject;
-        GameObject bigBtn = GameObject.Find("JoystickCanvas").transform.GetChild(1).gameObject;
-        bigBtn.GetComponentInChildren<Text>().text = "Jump";
-        bigBtn.SetActive(true);
-        GameObject getBtn = GameObject.Find("JoystickCanvas").transform.GetChild(3).gameObject;
-        getBtn.SetActive(true);
-        joystickBg.SetActive(true);
-        joystick = joystickBg.GetComponent<Joystick>();
-        joystick.ChangePlayer(gameObject);
-        joystick.ChangeSpeed(5);
-#endif
     }
 
     private void Start() //무기아이템 GameScene으로 넘어갈 때 weapon layer로 변경 
@@ -74,16 +60,14 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     private void FixedUpdate()
     {
-#if UNITY_EDITOR||UNITY_EDITOR_WIN
         Move();
-        if (Input.GetMouseButton(2))
+        if (Input.GetMouseButton(1))
         {
             Cursor.lockState = CursorLockMode.Confined;
             Rot();
         }
-        else if (Input.GetMouseButtonUp(2))
+        else if (Input.GetMouseButtonUp(1))
             Cursor.lockState = CursorLockMode.None;
-#endif
     }
 
     void OnTriggerEnter(Collider other)
@@ -105,7 +89,11 @@ public class PlayerCntrl_itemField : MonoBehaviour
         AM.PlayAnimation("Idle");
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Jump();
+            if (IsJump == false && transform.position.y < 2)
+            {
+                IsJump = true;
+                playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
+            }
         }
         if (Input.GetKey(KeyCode.D))
             this.transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
@@ -118,15 +106,6 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     }
 
-    public void Jump()
-    {
-        if (IsJump == false && transform.position.y < 2)
-        {
-            IsJump = true;
-            playerRigid.AddForce(0, 300, 0, ForceMode.Acceleration);
-        }
-    }
-
     void Rot()
     {
         float RotX = Input.GetAxis("Mouse X") * sensibilityX;
@@ -136,7 +115,7 @@ public class PlayerCntrl_itemField : MonoBehaviour
 
     /* 아이템 필드에서 아이템 터치(마우스 왼쪽 버튼 클릭) : TouchItem , fullItemMsgEnd */
 
-    public void TouchItem() //아이템 가방이 차기 전 : 아이템 가방 이미지 변경 및 itemPool로 위치 변경, 아이템 가방이 다 찬 후: 경고 메세지 
+    void TouchItem() //아이템 가방이 차기 전 : 아이템 가방 이미지 변경 및 itemPool로 위치 변경, 아이템 가방이 다 찬 후: 경고 메세지 
     {
         Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit rayHit;
