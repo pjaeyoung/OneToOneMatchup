@@ -23,7 +23,8 @@ public class WebServerScript : MonoBehaviour {
     {
         StringBuilder sendInfo = Info;
 
-        HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
+        string url = "http://192.168.0.15:10000/" + Url;
+        HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
         byte[] byteArr = UTF8Encoding.UTF8.GetBytes(sendInfo.ToString());
         httpWebRequest.ContentType = "application/x-www-form-urlencoded";
         httpWebRequest.Method = "POST";

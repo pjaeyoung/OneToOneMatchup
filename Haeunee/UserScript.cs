@@ -81,7 +81,7 @@ public class UserScript : MonoBehaviour
                 StringBuilder sendInfo = new StringBuilder();
                 sendInfo.Append("nick=" + nick);
                 sendInfo.Append("&tuto=" + tuto);
-                web.ConnectServer("http://192.168.0.22:10000/Tuto", sendInfo);
+                web.ConnectServer("Tuto", sendInfo);
                 loading.LoadScene("TutorialScene");
             }
             else if (EventSystem.current.currentSelectedGameObject == NoBtn)
@@ -90,7 +90,7 @@ public class UserScript : MonoBehaviour
                 StringBuilder sendInfo = new StringBuilder();
                 sendInfo.Append("nick=" + nick);
                 sendInfo.Append("&tuto=" + tuto);
-                web.ConnectServer("http://192.168.0.22:10000/Tuto", sendInfo);
+                web.ConnectServer("Tuto", sendInfo);
                 loading.LoadScene("WaitScene");
             }
         }
@@ -133,7 +133,7 @@ public class UserScript : MonoBehaviour
                 }
             }
 
-            string respJson = web.ConnectServer("http://192.168.0.22:10000/SignUp", sendInfo);
+            string respJson = web.ConnectServer("SignUp", sendInfo);
             Debug.Log(respJson);
 
             if (respJson.Equals("succ"))
@@ -173,7 +173,7 @@ public class UserScript : MonoBehaviour
 
     public void Login() //로그인
     {
-        string respJson = ConnectServer("http://192.168.0.22:10000/SignIn");
+        string respJson = ConnectServer("SignIn");
         Debug.Log(respJson);
         string[] loginResult = respJson.Split(',');
         if (loginResult[0].Equals("login")) //존재하는 아이디와 패스워드일 때

@@ -48,7 +48,7 @@ public class SocketServer {
     private void MakeServer()
     {
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //소켓생성
-        IPEndPoint ep = new IPEndPoint(IPAddress.Parse("192.168.0.22"), 10001); //연결할 서버 정보
+        IPEndPoint ep = new IPEndPoint(IPAddress.Parse("192.168.0.15"), 10001); //연결할 서버 정보
         sock.Connect(ep); //커넥트
         rd.socket = sock;
     }

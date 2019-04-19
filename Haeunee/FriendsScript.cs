@@ -61,7 +61,7 @@ public class FriendsScript : MonoBehaviour {
 
     List<sFriendEnter> friendEntList;
     void Start () {
-        url = "http://192.168.0.22:10000/Friends"; //친구 요청이 있는지 확인
+        url = "Friends"; //친구 요청이 있는지 확인
         tmpObj = new List<GameObject>();
         webServ = GameObject.Find("WebServer");
         webScript = webServ.GetComponent<WebServerScript>();

@@ -30,7 +30,7 @@ public class RankingScript : MonoBehaviour
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=reqlist");
         sendInfo.Append("&nick=" + nick);
-        string url = "http://192.168.0.22:10000/Ranking";
+        string url = "Ranking";
         string respData = webScript.ConnectServer(url, sendInfo);//랭킹 순서대로 서버에서 받아오기
         int y = -25;
         string[] rankList = respData.Split(',');//받아온 스트링 ,기준으로 나누기

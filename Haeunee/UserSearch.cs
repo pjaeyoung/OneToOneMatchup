@@ -85,7 +85,7 @@ public class UserSearch : MonoBehaviour
         sendInfo.Append("flag=nick");
         sendInfo.Append("&phone=" + nickPhone);
 
-        string url = "http://192.168.0.22:10000/UserSearch";
+        string url = "UserSearch";
         string respData = web.ConnectServer(url, sendInfo);
 
         if (respData == "fail")
@@ -115,7 +115,7 @@ public class UserSearch : MonoBehaviour
         sendInfo.Append("&phone=" + passPhone);
         sendInfo.Append("&nick=" + passNick);
 
-        string url = "http://192.168.0.22:10000/UserSearch";
+        string url = "UserSearch";
         string respData = web.ConnectServer(url, sendInfo);
 
         if(respData=="succ")
@@ -139,7 +139,7 @@ public class UserSearch : MonoBehaviour
         sendInfo.Append("nick=" + userNick);
         sendInfo.Append("&pass=" + changePass);
 
-        string url = "http://192.168.0.22:10000/ChangePassword";
+        string url = "ChangePassword";
         string respData = web.ConnectServer(url, sendInfo);
 
         if (respData == "succ")

@@ -77,7 +77,7 @@ public class EndSceneScript : MonoBehaviour
 
     string ResultSave(string result) //웹서버와 연결, 승률 계산하여 가져오기
     {
-        string Url = "http://192.168.0.22:10000/BattleEnd";
+        string Url = "BattleEnd";
         StringBuilder sendInfo = new StringBuilder();
         sendInfo.Append("flag=" + result);
         sendInfo.Append("&nick=" + server.nick);

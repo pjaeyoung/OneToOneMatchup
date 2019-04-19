@@ -56,7 +56,7 @@ public class UserDelete : MonoBehaviour
         sendInfo.Append("nick=" + web.nick);
         sendInfo.Append("&password=" + delPass);
 
-        string url = "http://192.168.0.22:10000/UserDel";
+        string url = "UserDel";
         string respData = web.ConnectServer(url, sendInfo);
 
         if (respData == "succ")
