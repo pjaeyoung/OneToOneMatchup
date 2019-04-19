@@ -92,10 +92,4 @@ public class itemCntrl : MonoBehaviour
             IsInHighlightBox = false; 
     }
 
-    public void TransferItem(Vector3 newPos)//targetZone이 마지막으로 가리킨 위치로 item 이동
-    {
-        transform.GetComponent<Rigidbody>().useGravity = true;
-        Vector3 dir = newPos - transform.position;
-        transform.GetComponent<Rigidbody>().velocity = transform.TransformDirection(dir.x, 0, dir.z);
-    }
 }
