@@ -133,7 +133,7 @@ public class PlayerScript : MonoBehaviour
                 return;
             itemClick();
         }
-        else if (Input.GetMouseButtonUp(0))
+        else if (sceneName == "ItemCollectScene" && Input.GetMouseButtonUp(0))
             highlightBox.SetActive(true);
         else if (sceneName == "GameScene" && !Block.activeSelf) // 아이템을 들고 있는 상태에서 방향 조정 및 던지기 
         {
@@ -150,9 +150,9 @@ public class PlayerScript : MonoBehaviour
                     ItemThrow();
                 }
             }
-            else
+            else if(getItem == null)
             {
-                if (Input.GetMouseButtonDown(0) && idleAni == true)
+                if (Input.GetMouseButton(0) && idleAni == true)
                     Attack();
             }
             if (aniEnd == true) //애니메이션 다끝나고
@@ -171,9 +171,6 @@ public class PlayerScript : MonoBehaviour
     {
         if (sceneName != SceneManager.GetActiveScene().name)
             sceneName = SceneManager.GetActiveScene().name;
-
-        if (GM == null)
-            Debug.Log("GM is null");
 
         if(sceneName == "ItemCollectScene")
         {
@@ -436,8 +433,8 @@ public class PlayerScript : MonoBehaviour
                     Vector3 newPos = transform.position;
                     newPos.y += 5;
                     hitObj.transform.position = newPos;
+                    hitObj.GetComponent<outline>().enabled = false;
                     getItem = hitObj;
-                    hitObj.GetComponent<Rigidbody>().useGravity = false;
 
                     int itemNum = s_itemSpawn.GetObjNum(hitObj);
                     sGetObj getObj = new sGetObj(itemNum);
@@ -468,6 +465,8 @@ public class PlayerScript : MonoBehaviour
 
         sThrowObj throwObj = new sThrowObj((int)eMSG.em_THROWOBJ);
         SocketServer.SingleTonServ().SendMsg(throwObj);
+
+        Debug.Log("item throw");
     }
 
     public void PlayerDamage(sHit hit) // 플레이어가 피격 당했다는 정보 받음 

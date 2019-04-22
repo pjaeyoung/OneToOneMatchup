@@ -57,7 +57,7 @@ public class ShotManager : MonoBehaviour {
         if (weaponType==(int)eWEAPON.em_WAND)
             transform.localPosition = new Vector3(4, 20, 17);
         else if (weaponType == (int)eWEAPON.em_BOW)
-            transform.localPosition = new Vector3(6, 12, 22);
+            transform.localPosition = new Vector3(-8, 12, 43);
         else
         {
             GetComponent<ShotManager>().enabled = false;

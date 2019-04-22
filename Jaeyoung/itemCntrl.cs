@@ -58,7 +58,7 @@ public class itemCntrl : MonoBehaviour
             else
                 s_outline.enabled = true;
         }
-        if (transform.position.y < -2)
+        if (scene.name == "ItemCollectScene" && transform.position.y < -2) //아이템 다시 버릴 때 바닥 뚫고 나갈 경우 위로 올리기 
             transform.position += Vector3.up * 3;
     }
 
@@ -85,7 +85,7 @@ public class itemCntrl : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other) //아이템이 하이라이트 박스에서 벗어나면 아웃라인 생성 
     {
         GameObject obj = other.gameObject;
         if (obj == highlightBox)
