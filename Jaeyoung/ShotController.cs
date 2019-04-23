@@ -9,7 +9,7 @@ public class ShotController : MonoBehaviour {
     GameObject StickEffect;
     EffSoundController effSound;
     Scene scene;
-    tutorial tuto;
+    public bool setPos = false;
 
     private void Awake()
     {
@@ -19,19 +19,21 @@ public class ShotController : MonoBehaviour {
             MagicEffect = GameObject.Find("MagicEffect");
             StickEffect = GameObject.Find("StickEffect");
         }
-        else if (scene.name == "TutorialScene")
-            tuto = GameObject.Find("Player").GetComponent<tutorial>();
     }
 
     void Start ()
     {
-        StartCoroutine(PosDelay()); //0.35초 후 이동 
         effSound = transform.parent.GetChild(1).GetComponent<EffSoundController>();
         effSound.PlayEff((int)eEFFSOUND.em_WIND);
     }	
     
 	void Update () //플레이어의 레이 방향으로 이동
     {
+        if(setPos == true)
+        {
+            setPos = false;
+            StartCoroutine(PosDelay()); //0.35초 후 shot pool 로 옮기기 
+        }
         transform.parent.Translate(rayPoint * 0.15f);
 	}
 
@@ -44,13 +46,15 @@ public class ShotController : MonoBehaviour {
             if (scene.name == "GameScene")
             {
                 if (transform.name == "Magic")
-                    MagicEffect.transform.position = other.gameObject.transform.position;
+                {
+                    MagicEffect.transform.position = other.transform.position;
+                    MagicEffect.GetComponent<hitEffect>().effStart = true;
+                }
                 else if (transform.name == "Arrow")
-                    StickEffect.transform.position = other.gameObject.transform.position + Vector3.up * 2;
-            }
-            else if (scene.name == "TutorialScene")
-            {
-                tuto.hpBar.value -= 1;
+                {
+                    StickEffect.transform.position = other.transform.position + Vector3.up * 2;
+                    StickEffect.GetComponent<hitEffect>().effStart = true;
+                }
             }
         }
     }

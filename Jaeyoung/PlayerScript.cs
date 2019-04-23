@@ -7,12 +7,12 @@ using UnityEngine.SceneManagement;
 //플레이어를 움직이는 스크립트
 public class PlayerScript : MonoBehaviour
 {
-    public Button[] itemButton;
+    public Button[] itemButton; //소지 아이템 창
     public LayerChange layerChange; // Touchable -> weapon layer 변경 스크립트 
-    ItemBtn s_itemBtn;
+    ItemBtn s_itemBtn; //아이템창 제어 스크립트 
     GameObject canvas;
     GameObject[] touchableItems; // 터치할 수 있는 아이템 목록, 배경 게임 오브젝트 예외처리 
-    public ItemFieldCntrl GM;
+    public ItemFieldCntrl GM; 
 
     GameObject sockServObj; //서버 오브젝트
     GameEnterScript playerInfo;
@@ -25,13 +25,13 @@ public class PlayerScript : MonoBehaviour
     Text hpText;
     HpBar playerHPBar;
     GameObject Block;
-    GameObject highlightBox;
+    GameObject highlightBox; //아웃라인 생성여부 판단 오브젝트 
     Camera playerCamera;
-    GameObject getItem = null;
+    GameObject getItem = null; //던지기 아이템 주웠는 지 판단 
     ItemSpawn s_itemSpawn;
     hitEffect s_hitEffect;
-    GameObject ChinkEffect;
-    Quaternion nowRot;
+    GameObject ChinkEffect; // 전사, 탱커 무기용 이펙트 
+    Quaternion nowRot; 
 
     string sceneName = "";
     int atkAni = 0;
@@ -148,6 +148,7 @@ public class PlayerScript : MonoBehaviour
                 {
                     Cursor.lockState = CursorLockMode.None;
                     ItemThrow();
+                    transform.Find("Canvas/ThrowPoint").gameObject.SetActive(false);
                 }
             }
             else if(getItem == null)
@@ -317,7 +318,7 @@ public class PlayerScript : MonoBehaviour
     {
         aniEnd = false;
         if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
-            shotMgr.Shooting(); 
+            shotMgr.Shooting(0); 
         else
             enemyAtk.AtkPoss(false); //근거리 공격 불가능
     }
@@ -413,10 +414,10 @@ public class PlayerScript : MonoBehaviour
             if(sceneName == "ItemCollectScene")
             {
                 bool possess = false;
-                if (hitObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단 
+                if (hitObj.GetComponentInChildren<outline>() != null) // outline 스크립트 있는 지 여부 판단, 없는 오브젝트 무시 
                     possess = true;
 
-                if (possess == true && hitObj.GetComponentInChildren<outline>().isActiveAndEnabled == true)
+                if (possess == true && hitObj.GetComponentInChildren<outline>().isActiveAndEnabled == true) // 아이템 가방창에 이미지 변경 
                 {
                     if (hitObj.tag == "item")
                         s_itemBtn.InputGetItemArr(hitObj);
@@ -424,7 +425,7 @@ public class PlayerScript : MonoBehaviour
                         s_itemBtn.GetComponent<ItemBtn>().inputGameObj(hitObj);
                 }
             }
-            else if (sceneName == "GameScene")
+            else if (sceneName == "GameScene") //아웃라인 활성화 상태인 아이템 클릭 후 캐릭터 머리 위로 옮기고 서버에 주운 아이템 정보 보내기 
             {
                 outline ObjOutline = hitObj.GetComponent<outline>();
                 if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
@@ -456,12 +457,9 @@ public class PlayerScript : MonoBehaviour
 
     void ItemThrow() //아이템 플레이어 정방향으로 던지기 
     {
-        getItem.GetComponent<Rigidbody>().useGravity = true;
-        getItem.GetComponent<Rigidbody>().velocity = transform.forward * 15;
         itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
         cntrl.isDestroyOK = true;
         getItem = null;
-        transform.Find("Canvas").Find("ThrowPoint").gameObject.SetActive(false);
 
         sThrowObj throwObj = new sThrowObj((int)eMSG.em_THROWOBJ);
         SocketServer.SingleTonServ().SendMsg(throwObj);

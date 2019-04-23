@@ -12,13 +12,12 @@ public class hitEffect : MonoBehaviour
     */
 
     EnemyScript s_Enemy;
-    Vector3 pos;
     AttackMgr atkMgr;
     ParticleSystem particle;
     EffSoundController sound;
-
+    Vector3 waitPos = new Vector3(1000, 0, 1000); //이펙트 풀 대기 위치 
+    public bool effStart = false; //이펙트 발동 
     public bool getAtkMgr = false; // AttackMgr 한 번만 받아서 저장하기 
-    string effectName = ""; //이펙트 이름 구별용 
 
     private void Awake()
     {
@@ -33,9 +32,7 @@ public class hitEffect : MonoBehaviour
   
         if(obj.tag == "Shootable" || obj.tag == "floor" || obj.tag == "Enemy" || obj.tag == "Player")
         {
-            particle.Play();
-            StartCoroutine(Delay());
-            if(name != "ChinkEffect")
+            if (name != "ChinkEffect")
                 sound.PlayEff((int)eEFFSOUND.em_BOMB);
             if (name == "HitEffect" && obj.tag == "Enemy" && getAtkMgr == true)
             {
@@ -54,12 +51,27 @@ public class hitEffect : MonoBehaviour
             if(s_Enemy != null)
                 atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
         }
+        if (effStart)
+        {
+            effStart = false;
+            particle.Play();
+            StartCoroutine(Delay());
+        }
     }
 
     IEnumerator Delay() // 1초 후 이펙트 위치 변경 
     {
-        yield return new WaitForSeconds(0.1f);
-        transform.position = new Vector3(1000, 1000, 1000);
-        particle.Stop();
+        if(particle.gameObject.transform.parent.name == "MagicEffect")
+        {
+            yield return new WaitForSeconds(4f);
+            transform.position = waitPos;
+            particle.Stop();
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.1f);
+            transform.position = waitPos;
+            particle.Stop();
+        }
     }
 }

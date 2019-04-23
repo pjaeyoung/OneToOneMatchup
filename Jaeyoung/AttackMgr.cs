@@ -24,7 +24,10 @@ public class AttackMgr : MonoBehaviour {
             aktPossible = false;
             HitSucc((int)eATKTYPE.em_NORMAL);
             if(obj.name == "Sword6" || obj.name == "GreatSword6")
+            {
                 ChinkEffect.transform.position = obj.transform.position + Vector3.up * 2;
+                ChinkEffect.GetComponent<hitEffect>().effStart = true;
+            }
         }
     }
 
