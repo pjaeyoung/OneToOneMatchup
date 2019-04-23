@@ -41,9 +41,11 @@ public class UserSearch : MonoBehaviour
         if(MSGWin.activeSelf && !IsClickSearchNickBtn)
         {
             winTime += Time.deltaTime;
-            if (winTime >= 1.5f)
+            if (winTime >= 1f)
             {
                 winTime = 0;
+                if(!MSGWin.transform.GetChild(1).gameObject.activeSelf)
+                    MSGWin.transform.GetChild(1).gameObject.SetActive(false);
                 MSGWin.SetActive(false);
             }
         }
@@ -87,20 +89,21 @@ public class UserSearch : MonoBehaviour
 
         string url = "UserSearch";
         string respData = web.ConnectServer(url, sendInfo);
+        string text = "";
 
+        MSGWin.SetActive(true);
         if (respData == "fail")
         {
-            MSGWin.GetComponentInChildren<Text>().text = "가입되지 않은 번호입니다.";
-            MSGWin.SetActive(true);
+            IsClickSearchNickBtn = false;
+            text = "가입되지 않은 번호입니다.";
         }
         else
         {
-            MSGWin.GetComponentInChildren<Text>().text = "당신의 닉네임은 '" + respData + "' 입니다.";
             IsClickSearchNickBtn = true;
-            MSGWin.SetActive(true);
+            text = "당신의 닉네임은 '" + respData + "' 입니다.";
             MSGWin.transform.GetChild(1).gameObject.SetActive(true);
         }
-        
+        MSGWin.GetComponent<PrintMSG>().print(text);
     }
 
     public void PassSearch()
@@ -125,8 +128,9 @@ public class UserSearch : MonoBehaviour
         }
         else
         {
-            MSGWin.GetComponentInChildren<Text>().text = "입력하신 정보를 다시 확인하세요.";
+            string text = "입력하신 정보를 다시 확인하세요.";
             MSGWin.SetActive(true);
+            MSGWin.GetComponent<PrintMSG>().print(text);
         }
     }
 
@@ -144,9 +148,10 @@ public class UserSearch : MonoBehaviour
 
         if (respData == "succ")
         {
-            MSGWin.GetComponentInChildren<Text>().text = "비밀번호가 변경되었습니다.";
+            string text = "비밀번호가 변경되었습니다.";
             MSGWin.SetActive(true);
-            transform.parent.gameObject.SetActive(false);
+            MSGWin.GetComponent<PrintMSG>().print(text);
+            passChangeWin.SetActive(false);
         }
     }
 }

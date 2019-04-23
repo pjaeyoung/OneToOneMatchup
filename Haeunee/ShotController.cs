@@ -58,7 +58,7 @@ public class ShotController : MonoBehaviour {
     IEnumerator PosDelay()
     {
         yield return new WaitForSeconds(0.35f);
-        transform.parent.transform.position = new Vector3(1000, 1000, 1000);
+        transform.parent.transform.position = new Vector3(1000, 0, 1000);
         GetComponent<ShotController>().enabled = false;
     }
 }

@@ -13,24 +13,18 @@ public class PlayerScript : MonoBehaviour
     Rigidbody playerRigidBody;
     AnimationController playerAniCon; //애니메이션
     AttackMgr enemyAtk;
-    GameMgr GM;
-
+    ItemFieldCntrl GM;
     ShotManager shotMgr;
     GameObject enemyObj;
-
     Text hpText;
     HpBar playerHPBar;
-
     GameObject Block;
-
     GameObject highlightBox;
     Camera playerCamera;
     GameObject getItem = null;
-
     itemSpawn2 s_itemSpawn2;
     hitEffect s_hitEffect;
     GameObject ChinkEffect;
-
     Quaternion nowRot;
 
     public int weaponNum = -1;
@@ -51,7 +45,7 @@ public class PlayerScript : MonoBehaviour
     bool itemImgChange = false;
     bool itemImgSet = false;
 
-    int IsJump; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
+    bool IsJump = false; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
     bool itemPoss = true;
 
     GameObject[] ItemImg;
@@ -62,13 +56,13 @@ public class PlayerScript : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(transform.parent);
-        sockServObj = GameObject.Find("GameMgr");
+        sockServObj = GameObject.Find("GameMgr2/MatchingCntrl");
         playerInfo = sockServObj.GetComponent<GameEnterScript>();
         weaponNum = playerInfo.savCharInfo.weapon;
 
         spawnInfo = sockServObj.GetComponent<SpawnScript>();
 
-        GM = GameObject.Find("itemFieldMgr").GetComponent<GameMgr>();
+        GM = GameObject.Find("GameMgr2/itemFieldCntrl").GetComponent<ItemFieldCntrl>();
         shotMgr = GetComponentInChildren<ShotManager>();
         shotMgr.ShotPosChange(weaponNum);
         shotMgr.point = GameObject.Find("PointPrefab");
@@ -98,7 +92,7 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < 4; i++)
             ItemImg[i].SetActive(false);
 
-        sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
+        sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
         effSound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 
@@ -110,14 +104,14 @@ public class PlayerScript : MonoBehaviour
             {
                 itemClick();
             }
-            else if(getItem!=null)
+            else if (getItem != null)
             {
-                if(Input.GetMouseButton(0))
+                if (Input.GetMouseButton(0))
                 {
                     Cursor.lockState = CursorLockMode.Confined;
                     Rot();
                 }
-                else if(Input.GetMouseButtonUp(0))
+                else if (Input.GetMouseButtonUp(0))
                 {
                     Cursor.lockState = CursorLockMode.None;
                     ItemThrow();
@@ -134,7 +128,7 @@ public class PlayerScript : MonoBehaviour
                 Attack();
             else if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A)))
             {
-                if(getItem == null)
+                if (getItem == null)
                     Move();
             }
             else
@@ -145,14 +139,13 @@ public class PlayerScript : MonoBehaviour
             if (aniEnd == true) //애니메이션 다끝나고
                 shotMgrStart();
         }
-      
     }
 
     void OnTriggerEnter(Collider other)
     {
         GameObject obj = other.gameObject;
         if (obj.tag == "floor")
-            IsJump = (int)eBOOLEAN.FALSE;
+            IsJump = false;
     }
 
     void Update()
@@ -163,7 +156,6 @@ public class PlayerScript : MonoBehaviour
             {
                 useItem();
             }
-            ActiveBlock();
         }
 
         if (damaged == true) //데미지를 받았을 때 애니메이션 재생
@@ -177,8 +169,6 @@ public class PlayerScript : MonoBehaviour
 
         if (gameEnd == true) //게임 끝
             changeEndScene();
-
-     
     }
 
     void Rot() // 좌우 회전
@@ -244,9 +234,9 @@ public class PlayerScript : MonoBehaviour
 
     void Jump() // 점프 
     {
-        if (IsJump == (int)eBOOLEAN.FALSE)
+        if (!IsJump)
         {
-            IsJump = (int)eBOOLEAN.TRUE;
+            IsJump = true;
             playerRigidBody.AddForce(0, 300, 0, ForceMode.Acceleration);
         }
     }
@@ -255,7 +245,7 @@ public class PlayerScript : MonoBehaviour
     {
         aniEnd = false;
         if (weaponNum == (int)eWEAPON.em_BOW || weaponNum == (int)eWEAPON.em_WAND)
-            shotMgr.Shooting(); //원거리 샷 발사
+            shotMgr.Shooting(0); //원거리 샷 발사
         else
             enemyAtk.AtkPoss(false); //근거리 공격 불가능
     }
@@ -282,17 +272,6 @@ public class PlayerScript : MonoBehaviour
             int IsItemUsed = GM.changeUsedItemImg(useItem.itemNum); //아이템 사용 되었을 때 서버에 정보 전송
             if (IsItemUsed == (int)eITEMUSE.UNUSED)
                 SocketServer.SingleTonServ().SendMsg(useItem);
-        }
-    }
-
-    void ActiveBlock() // block 활성화 
-    {
-        if (Input.GetKeyDown(KeyCode.Escape)) //ESC 눌렀을 때 뜨는 창 
-        {
-            Block.SetActive(true);
-            Block.transform.GetChild(0).gameObject.SetActive(true);
-            GetComponentInChildren<PlayerCameraScript>().enabled = false;
-            this.enabled = false;
         }
     }
 
@@ -327,6 +306,7 @@ public class PlayerScript : MonoBehaviour
                 effSound.PlayEff((int)eEFFSOUND.em_ARROWHIT);
             else if (enemyScript.weaponType == (int)eWEAPON.em_WAND)
                 effSound.PlayEff((int)eEFFSOUND.em_MAGIHIT);
+
         }
     }
 
@@ -349,13 +329,6 @@ public class PlayerScript : MonoBehaviour
             ItemImg[itemImgNum].SetActive(itemImgSet);
     }
 
-    void changeEndScene() // EndScene 전환 
-    {
-        GameObject.Destroy(GM.gameObject);
-        SceneManager.LoadScene("EndScene");
-        gameEnd = false;
-    }
-
     void itemClick() // 던질 아이템 클릭 가능 여부 체크 및 클릭한 아이템 머리 위로 위치 이동, targetZone 생성 조건 On! 
     {
         highlightBox.SetActive(false);
@@ -368,6 +341,7 @@ public class PlayerScript : MonoBehaviour
             if (hitObj.layer == (int)eLAYER.TOUCHABLE && ObjOutline.isActiveAndEnabled == true)
             {
                 Debug.Log("click");
+                hitObj.GetComponent<Rigidbody>().useGravity = false;
                 Vector3 newPos = transform.position;
                 newPos.y += 5;
                 hitObj.transform.position = newPos;
@@ -377,7 +351,7 @@ public class PlayerScript : MonoBehaviour
                 int itemNum = s_itemSpawn2.GetObjNum(hitObj);
                 sGetObj getObj = new sGetObj(itemNum);
                 SocketServer.SingleTonServ().SendMsg(getObj);
-
+                Debug.Log("send Succ");
                 transform.Find("Canvas").Find("ThrowPoint").gameObject.SetActive(true);
             }
             else
@@ -431,7 +405,13 @@ public class PlayerScript : MonoBehaviour
         itemImgSet = show;
     }
 
-    public void ChangeWaitScene() //게임이 끝났다는 정보 
+    void changeEndScene() // EndScene 전환 
+    {
+        SceneManager.LoadScene("EndScene");
+        gameEnd = false;
+    }
+
+    public void GameEndTrue() //게임이 끝났다는 정보 
     {
         gameEnd = true;
     }

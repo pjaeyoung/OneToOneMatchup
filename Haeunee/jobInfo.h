@@ -60,14 +60,14 @@ public:
 		}
 		else if (flag == eWEAPON::em_SHIElD)
 		{
-			hp = 400;
+			hp = 300;
 			atk = 30;
 			def = 20;
 			speed = 2;
 		}
 		else if (flag == eWEAPON::em_SWORD)
 		{
-			hp = 400;
+			hp = 300;
 			atk = 40;
 			def = 10;
 			speed = 2;
@@ -75,41 +75,41 @@ public:
 		else if (flag == eWEAPON::em_BOW)
 		{
 			hp = 300;
-			atk = 20;
+			atk = 30;
 			def = 5;
 			speed = 3;
 		}
 		else if (flag == eWEAPON::em_WAND)
 		{
-			hp = 250;
+			hp = 300;
 			atk = 30;
-			def = 5;
+			def = 10;
 			speed = 2;
 		}
 		else if (flag == 10+ eARMOR::em_DEFAULT_AMR)
 		{
-			hp = 100;
+			hp = 50;
 			atk = 10;
 			def = 5;
 			speed = 1;
 		}
 		else if (flag == 10 + eARMOR::em_ARMOR)
 		{
-			hp = 200;
+			hp = 100;
 			atk = 10;
 			def = 10;
 			speed = 1;
 		}
 		else if (flag == 10 + eARMOR::em_SUIT)
 		{
-			hp = 200;
+			hp = 100;
 			atk = 10;
 			def = 5;
 			speed = 2;
 		}
 		else if (flag == 10 + eARMOR::em_ROBE)
 		{
-			hp = 200;
+			hp = 100;
 			atk = 20;
 			def = 5;
 			speed = 1;

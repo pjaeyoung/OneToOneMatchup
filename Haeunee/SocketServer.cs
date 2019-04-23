@@ -176,9 +176,9 @@ public class SocketServer {
             sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);
             gameResult = esc.result;
             if(pScript==null)
-                sScript.ChangeWaitScene();
+                sScript.GameEndTrue();
             else
-                pScript.ChangeWaitScene();
+                pScript.GameEndTrue();
         }
         else if (room.flag == (int)eMSG.em_CHAT) //채팅
         {

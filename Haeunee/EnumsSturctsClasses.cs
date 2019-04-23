@@ -55,18 +55,11 @@ enum eMSG //메세지 종류
     em_CHAT,
 }
 
-enum Friend
+enum Friend //WaitScene 소셜창 탭
 {
     em_LIST = 1,
     em_SEARCH,
     em_REQUEST,
-}
-
-// 참, 거짓 판단 
-enum eBOOLEAN
-{
-    FALSE,
-    TRUE
 }
 
 //무기 종류
@@ -123,6 +116,21 @@ enum eATKTYPE
     em_NORMAL = 1,
     em_OBJTHROW,
 };
+
+enum eEFFSOUND //사운드 타입
+{
+    em_ARROW,
+    em_ARROWHIT,
+    em_SWING1,
+    em_SWING2,
+    em_MAGIHIT,
+    em_SWORD1,
+    em_SWORD2,
+    em_SWORD3,
+    em_SWORD4,
+    em_WIND,
+    em_BOMB,
+}
 
 struct sLogin
 {
@@ -359,35 +367,6 @@ public struct sChat //채팅
     {
         flag = f;
         chat = ch;
-    }
-}
-
-/* 아이템 클래스 : 아이템 획득 갯수, 빈 아이템가방 넘버 */
-public class ItemCount
-{
-    int getItemNum;
-    int maxItemNum;
-
-    public ItemCount()
-    {
-        getItemNum = 0;
-        maxItemNum = 3;
-    }
-
-    public int GetItemNum()
-    {
-        return getItemNum;
-    }
-
-    public int changeGetItemNum(int changeNum)
-    {
-        if (changeNum <= maxItemNum)
-        {
-            getItemNum = changeNum;
-            return 0;
-        }
-        else
-            return 1;
     }
 }
 

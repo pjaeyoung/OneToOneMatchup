@@ -32,8 +32,7 @@ public class SpawnScript : MonoBehaviour {
         {
             GameObject enemyOutWin = GameObject.Find("Canvas").transform.Find("EnemyOut").gameObject;
             enemyOutWin.SetActive(true);
-            StartCoroutine(OutDelay());
-            gameEnd = false;
+            changeEndScene();
         }
     }
 
@@ -91,11 +90,24 @@ public class SpawnScript : MonoBehaviour {
         aniMgr.weaponIndex = charInfo.weapon; //무기에 따른 애니메이션도 설정
     }
     
+
+    public void GameEndTrue()
+    {
+        gameEnd = true;
+    }
+
+    void changeEndScene() // EndScene 전환 
+    {
+        loading.LoadScene("WaitScene");
+        gameEnd = false;
+    }
+
     IEnumerator ItemDelay() 
     {
         yield return new WaitForSeconds(1.0f);
-        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("GameScene");
+        BgmController sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
+        sound.ChangeBgm();
+        loading.LoadScene("GameScene");
         while (true)
         {
             yield return new WaitForSeconds(0.2f);
@@ -105,20 +117,5 @@ public class SpawnScript : MonoBehaviour {
                 break;
             }
         }
-    }
-
-    IEnumerator OutDelay()
-    {
-        yield return new WaitForSeconds(1.0f);
-        GameObject.Destroy(GameObject.Find("itemBtnCanvas"));
-        GameObject.Destroy(GameObject.Find("itemFieldMgr"));
-        BgmController sound = GameObject.Find("SoundMgr").GetComponent<BgmController>();
-        sound.ChangeBgm("WaitScene");
-        GameObject.Destroy(gameObject);
-    }
-
-    public void ChangeWaitScene()
-    {
-        gameEnd = true;
     }
 }

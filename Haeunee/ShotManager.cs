@@ -9,13 +9,19 @@ public class ShotManager : MonoBehaviour {
     float maxDistance = 20;
     int myWeaponType;
     GameObject nowShot;
-    GameObject arrow;
-    GameObject magic;
+    GameObject[] arrow;
+    GameObject[] magic;
+
 
     void Start () {
         ray = new Ray();
-        arrow = GameObject.Find("ArrowPrefab");
-        magic = GameObject.Find("MagicPrefab");
+        arrow = new GameObject[2];
+        arrow[0] = GameObject.Find("ArrowPrefab1");
+        arrow[1] = GameObject.Find("ArrowPrefab2");
+
+        magic = new GameObject[2];
+        magic[0] = GameObject.Find("MagicPrefab1");
+        magic[1] = GameObject.Find("MagicPrefab2");
     }
 	
 	void Update () {
@@ -39,12 +45,12 @@ public class ShotManager : MonoBehaviour {
         }
     }
 
-    public void Shooting()
+    public void Shooting(int shotNum)
     { //샷 생성
         if (myWeaponType == (int)eWEAPON.em_BOW)
-            nowShot = arrow;
+            nowShot = arrow[shotNum];
         else if (myWeaponType == (int)eWEAPON.em_WAND)
-            nowShot = magic;
+            nowShot = magic[shotNum];
         nowShot.transform.position = transform.position;
         nowShot.GetComponentInChildren<ShotController>().enabled = true;
         nowShot.transform.GetChild(0).transform.eulerAngles = GetComponentInParent<Transform>().eulerAngles;

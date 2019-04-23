@@ -15,11 +15,10 @@ public class hitEffect : MonoBehaviour
     Vector3 pos;
     AttackMgr atkMgr;
     ParticleSystem particle;
+    EffSoundController sound;
 
     public bool getAtkMgr = false; // AttackMgr 한 번만 받아서 저장하기 
     string effectName = ""; //이펙트 이름 구별용 
-
-    EffSoundController sound;
 
     private void Awake()
     {

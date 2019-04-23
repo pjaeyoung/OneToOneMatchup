@@ -50,8 +50,7 @@ public class EnemyScript : MonoBehaviour
                 playerAniCon.PlayDeath("Death");
         }
 
-        if(MoveLimit(enemyPos.x, transform.position.x) ||
-            MoveLimit(enemyPos.y, transform.position.y)|| MoveLimit(enemyPos.z, transform.position.z)) //움직임
+        if(MoveLimit(enemyPos.y, transform.position.y)) //움직임
             transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
 
         if (atkAni == true) //공격
@@ -81,6 +80,7 @@ public class EnemyScript : MonoBehaviour
         }
         else if (MoveLimit(enemyPos.x, transform.position.x) || MoveLimit(enemyPos.z, transform.position.z))
         {
+            transform.position = Vector3.Lerp(transform.position, enemyPos, 0.5f);
             playerAniCon.PlayAnimation("Move");//움직임 애니메이션(점프일때 적용x)
             Debug.Log("enemy Move");
         }
@@ -104,7 +104,7 @@ public class EnemyScript : MonoBehaviour
             getObj.transform.position = newPos;
         }
 
-        if(objThrow == true)
+        if(objThrow==true)//물건 던지기
         {
             objThrow = false;
             getObj.GetComponent<Rigidbody>().velocity = transform.forward * 15;
@@ -144,7 +144,7 @@ public class EnemyScript : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         if (weaponType == (int)eWEAPON.em_BOW || weaponType == (int)eWEAPON.em_WAND)
-            shotMgr.Shooting();
+            shotMgr.Shooting(1);
     }
 
     public void GetThrowObj(int num)

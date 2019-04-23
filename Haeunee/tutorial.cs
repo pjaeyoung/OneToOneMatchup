@@ -31,7 +31,6 @@ public class tutorial : MonoBehaviour
     GameObject skipBtn;
     GameObject Enemy;
     GameObject hpPotion;
-    GameObject SetUp;
 
     float moveSpeed = 5.0f;
     float sensibilityX = 2.0f;
@@ -94,8 +93,6 @@ public class tutorial : MonoBehaviour
 
     void Start()
     {
-        //SetUp = GameObject.Find("SoundMgr/SettingBtn");
-        //SetUp.SetActive(false);
         StartCoroutine(textBtnActive());
     }
 
@@ -449,7 +446,7 @@ public class tutorial : MonoBehaviour
     {
         getItem.transform.GetComponent<Rigidbody>().useGravity = true;
         Vector3 dir = targetZone.transform.position - transform.position;
-        getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z);
+        getItem.GetComponent<Rigidbody>().velocity = getItem.transform.TransformDirection(dir.x, 0, dir.z) * 2;
         targetZone.SetActive(false);
     } //targetZone이 마지막으로 그려진 위치에 아이템 던지기 
 

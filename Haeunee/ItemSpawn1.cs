@@ -13,7 +13,7 @@ public class ItemSpawn1 : MonoBehaviour
 
     void Awake()
     {
-        enter = GameObject.Find("GameMgr").GetComponent<GameEnterScript>();
+        enter = GameObject.Find("GameMgr2/MatchingCntrl").GetComponent<GameEnterScript>();
         int spawnCount = itemSpawn.Length;
         int weaponCount = weapons.Length;
         int armorCount = weaponCount + 3;
@@ -35,8 +35,8 @@ public class ItemSpawn1 : MonoBehaviour
                 while (true)
                 {
                     ran = Random.Range(0, spawnCount);
-                    int IsuseableNum = IsSpawnUseable(ran);
-                    if (IsuseableNum == (int)eBOOLEAN.TRUE)
+                    bool IsuseableNum = IsSpawnUseable(ran);
+                    if (IsuseableNum)
                     {
                         callWeapon(ran, i);
                         break;
@@ -50,8 +50,8 @@ public class ItemSpawn1 : MonoBehaviour
                 while (true)
                 {
                     ran = Random.Range(0, spawnCount);
-                    int IsuseableNum = IsSpawnUseable(ran);
-                    if (IsuseableNum == (int)eBOOLEAN.TRUE)
+                    bool IsuseableNum = IsSpawnUseable(ran);
+                    if (IsuseableNum)
                     {
                         callArmor(ran, weaponCount, i);
                         break;
@@ -65,8 +65,8 @@ public class ItemSpawn1 : MonoBehaviour
                 while (true)
                 {
                     ran = Random.Range(0, spawnCount);
-                    int IsuseableNum = IsSpawnUseable(ran);
-                    if (IsuseableNum == (int)eBOOLEAN.TRUE)
+                    bool IsuseableNum = IsSpawnUseable(ran);
+                    if (IsuseableNum)
                     {
                         callItem(ran, itemIdx);
                         itemIdx++;
@@ -108,14 +108,14 @@ public class ItemSpawn1 : MonoBehaviour
     }
 
     /* itemSpawn[num] 에 이미 스폰된 아이템이 있는지 여부 판단 */
-    int IsSpawnUseable(int num)
+    bool IsSpawnUseable(int num)
     {
         if (usedSpawnNum[num] == -1)
         {
             usedSpawnNum[num] = num;
-            return (int)eBOOLEAN.TRUE;
+            return true;
         }
         else
-            return (int)eBOOLEAN.FALSE;
+            return false;
     }
 }

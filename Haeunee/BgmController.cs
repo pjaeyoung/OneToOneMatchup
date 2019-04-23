@@ -10,18 +10,21 @@ public class BgmController : MonoBehaviour
     public AudioSource audioBgm;
     public Slider bgmVolSlider;
     public AudioClip[] bgmClip;
-    public GameObject SetUp;
     string nowScene;
-    bool fadeIn = false;
+    bool fadeIn = false; //화면 전환시 볼륨 자연스럽게 전환 
     bool fadeOut = false;
-    public GameObject SettingWin;
-    public GameObject block;
-    public Button ExitBtn;
+    public GameObject SettingWin; //설정창 
+    public GameObject SetUpBtn; //설정창 버튼
+    public GameObject userDelWin; //계정삭제창
+    public Button exitBtn; //나가기창 버튼
+    public GameObject block; //마우스 클릭 방지 
     string sceneName;
 
     void Start()
     {
         DontDestroyOnLoad(this);
+        sceneName = SceneManager.GetActiveScene().name;
+        BGMSetAndBtnOnOff();
     }
     
     void Update()
@@ -38,65 +41,74 @@ public class BgmController : MonoBehaviour
             if (audioBgm.volume <= 0)
             {
                 fadeOut = false;
-                SceneChange();
             }
         }
         else
             audioBgm.volume = bgmVolSlider.value;
+
+        if(sceneName != SceneManager.GetActiveScene().name)
+        {
+            sceneName = SceneManager.GetActiveScene().name;
+            BGMSetAndBtnOnOff();
+        }
     }
 
-    public void ChangeBgm(string name)
+    public void ChangeBgm()
     {
         fadeOut = true;
-        sceneName = name;
     }
 
     public void SettingBtnClick()
     {
         SettingWin.SetActive(true);
         block.SetActive(true);
-        ExitBtn.interactable = false;
+        exitBtn.interactable = false;
     }
 
     public void CloseBtnClick()
     {
+        if (userDelWin.activeSelf)
+        {
+            userDelWin.SetActive(false);
+            return;
+        }
+
         SettingWin.SetActive(false);
         block.SetActive(false);
-        ExitBtn.interactable = true;
+        exitBtn.interactable = true;
     }
-
-    void SceneChange()
+    
+    void BGMSetAndBtnOnOff() //씬 별 BGM setting, SetUpBtn과 ExitBtn 화면 출력 여부 판단
     {
-        loading.LoadScene(sceneName);
         if (sceneName == "LoginScene" || sceneName == "WaitScene")
         {
-            audioBgm.clip = bgmClip[0];
             transform.GetChild(0).gameObject.SetActive(true);
-            SetUp.SetActive(true);
-            ExitBtn.gameObject.SetActive(true);
+            exitBtn.gameObject.SetActive(true);
+            SetUpBtn.SetActive(true);
+            if (audioBgm.clip.name == bgmClip[0].name)
+                return;
+            audioBgm.clip = bgmClip[0];
         }
-        else if (sceneName == "ItemCollectScene")
+        else
         {
-            audioBgm.clip = bgmClip[1];
-            transform.GetChild(0).gameObject.SetActive(false);
-            SetUp.SetActive(false);
-            SettingWin.SetActive(false);
-            ExitBtn.gameObject.SetActive(false);
-            block.SetActive(false);
-        }
-        else if (sceneName == "LoadingScene")
-        {
-            SetUp.SetActive(false);
+            exitBtn.gameObject.SetActive(false);
+            SetUpBtn.SetActive(false);
             SettingWin.SetActive(false);
             block.SetActive(false);
+            if (sceneName == "ItemCollectScene")
+            {
+                audioBgm.clip = bgmClip[1];
+                transform.GetChild(0).gameObject.SetActive(false);
+            }
+            else if (sceneName == "GameScene")
+            {
+                audioBgm.clip = bgmClip[2];
+            }
+            else if (sceneName == "LoadingScene")
+            {
+                return;
+            }
         }
-        if (sceneName == "GameScene")
-        {
-            audioBgm.clip = bgmClip[2];
-            SetUp.SetActive(false);
-            SettingWin.SetActive(false);
-        }
-
         audioBgm.Play();
         audioBgm.volume = 0;
         fadeIn = true;

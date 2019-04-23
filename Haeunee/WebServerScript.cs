@@ -19,10 +19,9 @@ public class WebServerScript : MonoBehaviour {
         SocketServer.SingleTonServ().WaitRecieve();
     }
 
-    public string ConnectServer(string Url, StringBuilder Info) //웹서버와 연결
+    public string ConnectServer(string Url,StringBuilder Info) //웹서버와 연결
     {
         StringBuilder sendInfo = Info;
-
         string url = "http://192.168.0.15:10000/" + Url;
         HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
         byte[] byteArr = UTF8Encoding.UTF8.GetBytes(sendInfo.ToString());
@@ -31,6 +30,8 @@ public class WebServerScript : MonoBehaviour {
         httpWebRequest.ContentLength = byteArr.Length;
 
         Stream stream = httpWebRequest.GetRequestStream();
+        if (stream == null)
+            Debug.Log("stream is null");
         stream.Write(byteArr, 0, byteArr.Length);
 
         HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();

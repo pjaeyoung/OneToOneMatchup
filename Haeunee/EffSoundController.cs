@@ -3,21 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-enum eEFFSOUND
-{
-    em_ARROW,
-    em_ARROWHIT,
-    em_SWING1,
-    em_SWING2,
-    em_MAGIHIT,
-    em_SWORD1,
-    em_SWORD2,
-    em_SWORD3,
-    em_SWORD4,
-    em_WIND,
-    em_BOMB,
-}
-
 public class EffSoundController : MonoBehaviour
 {
     public AudioSource audioEff;
@@ -26,7 +11,7 @@ public class EffSoundController : MonoBehaviour
 
     private void Awake()
     {
-        GameObject soundMgr = GameObject.Find("SoundMgr");
+        GameObject soundMgr = GameObject.Find("GameMgr");
         GameObject setWin = soundMgr.transform.Find("SettingWin").gameObject;
         effVolSlider = setWin.transform.Find("EffSoundSlider").GetComponent<Slider>();
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class ChatScript : MonoBehaviour
 {
@@ -9,8 +10,6 @@ public class ChatScript : MonoBehaviour
     public InputField chatInput;
     string printChat = "";
     string nowChat = "";
-    int nowTextNum = 0;
-
     WebServerScript web;
 
     void Start()
