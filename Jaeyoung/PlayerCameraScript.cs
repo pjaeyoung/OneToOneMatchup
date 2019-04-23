@@ -4,7 +4,7 @@ using UnityEngine;
 //카메라 벽 뚫지 않게 하기 위한 스크립트
 public class PlayerCameraScript : MonoBehaviour {
     Quaternion initRot; //초기 회전각
-    Quaternion preRot; //예측한 회전각 
+    Quaternion preRot; //예측한 회전각  
     public float sensibility = 5f; //회전운동 민감도
     public int MaxRot = 30; //최대 회전각 크기 
     public int MinRot = -30; //최소 회전각 크기 
@@ -31,10 +31,10 @@ public class PlayerCameraScript : MonoBehaviour {
             other.gameObject.layer = (int)eLAYER.TOUCHWALL;
         }
     }
-
-    void FixedUpdate()
+    
+    void LateUpdate ()
     {
-        if (Input.GetMouseButton(2)) //카메라 위 아래 회전 
+        if (Input.GetMouseButton(1)) //카메라 위 아래 회전 
         {
             float RotY = Input.GetAxis("Mouse Y") * sensibility;
             preRot *= Quaternion.Euler(Vector3.left * RotY);

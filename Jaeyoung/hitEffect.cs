@@ -15,6 +15,7 @@ public class hitEffect : MonoBehaviour
     Vector3 pos;
     AttackMgr atkMgr;
     ParticleSystem particle;
+    EffSoundController sound;
 
     public bool getAtkMgr = false; // AttackMgr 한 번만 받아서 저장하기 
     string effectName = ""; //이펙트 이름 구별용 
@@ -22,17 +23,20 @@ public class hitEffect : MonoBehaviour
     private void Awake()
     {
         particle = GetComponentInChildren<ParticleSystem>();
+        sound = gameObject.GetComponentInChildren<EffSoundController>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         name = this.gameObject.name;
         GameObject obj = other.gameObject;
-
+  
         if(obj.tag == "Shootable" || obj.tag == "floor" || obj.tag == "Enemy" || obj.tag == "Player")
         {
             particle.Play();
             StartCoroutine(Delay());
+            if(name != "ChinkEffect")
+                sound.PlayEff((int)eEFFSOUND.em_BOMB);
             if (name == "HitEffect" && obj.tag == "Enemy" && getAtkMgr == true)
             {
                 atkMgr.HitSucc((int)eATKTYPE.em_OBJTHROW);
@@ -47,13 +51,14 @@ public class hitEffect : MonoBehaviour
         if(getAtkMgr == true) 
         {
             s_Enemy = SocketServer.SingleTonServ().NowEnemyScript();
-            atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
+            if(s_Enemy != null)
+                atkMgr = s_Enemy.gameObject.GetComponent<AttackMgr>();
         }
     }
 
     IEnumerator Delay() // 1초 후 이펙트 위치 변경 
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.1f);
         transform.position = new Vector3(1000, 1000, 1000);
         particle.Stop();
     }
