@@ -351,10 +351,13 @@ public struct sEnd //항복 버튼 사용, 죽음
 {
     private int flag;
     public int result;
-    public sEnd(int res, int f = (int)eMSG.em_END)
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+    public char[] enemyNick;
+    public sEnd(int res, char[] enemy, int f = (int)eMSG.em_END)
     {
         flag = f;
         result = res;
+        enemyNick = enemy;
     }
 }
 

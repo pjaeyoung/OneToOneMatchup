@@ -25,13 +25,18 @@ public class ShotController : MonoBehaviour {
 
     void Start ()
     {
-        StartCoroutine(PosDelay()); //0.35초 후 이동 
         effSound = transform.parent.GetChild(1).GetComponent<EffSoundController>();
-        effSound.PlayEff((int)eEFFSOUND.em_WIND);
-    }	
-    
-	void Update () //플레이어의 레이 방향으로 이동
+    }
+
+    private void OnEnable()
     {
+        StartCoroutine(PosDelay()); //0.35초 후 이동 
+        effSound.PlayEff((int)eEFFSOUND.em_WIND);
+    }
+
+    void Update () //플레이어의 레이 방향으로 이동
+    {
+        transform.LookAt(rayPoint);
         transform.parent.Translate(rayPoint * 0.15f);
 	}
 

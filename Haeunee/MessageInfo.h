@@ -157,6 +157,7 @@ struct sEnd : sFlag //항복 버튼 사용, 죽음
 {
 	sEnd() : sFlag(flag = eMSG::em_END) {};
 	int result = 0;
+	char enemyNick[30] = {NULL};
 };
 
 struct sChat : sFlag //채팅

@@ -453,7 +453,7 @@ public class PlayerScript : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         //서버에 죽었다는 메세지 보내기 
-        sEnd dead = new sEnd(0);
+        sEnd dead = new sEnd(0, null);
         SocketServer.SingleTonServ().SendMsg(dead);
     }
 

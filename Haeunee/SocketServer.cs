@@ -41,6 +41,7 @@ public class SocketServer {
     static sGameRoom room;
     static int enterNum;
     static int gameResult;
+    static char[] enemyNick;
     static FriendsScript fScript;
     IntPtr ptr;
     static ChatScript chatScript;
@@ -175,6 +176,7 @@ public class SocketServer {
             Type m_type = typeof(sEnd);
             sEnd esc = (sEnd)Marshal.PtrToStructure(buff, m_type);
             gameResult = esc.result;
+            enemyNick = esc.enemyNick;
             if(pScript==null)
                 sScript.GameEndTrue();
             else
