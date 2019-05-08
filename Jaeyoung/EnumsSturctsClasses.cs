@@ -52,13 +52,14 @@ enum eMSG //메세지 종류
     em_THROWOBJ,
     em_READY,
     em_END,
+    em_CHAT,
 }
 
-// 참, 거짓 판단 
-enum eBOOLEAN
+enum Friend //WaitScene 소셜창 탭
 {
-    FALSE,
-    TRUE
+    em_LIST = 1,
+    em_SEARCH,
+    em_REQUEST,
 }
 
 //무기 종류
@@ -115,6 +116,27 @@ enum eATKTYPE
     em_NORMAL = 1,
     em_OBJTHROW,
 };
+
+enum eEFFSOUND //사운드 타입
+{
+    em_ARROW,
+    em_ARROWHIT,
+    em_SWING1,
+    em_SWING2,
+    em_MAGIHIT,
+    em_SWORD1,
+    em_SWORD2,
+    em_SWORD3,
+    em_SWORD4,
+    em_WIND,
+    em_BOMB,
+}
+
+enum eItemBtnArrFlag // 아이템 가방 배열 체크 모드
+{
+    em_CHKGETNUM, 
+    em_CHKEMPTY
+}
 
 struct sLogin
 {
@@ -238,7 +260,7 @@ public struct sHit //공격 성공
 {
     private int flag;
     public int dmgAni;
-    int atkType;
+    public int atkType;
     public int hp;
     public sHit(int ani,int type, int nowHp, int f = (int)eMSG.em_HIT)
     {
@@ -316,13 +338,9 @@ struct sGetObj
 struct sThrowObj
 {
     int flag;
-    public float throwPosX, throwPosY, throwPosZ;
-    public sThrowObj(float x, float y, float z, int f = (int)eMSG.em_THROWOBJ)
+    public sThrowObj(int f = (int)eMSG.em_THROWOBJ)
     {
         flag = f;
-        throwPosX = x;
-        throwPosY = y;
-        throwPosZ = z;
     }
 };
 
@@ -339,103 +357,27 @@ public struct sEnd //항복 버튼 사용, 죽음
 {
     private int flag;
     public int result;
-    public sEnd(int res, int f = (int)eMSG.em_END)
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+    public char[] enemyNick;
+    public sEnd(int res, char[] enemy, int f = (int)eMSG.em_END)
     {
         flag = f;
         result = res;
+        enemyNick = enemy;
     }
 }
 
-/* 아이템 클래스 : 아이템 획득 갯수, 빈 아이템가방 넘버 */
-public class ItemCount
+public struct sChat //채팅
 {
-    int getItemNum;
-    int maxItemNum;
-
-    public ItemCount()
+    private int flag;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
+    public char[] chat;
+    public sChat(char[] ch, int f = (int)eMSG.em_CHAT)
     {
-        getItemNum = 0;
-        maxItemNum = 3;
-    }
-
-    public int GetItemNum()
-    {
-        return getItemNum;
-    }
-
-    public int changeGetItemNum(int changeNum)
-    {
-        if (changeNum <= maxItemNum)
-        {
-            getItemNum = changeNum;
-            return 0;
-        }
-        else
-            return 1;
+        flag = f;
+        chat = ch;
     }
 }
 
-/* fightScene에 들고 갈 플레이어 정보 (서버 연동) */
-public class PlayerInfo
-{
-    int weapon;
-    int armor;
-    int[] getItemArr;
 
-    public PlayerInfo()
-    {
-        weapon = (int)eWEAPON.em_STICK;
-        armor = (int)eARMOR.em_DEFAULT_AMR;
-        getItemArr = new int[3];
-    }
-
-    public void InputGetItemArr(int i, int index)
-    {
-        getItemArr[index] = i;
-    }
-
-    public void changeArmor(string armorName)
-    {
-        string ArmorGender = armorName.Substring(0, 1);
-        string ArmorNumStr = armorName.Substring(8, 1);
-        int ArmorNumInt = int.Parse(ArmorNumStr);
-        if (ArmorGender == "F" || ArmorGender == "M")
-            armor = ArmorNumInt;
-    }
-
-    public void changeWeapon(string w)
-    {
-        if (w == "greatSword")
-        {
-            weapon = (int)eWEAPON.em_GREATESWORD;
-        }
-        else if (w == "wand")
-        {
-            weapon = (int)eWEAPON.em_WAND;
-        }
-        else if (w == "bow")
-        {
-            weapon = (int)eWEAPON.em_BOW;
-        }
-        else if (w == "swordAndShield")
-        {
-            weapon = (int)eWEAPON.em_SWORDANDSHIELD;
-        }
-    }
-
-    public int getPlayerWeapon()
-    {
-        return weapon;
-    }
-
-    public int getPlayerArmor()
-    {
-        return armor;
-    }
-
-    public int getPlayerItemArr(int idx)
-    {
-        return getItemArr[idx];
-    }
-}
 
