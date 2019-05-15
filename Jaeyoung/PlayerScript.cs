@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 public class PlayerScript : MonoBehaviour
 {
     public Button[] itemButton; //소지 아이템 창
-    public LayerChange layerChange; // Touchable -> weapon layer 변경 스크립트 
     ItemBtn s_itemBtn; //아이템창 제어 스크립트 
     GameObject canvas;
     GameObject[] touchableItems; // 터치할 수 있는 아이템 목록, 배경 게임 오브젝트 예외처리 
@@ -22,16 +21,20 @@ public class PlayerScript : MonoBehaviour
     AttackMgr enemyAtk;
     ShotManager shotMgr;
     GameObject enemyObj;
-    Text hpText;
     HpBar playerHPBar;
-    GameObject Block;
+    GameObject block;
     GameObject highlightBox; //아웃라인 생성여부 판단 오브젝트 
     Camera playerCamera;
+    Animator cameraAni;
     GameObject getItem = null; //던지기 아이템 주웠는 지 판단 
     ItemSpawn s_itemSpawn;
     hitEffect s_hitEffect;
     GameObject ChinkEffect; // 전사, 탱커 무기용 이펙트 
-    Quaternion nowRot; 
+    Quaternion nowRot;
+    Image usedItemEff;
+    ParticleSystem usedItemParticle; //사용한 아이템 표시 파티클
+    ParticleSystemRenderer usedItemParticleRender;
+    GameObject Info; //ui Info 에 표시할 무기 이미지 출력
 
     string sceneName = "";
     int atkAni = 0;
@@ -45,15 +48,13 @@ public class PlayerScript : MonoBehaviour
     int nowHp = 0;
     public int weaponNum = -1;
     bool gameEnd = false;
-    int itemImgNum = 0;
-    bool itemImgChange = false;
-    bool itemImgSet = false;
     int sensibilityX = 10; // 마우스 좌우 움직임 감도 
     bool IsJump = false; // 공중에 있는 상태면 TRUE, 땅에 닿인 상태면 FALSE
-    bool IsLayerChange = false; //layerchage를 했는 지 여부 
     bool itemPoss = true; //GameScene에서 소비아이템 사용 가능 여부 
-
-    GameObject[] ItemImg;
+    public bool ItemParticleAct = false;
+    public bool ItemEffAct = false;
+    public int usedItemNum = -1;
+    
 
     BgmController sound;
     EffSoundController effSound;
@@ -64,6 +65,7 @@ public class PlayerScript : MonoBehaviour
         playerRigid = GetComponent<Rigidbody>();
         nowRot = transform.localRotation;
         playerCamera = GameObject.Find("Camera").GetComponent<Camera>();
+        cameraAni = playerCamera.GetComponent<Animator>();
         playerAniCon = GetComponent<AnimationController>();
 
         sceneName = SceneManager.GetActiveScene().name;
@@ -73,7 +75,7 @@ public class PlayerScript : MonoBehaviour
             playerSpeed = 3;
             s_itemBtn = GameObject.Find("itemBtnCanvas/btn_GetItem").GetComponent<ItemBtn>();
             canvas = GameObject.Find("Canvas");
-            Block = null;
+            block = null;
         }
         
         else if (sceneName == "GameScene")
@@ -84,6 +86,10 @@ public class PlayerScript : MonoBehaviour
             playerInfo = sockServObj.GetComponent<GameEnterScript>();
             weaponNum = playerInfo.savCharInfo.weapon;
             spawnInfo = sockServObj.GetComponent<SpawnScript>();
+            usedItemEff = GameObject.Find("usedItemEff").GetComponent<Image>();
+            usedItemEff.gameObject.SetActive(false);
+            Info = GameObject.Find("Info");
+            Info.transform.GetChild(weaponNum + 1).gameObject.SetActive(true);
 
             shotMgr = GetComponentInChildren<ShotManager>();
             shotMgr.ShotPosChange(weaponNum);
@@ -91,23 +97,15 @@ public class PlayerScript : MonoBehaviour
             shotMgr.point.SetActive(false);
             
             StartCoroutine(MoveDelay()); //플레이어의 정보 전송하는 코루틴
-            hpText = GameObject.Find("Canvas").transform.GetChild(0).GetComponent<Text>();
-            playerHPBar = GameObject.Find("Canvas").transform.GetChild(3).GetComponent<HpBar>();
-            Block = GameObject.Find("Canvas").transform.GetChild(4).gameObject;
-
+            playerHPBar = GameObject.Find("Canvas/playerHP").GetComponent<HpBar>();
+            block = GameObject.Find("Canvas/Block").gameObject;
+            block.SetActive(false);
 
             s_itemSpawn = GameObject.Find("itemSpawnArr").GetComponent<ItemSpawn>();
             s_hitEffect = GameObject.Find("HitEffect").GetComponent<hitEffect>();
             ChinkEffect = GameObject.Find("ChinkEffect");
-
-            ItemImg = new GameObject[4];
-            ItemImg[(int)eITEM.em_HP_POTION] = GameObject.Find("HpPotionImg").gameObject;
-            ItemImg[(int)eITEM.em_SPEED_POTION] = GameObject.Find("SpdPotionImg").gameObject;
-            ItemImg[(int)eITEM.em_DAMAGE_UP_POTIOM] = GameObject.Find("AtkPotionImg").gameObject;
-            ItemImg[(int)eITEM.em_DEFENCE_UP_POTION] = GameObject.Find("DefPotionImg").gameObject;
-            for (int i = 0; i < 4; i++)
-                ItemImg[i].SetActive(false);
-
+            usedItemParticle = transform.Find("ItemEffect").GetComponentInChildren<ParticleSystem>();
+            usedItemParticleRender = transform.Find("ItemEffect").GetComponentInChildren<ParticleSystemRenderer>();
             sound = GameObject.Find("GameMgr").GetComponent<BgmController>();
             effSound = gameObject.GetComponentInChildren<EffSoundController>();
         }
@@ -129,13 +127,13 @@ public class PlayerScript : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && highlightBox.activeSelf == true) //하이라이트 박스 출력 중일 때만 아이템 클릭 가능
         {
-            if (sceneName == "GameScene" && Block.activeSelf)
+            if (sceneName == "GameScene" && block.activeSelf)
                 return;
             itemClick();
         }
         else if (sceneName == "ItemCollectScene" && Input.GetMouseButtonUp(0))
             highlightBox.SetActive(true);
-        else if (sceneName == "GameScene" && !Block.activeSelf) // 아이템을 들고 있는 상태에서 방향 조정 및 던지기 
+        else if (sceneName == "GameScene" && !block.activeSelf) // 아이템을 들고 있는 상태에서 방향 조정 및 던지기 
         {
             if (getItem != null)
             {
@@ -173,46 +171,39 @@ public class PlayerScript : MonoBehaviour
         if (sceneName != SceneManager.GetActiveScene().name)
             sceneName = SceneManager.GetActiveScene().name;
 
-        if(sceneName == "ItemCollectScene")
+        if (sceneName == "GameScene")
         {
-            if (!IsLayerChange) 
-            {
-                //ItemCollectScene에서 무기/방어구/소비아이템 구분 없이 Touchable로 마우스 클릭 통일시킨 후 
-                //무기아이템만 GameScene으로 넘어갈 때 weapon layer로 변경 (무기아이템 충돌체크 위함) 
-                IsLayerChange = true;
-                changeLayer();
-            }
-        }
-
-        else if (sceneName == "GameScene")
-        {
-            if (Block.activeSelf == false)
+            if (block.activeSelf == false)
             {
                 if (itemPoss == true)
                     useItem();
             }
 
             if (damaged == true) //데미지를 받았을 때 애니메이션 재생
+            {
+                cameraAni.SetTrigger("shakeAct");
                 DamageAniAct();
+            }
 
             if (nowHp != playerHp) //hp변했을 때
                 changeHPTextAndDeathAniAct();
 
-            if (itemImgChange == true) //아이템을 사용하여 아이템 이미지가 바뀐 경우
-                setItemImg();
-
             if (gameEnd == true) //게임 끝
                 changeEndScene();
+
+            if(ItemParticleAct)
+                ActusedItemParticle(usedItemNum);
+            
         }
         
     }
 
-    private void LateUpdate() //카메라 좌우 회전 및 마우스 화면 안 움직임 제어
+    private void LateUpdate() //카메라 좌우 회전 및 마우스 화면 안 움직임 제어 [재영]
     {
 
         if (Input.GetMouseButton(1))
         {
-            if (sceneName == "GameScene" && Block.activeSelf)
+            if (sceneName == "GameScene" && block.activeSelf)
                 return;
             Cursor.lockState = CursorLockMode.Confined;
             Rot();
@@ -222,29 +213,7 @@ public class PlayerScript : MonoBehaviour
 
     }
 
-    void changeLayer() //GameScene 넘어가기 전 무기 Layer 변경: Touchable -> weapon
-    {
-        layerChange = GM.gameObject.GetComponent<LayerChange>();
-        s_itemSpawn = GameObject.Find("itemSpawn").GetComponent<ItemSpawn>();
-        int itemSpawnLens = s_itemSpawn.itemSpawn.Length;
-
-        GameObject[] Items = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-        int len = Items.Length;
-        touchableItems = new GameObject[itemSpawnLens];
-        int idx = 0;
-        for (int i = 0; i < len; i++)
-        {
-            if (Items[i].layer == (int)eLAYER.TOUCHABLE)
-            {
-                touchableItems[idx] = Items[i];
-                if (touchableItems[idx].tag == "weapon")
-                    layerChange.InputWeaponArr(touchableItems[idx]);
-                idx++;
-            }
-        }
-    }
-
-    void Rot() // 좌우 회전
+    void Rot() // 좌우 회전 [재영]
     {
         float RotX = Input.GetAxis("Mouse X") * sensibilityX;
         nowRot *= Quaternion.Euler(Vector3.up * RotX);
@@ -348,6 +317,52 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+
+    IEnumerator ActusedItemEff() // 아이템 사용 이펙트 실행 [재영]
+    {
+        while (ItemEffAct)
+        {
+            usedItemEff.CrossFadeAlpha(0, 0.5f, true);
+            yield return new WaitForSeconds(1f);
+            usedItemEff.CrossFadeAlpha(1, 0.5f, true);
+            yield return new WaitForSeconds(1f);
+        }
+        usedItemEff.gameObject.SetActive(ItemEffAct);
+    }
+
+    void ActusedItemParticle(int itemNum) //아이템 사용 파티클 실행 [재영]
+    {
+        ItemParticleAct = false; //파티클 한 번만 재생 
+        usedItemEff.gameObject.SetActive(ItemEffAct);
+
+        if (itemNum == (int)eITEM.em_HP_POTION)
+        {
+            usedItemParticleRender.material = Resources.Load<Material>("Shaders/hpeff");
+            usedItemEff.color = new Color32(255, 110, 0, 255);
+        }
+        else if (itemNum == (int)eITEM.em_SPEED_POTION)
+        {
+            usedItemParticleRender.material = Resources.Load<Material>("Shaders/speedeff");
+            usedItemEff.color = new Color32(0, 226, 255, 255);
+        }
+        else if (itemNum == (int)eITEM.em_DAMAGE_UP_POTIOM)
+        {
+            usedItemParticleRender.material = Resources.Load<Material>("Shaders/damageeff");
+            usedItemEff.color = new Color32(255, 0, 255, 255);
+        }
+        else if (itemNum == (int)eITEM.em_DEFENCE_UP_POTION)
+        {
+            usedItemParticleRender.material = Resources.Load<Material>("Shaders/defenceeff");
+            usedItemEff.color = new Color32(0, 255, 80, 255);
+        }
+        else
+            return;
+
+        StartCoroutine(ActusedItemEff());
+        if (!usedItemParticle.isPlaying) 
+            usedItemParticle.Play();
+    }
+
     void DamageAniAct() // 피격 애니메이션 
     {
         damaged = false;
@@ -356,9 +371,13 @@ public class PlayerScript : MonoBehaviour
         else if (dmgAni == 1)
             playerAniCon.PlayAtkDmg("GetDamage02");
         if (spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_GREATESWORD || spawnInfo.enemyInfo.weapon == (int)eWEAPON.em_SWORDANDSHIELD)
+        {
             ChinkEffect.transform.position = transform.position + Vector3.up * 2;
+            ChinkEffect.GetComponent<hitEffect>().effStart = true;
+        }
         Debug.Log("Damaged");
         EnemyScript enemyScript = enemyObj.GetComponent<EnemyScript>();
+        //무기에 따른 피격 사운드
         if (atkType == (int)eATKTYPE.em_NORMAL)
         {
             if (enemyScript.weaponType == (int)eWEAPON.em_SWORDANDSHIELD)
@@ -387,7 +406,6 @@ public class PlayerScript : MonoBehaviour
     {
         playerHp = nowHp;
         playerHPBar.changeHpBar(playerHp);
-        hpText.text = "Player Hp: " + playerHp;
         if (playerHp <= 0) //죽음
         {
             playerAniCon.PlayDeath("Death");
@@ -395,14 +413,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void setItemImg() // 아이템 사용 이미지 
-    {
-        itemImgChange = false;
-        if(itemImgNum != -1)
-            ItemImg[itemImgNum].SetActive(itemImgSet);
-    }
-
-    void itemClick() // 아이템 마우스 클릭 : ItemCollectScene(아이템 Btn이미지 변경), GameScene(아이템 던지기)
+    void itemClick() // 아이템 마우스 클릭 : ItemCollectScene(아이템 Btn이미지 변경), GameScene(아이템 던지기) [재영]
     {
         highlightBox.SetActive(false);
         Ray cameraRay = playerCamera.ScreenPointToRay(Input.mousePosition);
@@ -458,6 +469,7 @@ public class PlayerScript : MonoBehaviour
     void ItemThrow() //아이템 플레이어 정방향으로 던지기 
     {
         itemCntrl cntrl = getItem.GetComponent<itemCntrl>();
+        cntrl.throwChar = gameObject;
         cntrl.isDestroyOK = true;
         getItem = null;
 
@@ -485,13 +497,6 @@ public class PlayerScript : MonoBehaviour
     public void ChangePlayerSpeed(int speed) //속도 변화
     {
         playerSpeed = speed;
-    }
-
-    public void ChangeItemImg(int itemNum, bool show) // 아이템 이미지를 변경시켜야 한다는 정보
-    {
-        itemImgChange = true;
-        itemImgNum = itemNum;
-        itemImgSet = show;
     }
 
     void changeEndScene() // EndScene 전환 
@@ -541,7 +546,7 @@ public class PlayerScript : MonoBehaviour
     IEnumerator DeathEnd(float delay) //서버에 죽었다는 메세지 보내기
     {
         yield return new WaitForSeconds(delay);
-        sEnd dead = new sEnd(0);
+        sEnd dead = new sEnd(0,null);
         SocketServer.SingleTonServ().SendMsg(dead);
     }
 
